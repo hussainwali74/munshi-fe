@@ -1,54 +1,103 @@
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle } from "lucide-react";
-import { auth } from "@clerk/nextjs/server";
 
-export default function LandingPage() {
-  const { userId } = auth();
+'use client';
+import DashboardLayout from '@/components/DashboardLayout';
+import { ArrowUpRight, ArrowDownLeft, AlertTriangle, Users } from 'lucide-react';
 
-  if (userId) {
-    redirect("/dashboard");
-  }
-
+export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-100 to-white">
-      <div className="container mx-auto px-4 py-16">
-        <header className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-blue-900 mb-4">Welcome to Khata App</h1>
-          <p className="text-xl text-gray-600">Simplify your business accounting with ease</p>
-        </header>
+    <DashboardLayout>
+      <div className="mb-8">
+        <h1 className="heading-1">Dashboard</h1>
+        <p className="text-muted">Welcome back to your Digital Dukan</p>
+      </div>
 
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div>
-            <h2 className="text-3xl font-semibold text-blue-800 mb-6">Manage Your Accounts Effortlessly</h2>
-            <ul className="space-y-4">
-              {["Easy invoice creation", "Customer management", "Product inventory", "Financial reports"].map((feature, index) => (
-                <li key={index} className="flex items-center text-gray-700">
-                  <CheckCircle className="text-green-500 mr-2" />
-                  {feature}
-                </li>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 grid-cols-2 grid-cols-4 gap-4 mb-8">
+        <StatCard
+          title="Total Udhar (Receivable)"
+          value="Rs 45,200"
+          icon={<ArrowUpRight className="text-danger" />}
+          trend="+12% this month"
+        />
+        <StatCard
+          title="Total Payable"
+          value="Rs 12,500"
+          icon={<ArrowDownLeft className="text-success" />}
+          trend="-5% this month"
+        />
+        <StatCard
+          title="Low Stock Items"
+          value="3 Items"
+          icon={<AlertTriangle className="text-warning" />}
+          trend="Needs attention"
+        />
+        <StatCard
+          title="Active Customers"
+          value="128"
+          icon={<Users className="text-primary" />}
+          trend="+4 new today"
+        />
+      </div>
+
+      {/* Recent Transactions & Quick Actions */}
+      <div className="grid grid-cols-1 grid-cols-3 gap-8">
+        <div className="lg-col-span-2">
+          <div className="card">
+            <h2 className="heading-2 mb-4">Recent Transactions</h2>
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg border-b border-gray-100 last:border-0">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${i % 2 === 0 ? 'bg-red-100 text-danger' : 'bg-green-100 text-success'}`}>
+                      {i % 2 === 0 ? <ArrowUpRight size={20} /> : <ArrowDownLeft size={20} />}
+                    </div>
+                    <div>
+                      <p className="font-semibold">Ahmed Ali</p>
+                      <p className="text-sm text-muted">Plumbing Pipe x 2</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className={`font-bold ${i % 2 === 0 ? 'text-danger' : 'text-success'}`}>
+                      {i % 2 === 0 ? '-' : '+'} Rs {i * 500}
+                    </p>
+                    <p className="text-sm text-muted">Today, 10:30 AM</p>
+                  </div>
+                </div>
               ))}
-            </ul>
-            <div className="mt-8 space-x-4">
-              <Link href="/sign-up">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-300">
-                  Get Started
-                  <ArrowRight className="ml-2" />
-                </Button>
-              </Link>
-              <Link href="/sign-in">
-                <Button variant="outline" className="px-6 py-3 rounded-lg font-semibold transition duration-300">
-                  I already have an account
-                </Button>
-              </Link>
             </div>
           </div>
-          <div className="hidden md:block">
-            <img src="/landing-image.svg" alt="Khata App" className="w-full h-auto" />
+        </div>
+
+        <div>
+          <div className="card mb-6">
+            <h2 className="heading-2 mb-4">Quick Actions</h2>
+            <div className="flex flex-col gap-3">
+              <button className="btn btn-primary w-full justify-start">
+                <ArrowUpRight size={20} /> Add Udhar (Credit)
+              </button>
+              <button className="btn btn-secondary w-full justify-start">
+                <ArrowDownLeft size={20} /> Add Payment
+              </button>
+              <button className="btn btn-secondary w-full justify-start">
+                <Users size={20} /> Add New Customer
+              </button>
+            </div>
           </div>
         </div>
       </div>
+    </DashboardLayout>
+  );
+}
+
+function StatCard({ title, value, icon, trend }: any) {
+  return (
+    <div className="card">
+      <div className="flex items-start justify-between mb-2">
+        <p className="text-muted font-medium">{title}</p>
+        <div className="p-2 bg-gray-50 rounded-lg">{icon}</div>
+      </div>
+      <h3 className="text-2xl font-bold mb-1">{value}</h3>
+      <p className="text-sm text-muted">{trend}</p>
     </div>
   );
 }

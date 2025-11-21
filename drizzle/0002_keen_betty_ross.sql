@@ -1,1 +1,0 @@
-ALTER TABLE "invoices" ADD COLUMN "discount_percentage2" double precision DEFAULT 2;

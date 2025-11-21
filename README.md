@@ -1,58 +1,44 @@
-# Munshi FE
+# Digital Dukan - Online Khata App
 
-Munshi FE is a frontend web application built with TypeScript. It serves as the user interface for the Munshi platform, which appears to focus on financial or business management tasks such as invoicing, customer/product management, and dashboard analytics.
+A premium, user-friendly Khata and Inventory management app for Pakistani shopkeepers.
 
 ## Features
+- **Khata (Ledger)**: Manage customer credits (Udhar) and payments.
+- **Inventory**: Track stock, low stock alerts, and pricing.
+- **Employees**: Manage staff details and attendance.
+- **Bilingual**: Designed with Urdu support in mind.
+- **Custom Auth**: 
+  - **Vendor-Independent**: Uses a custom `users` table in Postgres.
+  - **Secure**: Powered by `bcrypt` (hashing) and `jose` (JWT sessions).
+  - **Air-Tight**: Database is locked down; only the server can access data.
 
-- **Invoices Management**: Create, list, and manage invoices efficiently.
-- **Dashboard Search**: Quickly access specific customers or products using a powerful search functionality.
-- **Data Visualization**: View insightful charts and graphs showing sales trends and customer activity directly on the dashboard.
-- **User Settings**: Manage user profiles and app configurations via a dedicated settings page.
-- **Dark Mode**: Toggle between light and dark themes for optimal user experience in different environments.
+## Setup Instructions
 
-## Getting Started
+### 1. Database Setup (Supabase)
+1. Create a new project on [Supabase](https://supabase.com).
+2. Go to the **SQL Editor** in your Supabase dashboard.
+3. Copy the contents of `supabase/schema.sql` and run it to create the tables and security policies.
+4. Go to **Project Settings > API** and copy your `URL` and `anon` key.
 
-Visit the production deployment: [Khaata Online Frontend](https://khaata-online-fe.vercel.app)
-
-### Prerequisites
-
-- Node.js
-- npm or yarn
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/hussainwali74/munshi-fe.git
-   cd munshi-fe
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
-
-### Running the App
+### 2. Environment Variables
+Create a `.env.local` file in the root directory and add your Supabase credentials:
 
 ```bash
-npm start
-# or
-yarn start
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-## Contributing
+### 3. Run Locally
+```bash
+npm install
+npm run dev
+```
 
-If you wish to contribute to Munshi FE, please ensure your changes align with the features listed above. Typical areas to contribute include:
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-- Enhancing invoice management workflows
-- Improving dashboard search and visualization
-- Adding new settings or improving user experience (such as dark mode)
-
-## License
-
-Currently, no license is specified.
-
-## Maintainer
-
-[**hussainwali74**](https://github.com/hussainwali74)
+## Deployment
+This app is ready to be deployed on **Vercel**.
+1. Push this code to GitHub.
+2. Import the project in Vercel.
+3. Add the Environment Variables in Vercel settings.
+4. Deploy!
