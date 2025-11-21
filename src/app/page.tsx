@@ -2,13 +2,16 @@
 'use client';
 import DashboardLayout from '@/components/DashboardLayout';
 import { ArrowUpRight, ArrowDownLeft, AlertTriangle, Users } from 'lucide-react';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Home() {
+  const { t } = useLanguage();
+
   return (
     <DashboardLayout>
       <div className="mb-8">
-        <h1 className="heading-1">Dashboard</h1>
-        <p className="text-muted">Welcome back to your Digital Dukan</p>
+        <h1 className="heading-1">{t('common.dashboard')}</h1>
+        <p className="text-muted">{t('common.welcomeBack')} Ezekata</p>
       </div>
 
       {/* Stats Grid */}
