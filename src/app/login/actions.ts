@@ -12,14 +12,14 @@ export type AuthState = {
 }
 
 export async function login(prevState: AuthState, formData: FormData): Promise<AuthState> {
-    const email = formData.get('email') as string
+    const identifier = formData.get('identifier') as string
     const password = formData.get('password') as string
 
-    // Fetch user from custom 'users' table
+    // Fetch user from custom 'users' table by email or phone
     const { data: user, error } = await db
         .from('users')
         .select('*')
-        .eq('email', email)
+        .or(`email.eq.${identifier},phone_number.eq.${identifier}`)
         .single()
 
     if (error || !user) {
@@ -44,11 +44,12 @@ export async function signup(prevState: AuthState, formData: FormData): Promise<
     const password = formData.get('password') as string
     const fullName = formData.get('fullName') as string
     const businessName = formData.get('businessName') as string
+    const phoneNumber = formData.get('phoneNumber') as string
 
     // Check if user exists
-    const { data: existingUser } = await db.from('users').select('id').eq('email', email).single()
+    const { data: existingUser } = await db.from('users').select('id').or(`email.eq.${email},phone_number.eq.${phoneNumber}`).single()
     if (existingUser) {
-        return { error: 'User already exists' }
+        return { error: 'User with this email or phone already exists' }
     }
 
     const hashedPassword = await hashPassword(password)
@@ -57,7 +58,8 @@ export async function signup(prevState: AuthState, formData: FormData): Promise<
         email,
         password_hash: hashedPassword,
         full_name: fullName,
-        business_name: businessName
+        business_name: businessName,
+        phone_number: phoneNumber
     }).select().single()
 
     if (error) {

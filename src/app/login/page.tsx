@@ -70,21 +70,35 @@ export default function LoginPage() {
                                         placeholder="Enter your business name"
                                     />
                                 </div>
+
+                                <div>
+                                    <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                                        Phone Number
+                                    </label>
+                                    <input
+                                        id="phoneNumber"
+                                        name="phoneNumber"
+                                        type="tel"
+                                        required
+                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 text-sm"
+                                        placeholder="Enter your phone number"
+                                    />
+                                </div>
                             </>
                         )}
 
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                                Email/Username
+                            <label htmlFor={isLogin ? "identifier" : "email"} className="block text-sm font-medium text-gray-700 mb-1">
+                                {isLogin ? "Email or Phone Number" : "Email"}
                             </label>
                             <input
-                                id="email"
-                                name="email"
-                                type="email"
-                                autoComplete="email"
+                                id={isLogin ? "identifier" : "email"}
+                                name={isLogin ? "identifier" : "email"}
+                                type={isLogin ? "text" : "email"}
+                                autoComplete={isLogin ? "username" : "email"}
                                 required
                                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 text-sm"
-                                placeholder="Enter your email"
+                                placeholder={isLogin ? "Enter your email or phone number" : "Enter your email"}
                             />
                         </div>
 
@@ -137,7 +151,7 @@ export default function LoginPage() {
                     <div className="mt-6 text-center text-sm text-gray-600">
                         {isLogin ? (
                             <span>
-                                Don't have an account?{' '}
+                                Don&apos;t have an account?{' '}
                                 <button
                                     type="button"
                                     onClick={() => setIsLogin(false)}

@@ -167,3 +167,4 @@ begin
   where id = p_customer_id;
 end;
 $$;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_number TEXT UNIQUE;
