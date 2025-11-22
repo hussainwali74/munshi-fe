@@ -26,9 +26,9 @@ export default function LandingPage() {
         <div className={styles.headerContainer}>
           <div className={styles.logo}>
             <div className={styles.logoIcon}>
-              <span>D</span>
+              <span>EZ</span>
             </div>
-            <span className={styles.logoText}>Digital Dukan</span>
+            <span className={styles.logoText}>Khata</span>
           </div>
           <nav className={styles.nav}>
             <Link href="#features" className={styles.navLink}>Features</Link>
@@ -53,7 +53,7 @@ export default function LandingPage() {
       <section className={styles.heroSection}>
         <div className={styles.heroContainer}>
           <div className={styles.heroText}>
-             <div className={styles.badge}>
+            <div className={styles.badge}>
               <span className={styles.pingWrapper}>
                 <span className={styles.ping}></span>
                 <span className={styles.pingDot}></span>
@@ -74,9 +74,9 @@ export default function LandingPage() {
             </p>
 
             <div className={styles.heroButtons}>
-              <button className={styles.downloadBtn}>
+              {/* <button className={styles.downloadBtn}>
                 <Download size={20} /> Download App
-              </button>
+              </button> */}
               <Link
                 href="/dashboard"
                 className={styles.webBtn}
@@ -88,95 +88,95 @@ export default function LandingPage() {
 
           {/* Mobile App Mockup */}
           <div className={styles.heroImage}>
-             <div className={styles.phoneFrame}>
-                <div className={styles.notch}></div>
+            <div className={styles.phoneFrame}>
+              <div className={styles.notch}></div>
 
-                <div className={styles.screen}>
-                  {/* App Header */}
-                  <div className={styles.appHeader}>
-                    <div className={styles.headerTop}>
-                      <div>
-                        <p className={styles.textXs + " " + styles.opacity80}>Welcome back</p>
-                        <p className={styles.fontBold}>Bismillah General Store</p>
-                      </div>
-                      <div className={styles.userAvatar}>
-                        <Users size={16} />
-                      </div>
+              <div className={styles.screen}>
+                {/* App Header */}
+                <div className={styles.appHeader}>
+                  <div className={styles.headerTop}>
+                    <div>
+                      <p className={styles.textXs + " " + styles.opacity80}>Welcome back</p>
+                      <p className={styles.fontBold}>Bismillah General Store</p>
                     </div>
-                    <div className={styles.statsCard}>
-                      <p className={styles.textXs + " " + styles.opacity80 + " " + styles.mb1}>Total Udhar (Receivable)</p>
-                      <p className={styles.text2xl + " " + styles.fontBold}>Rs 45,200</p>
+                    <div className={styles.userAvatar}>
+                      <Users size={16} />
+                    </div>
+                  </div>
+                  <div className={styles.statsCard}>
+                    <p className={styles.textXs + " " + styles.opacity80 + " " + styles.mb1}>Total Udhar (Receivable)</p>
+                    <p className={styles.text2xl + " " + styles.fontBold}>Rs 45,200</p>
+                  </div>
+                </div>
+
+                {/* App Body */}
+                <div className={styles.appBody}>
+                  <div className={styles.actionGrid}>
+                    <div className={styles.actionCard}>
+                      <div className={styles.w10h10 + " " + styles.bgBlue100 + " " + styles.textBlue600 + " " + styles.roundedFull + " " + styles.flexCenter}><BarChart3 size={20} /></div>
+                      <span className={styles.textXs + " " + styles.fontBold + " " + styles.textGray700}>Khata</span>
+                    </div>
+                    <div className={styles.actionCard}>
+                      <div className={styles.w10h10 + " " + styles.bgGreen100 + " " + styles.textGreen600 + " " + styles.roundedFull + " " + styles.flexCenter}><Layers size={20} /></div>
+                      <span className={styles.textXs + " " + styles.fontBold + " " + styles.textGray700}>Stock</span>
                     </div>
                   </div>
 
-                  {/* App Body */}
-                  <div className={styles.appBody}>
-                    <div className={styles.actionGrid}>
-                      <div className={styles.actionCard}>
-                         <div className={styles.w10h10 + " " + styles.bgBlue100 + " " + styles.textBlue600 + " " + styles.roundedFull + " " + styles.flexCenter}><BarChart3 size={20}/></div>
-                         <span className={styles.textXs + " " + styles.fontBold + " " + styles.textGray700}>Khata</span>
-                      </div>
-                      <div className={styles.actionCard}>
-                         <div className={styles.w10h10 + " " + styles.bgGreen100 + " " + styles.textGreen600 + " " + styles.roundedFull + " " + styles.flexCenter}><Layers size={20}/></div>
-                         <span className={styles.textXs + " " + styles.fontBold + " " + styles.textGray700}>Stock</span>
-                      </div>
+                  <div className={styles.recentActivity}>
+                    <div className={styles.flexCenter + " " + styles.justifyBetween + " " + styles.mb3}>
+                      <h3 className={styles.fontBold + " " + styles.textXs + " " + styles.textGray800}>Recent Activity</h3>
+                      <span className={styles.textXs + " " + styles.textPrimary}>View All</span>
                     </div>
-
-                    <div className={styles.recentActivity}>
-                      <div className={styles.flexCenter + " " + styles.justifyBetween + " " + styles.mb3}>
-                        <h3 className={styles.fontBold + " " + styles.textXs + " " + styles.textGray800}>Recent Activity</h3>
-                        <span className={styles.textXs + " " + styles.textPrimary}>View All</span>
+                    <div className={styles.spaceY3}>
+                      <div className={styles.activityRow}>
+                        <div className={styles.flexCenter + " " + styles.gap2}>
+                          <div className={styles.w8h8 + " " + styles.roundedFull + " " + styles.bgRed100 + " " + styles.textRed600 + " " + styles.flexCenter + " " + styles.textXs + " " + styles.fontBold}>A</div>
+                          <div>
+                            <p className={styles.textXs + " " + styles.fontBold + " " + styles.textGray800}>Ali Khan</p>
+                            <p className={styles.textSmall + " " + styles.textGray500}>Udhar given</p>
+                          </div>
+                        </div>
+                        <span className={styles.textXs + " " + styles.fontBold + " " + styles.textRed500}>- Rs 500</span>
                       </div>
-                      <div className={styles.spaceY3}>
-                         <div className={styles.activityRow}>
-                           <div className={styles.flexCenter + " " + styles.gap2}>
-                             <div className={styles.w8h8 + " " + styles.roundedFull + " " + styles.bgRed100 + " " + styles.textRed600 + " " + styles.flexCenter + " " + styles.textXs + " " + styles.fontBold}>A</div>
-                             <div>
-                               <p className={styles.textXs + " " + styles.fontBold + " " + styles.textGray800}>Ali Khan</p>
-                               <p className={styles.textSmall + " " + styles.textGray500}>Udhar given</p>
-                             </div>
-                           </div>
-                           <span className={styles.textXs + " " + styles.fontBold + " " + styles.textRed500}>- Rs 500</span>
-                         </div>
-                         <div className={styles.activityRow}>
-                           <div className={styles.flexCenter + " " + styles.gap2}>
-                             <div className={styles.w8h8 + " " + styles.roundedFull + " " + styles.bgGreen100 + " " + styles.textGreen600 + " " + styles.flexCenter + " " + styles.textXs + " " + styles.fontBold}>S</div>
-                             <div>
-                               <p className={styles.textXs + " " + styles.fontBold + " " + styles.textGray800}>Sana</p>
-                               <p className={styles.textSmall + " " + styles.textGray500}>Payment received</p>
-                             </div>
-                           </div>
-                           <span className={styles.textXs + " " + styles.fontBold + " " + styles.textGreen500}>+ Rs 1,200</span>
-                         </div>
+                      <div className={styles.activityRow}>
+                        <div className={styles.flexCenter + " " + styles.gap2}>
+                          <div className={styles.w8h8 + " " + styles.roundedFull + " " + styles.bgGreen100 + " " + styles.textGreen600 + " " + styles.flexCenter + " " + styles.textXs + " " + styles.fontBold}>S</div>
+                          <div>
+                            <p className={styles.textXs + " " + styles.fontBold + " " + styles.textGray800}>Sana</p>
+                            <p className={styles.textSmall + " " + styles.textGray500}>Payment received</p>
+                          </div>
+                        </div>
+                        <span className={styles.textXs + " " + styles.fontBold + " " + styles.textGreen500}>+ Rs 1,200</span>
                       </div>
                     </div>
                   </div>
-
-                  {/* App Nav */}
-                  <div className={styles.appNav}>
-                    <div className={`${styles.navItem} ${styles.active}`}><BarChart3 size={20}/><span className={styles.mt1 + " " + styles.fontBold}>Home</span></div>
-                    <div className={styles.navItem}><Users size={20}/><span className={styles.mt1}>Customers</span></div>
-                    <div className={styles.navItem}><Layers size={20}/><span className={styles.mt1}>Items</span></div>
-                  </div>
                 </div>
-             </div>
 
-             {/* Floating Badges */}
-             <div className={`${styles.floatingBadge} ${styles.badgeTop}`}>
-                <div className={styles.badgeIcon}><CheckCircle2 size={20} /></div>
-                <div>
-                  <p className={styles.textXs + " " + styles.textGray500}>Stock Updated</p>
-                  <p className={styles.fontBold + " " + styles.textXs + " " + styles.textGray800}>Automatically</p>
+                {/* App Nav */}
+                <div className={styles.appNav}>
+                  <div className={`${styles.navItem} ${styles.active}`}><BarChart3 size={20} /><span className={styles.mt1 + " " + styles.fontBold}>Home</span></div>
+                  <div className={styles.navItem}><Users size={20} /><span className={styles.mt1}>Customers</span></div>
+                  <div className={styles.navItem}><Layers size={20} /><span className={styles.mt1}>Items</span></div>
                 </div>
-             </div>
+              </div>
+            </div>
 
-             <div className={`${styles.floatingBadge} ${styles.badgeBottom}`}>
-                <div className={styles.bgBlue100 + " " + styles.p2 + " " + styles.roundedFull + " " + styles.textBlue600}><Globe size={20} /></div>
-                <div>
-                  <p className={styles.textXs + " " + styles.textGray500}>Language</p>
-                  <p className={styles.fontBold + " " + styles.textXs + " " + styles.textGray800 + " " + styles.urduText}>اردو / English</p>
-                </div>
-             </div>
+            {/* Floating Badges */}
+            <div className={`${styles.floatingBadge} ${styles.badgeTop}`}>
+              <div className={styles.badgeIcon}><CheckCircle2 size={20} /></div>
+              <div>
+                <p className={styles.textXs + " " + styles.textGray500}>Stock Updated</p>
+                <p className={styles.fontBold + " " + styles.textXs + " " + styles.textGray800}>Automatically</p>
+              </div>
+            </div>
+
+            <div className={`${styles.floatingBadge} ${styles.badgeBottom}`}>
+              <div className={styles.bgBlue100 + " " + styles.p2 + " " + styles.roundedFull + " " + styles.textBlue600}><Globe size={20} /></div>
+              <div>
+                <p className={styles.textXs + " " + styles.textGray500}>Language</p>
+                <p className={styles.fontBold + " " + styles.textXs + " " + styles.textGray800 + " " + styles.urduText}>اردو / English</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -207,7 +207,7 @@ export default function LandingPage() {
               title="Employee Management"
               description="Manage staff details, track attendance, and salaries easily within the app."
             />
-             <FeatureCard
+            <FeatureCard
               icon={<Globe size={32} />}
               title="Bilingual Support"
               description="Full Urdu support and clean UX designed specifically for Pakistani shopkeepers. Switch languages instantly."
@@ -229,7 +229,7 @@ export default function LandingPage() {
       {/* Why Section */}
       <section className={`${styles.section} ${styles.whySection}`}>
         <div className={styles.container}>
-           <div className={styles.sectionTitle}>
+          <div className={styles.sectionTitle}>
             <h2>Why Pakistani Shopkeepers Love Digital Dukan</h2>
           </div>
           <div className={styles.whyGrid}>
@@ -255,8 +255,8 @@ export default function LandingPage() {
       <section id="how-it-works" className={styles.section}>
         <div className={styles.container}>
           <div className={styles.sectionTitle}>
-             <h2>How It Works</h2>
-             <p>Get started in minutes.</p>
+            <h2>How It Works</h2>
+            <p>Get started in minutes.</p>
           </div>
 
           <div className={styles.stepsGrid}>
@@ -300,31 +300,25 @@ export default function LandingPage() {
               </ul>
             </div>
             <div className={styles.mdHalf + " " + styles.techGrid}>
-               <div className={styles.techItem}>
-                 <Database className={styles.textPrimary + " " + styles.mb1} size={32} />
-                 <span>Postgres</span>
-               </div>
-               <div className={styles.techItem}>
-                 <ShieldCheck className={styles.textPrimary + " " + styles.mb1} size={32} />
-                 <span>JWT Auth</span>
-               </div>
-               <div className={styles.techItem}>
-                 <Zap className={styles.textPrimary + " " + styles.mb1} size={32} />
-                 <span>Next.js</span>
-               </div>
-               <div className={styles.techItem}>
-                 <Lock className={styles.textPrimary + " " + styles.mb1} size={32} />
-                 <span>RLS Policies</span>
-               </div>
+              <div className={styles.techItem}>
+                <Database className={styles.textPrimary + " " + styles.mb1} size={32} />
+                <span>Postgres</span>
+              </div>
+              <div className={styles.techItem}>
+                <ShieldCheck className={styles.textPrimary + " " + styles.mb1} size={32} />
+                <span>JWT Auth</span>
+              </div>
+              <div className={styles.techItem}>
+                <Zap className={styles.textPrimary + " " + styles.mb1} size={32} />
+                <span>Next.js</span>
+              </div>
+              <div className={styles.techItem}>
+                <Lock className={styles.textPrimary + " " + styles.mb1} size={32} />
+                <span>RLS Policies</span>
+              </div>
             </div>
           </div>
         </div>
-      </section>
-
-      {/* Deployment Banner */}
-      <section className={styles.deployBanner}>
-          <div className={styles.vercelIcon}>V</div>
-          <p className={styles.fontMedium}>Deploy instantly on Vercel — fast, secure, and scalable.</p>
       </section>
 
       {/* CTA Section */}
@@ -371,7 +365,7 @@ export default function LandingPage() {
                 <li><Link href="/pricing">Pricing</Link></li>
               </ul>
             </div>
-             <div className={styles.footerLinks}>
+            <div className={styles.footerLinks}>
               <h4>Company</h4>
               <ul>
                 <li><Link href="/about">About Us</Link></li>
@@ -379,7 +373,7 @@ export default function LandingPage() {
                 <li><Link href="/contact">Contact</Link></li>
               </ul>
             </div>
-             <div className={styles.footerLinks}>
+            <div className={styles.footerLinks}>
               <h4>Legal</h4>
               <ul>
                 <li><Link href="/privacy">Privacy Policy</Link></li>
@@ -397,7 +391,7 @@ export default function LandingPage() {
               <div className={styles.socialIcon}>
                 <svg className={styles.w4h4} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" /></svg>
               </div>
-               <div className={styles.socialIcon}>
+              <div className={styles.socialIcon}>
                 <svg className={styles.w4h4} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg>
               </div>
             </div>
