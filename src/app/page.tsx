@@ -16,6 +16,7 @@ import {
   Layers,
   Download
 } from 'lucide-react';
+import styles from './page.module.css';
 
 export default function LandingPage() {
   return (
@@ -29,19 +30,15 @@ export default function LandingPage() {
             </div>
             <span className={styles.logoText}>Khata</span>
           </div>
-          <nav className="hidden md:flex gap-8">
-            <Link href="#features" className="text-text-secondary font-medium text-[0.95rem] transition-colors duration-200 no-underline hover:text-primary">Features</Link>
-            <Link href="#how-it-works" className="text-text-secondary font-medium text-[0.95rem] transition-colors duration-200 no-underline hover:text-primary">How it Works</Link>
-            <Link href="#tech-stack" className="text-text-secondary font-medium text-[0.95rem] transition-colors duration-200 no-underline hover:text-primary">Tech</Link>
+          <nav className={styles.headerNav}>
+            <Link href="#features" className={styles.navLink}>Features</Link>
+            <Link href="#how-it-works" className={styles.navLink}>How it Works</Link>
           </nav>
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="text-text-primary font-semibold no-underline">
+          <div className={styles.headerActions}>
+            <Link href="/login" className={styles.loginLink}>
               Login
             </Link>
-            <Link
-              href="/dashboard"
-              className="bg-primary text-white py-[0.6rem] px-5 rounded-[50px] font-semibold no-underline flex items-center gap-2 transition-all duration-300 shadow-md hover:bg-primary-dark hover:-translate-y-0.5 hover:shadow-glow"
-            >
+            <Link href="/dashboard" className={styles.headerButton}>
               Try Free <ArrowRight size={16} />
             </Link>
           </div>
@@ -73,13 +70,7 @@ export default function LandingPage() {
             </p>
 
             <div className={styles.heroButtons}>
-              {/* <button className={styles.downloadBtn}>
-                <Download size={20} /> Download App
-              </button> */}
-              <Link
-                href="/dashboard"
-                className="bg-surface text-text-primary py-4 px-8 rounded-[50px] font-bold text-lg border border-border no-underline flex items-center justify-center transition-all duration-200 hover:bg-background hover:border-text-secondary"
-              >
+              <Link href="/dashboard" className={styles.heroButton}>
                 Try Free on Web
               </Link>
             </div>
@@ -231,19 +222,19 @@ export default function LandingPage() {
           <div className={styles.sectionTitle}>
             <h2>Why Pakistani Shopkeepers Love EZ Khata</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className={styles.whyGrid}>
             {[
               { title: "Simple to Use", desc: "Designed for anyone, no tech skills needed." },
               { title: "For Retail", desc: "Perfect for Kiryana, Medical, and General Stores." },
               { title: "Mobile & Desktop", desc: "Works on your phone and laptop seamlessly." },
               { title: "100% Reliable", desc: "Accurate calculations, zero errors." }
             ].map((item, i) => (
-              <div key={i} className="bg-white p-8 rounded-[20px] shadow-sm text-center relative overflow-hidden border border-border">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark text-white rounded-full flex items-center justify-center font-extrabold mx-auto mb-4">
+              <div key={i} className={styles.whyCard}>
+                <div className={styles.whyBadge}>
                   {i + 1}
                 </div>
-                <h3 className="font-bold text-lg mb-2">{item.title}</h3>
-                <p className="text-text-secondary text-sm">{item.desc}</p>
+                <h3 className={styles.whyTitle}>{item.title}</h3>
+                <p className={styles.whyDescription}>{item.desc}</p>
               </div>
             ))}
           </div>
@@ -258,9 +249,9 @@ export default function LandingPage() {
             <p>Get started in minutes.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+          <div className={styles.howItWorksGrid}>
             {/* Connecting Line (Desktop) */}
-            <div className="hidden md:block absolute top-10 left-[50px] right-[50px] h-[2px] bg-[#E5E7EB] z-0"></div>
+            <div className={styles.connectingLine}></div>
 
             {[
               { icon: Smartphone, title: "Sign Up", desc: "Create your secure account in seconds." },
@@ -268,90 +259,47 @@ export default function LandingPage() {
               { icon: BarChart3, title: "Track Khata", desc: "Record udhar and payments daily." },
               { icon: Zap, title: "Grow Business", desc: "View insights and grow your profits." }
             ].map((step, i) => (
-              <div key={i} className="text-center relative z-10 bg-background">
-                <div className="w-20 h-20 bg-white border border-border rounded-full flex items-center justify-center mx-auto mb-6 text-primary shadow-md">
+              <div key={i} className={styles.stepCard}>
+                <div className={styles.stepIcon}>
                   <step.icon size={32} />
                 </div>
-                <h3 className="font-bold text-xl mb-2">{step.title}</h3>
-                <p className="text-text-secondary">{step.desc}</p>
+                <h3 className={styles.stepTitle}>{step.title}</h3>
+                <p className={styles.stepDescription}>{step.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Tech Stack Section */}
-      <section id="tech-stack" className="py-24">
-        <div className="max-w-[1200px] mx-auto px-6">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-16">
-            <div className="w-full md:w-1/2">
-              <h2 className="flex items-center gap-4 text-[2rem] font-extrabold mb-6">
-                <Server className="text-primary" /> Built with Modern Tech
-              </h2>
-              <p className={styles.textTextSecondary + " " + styles.mb6 + " " + styles.leadingRelaxed}>
-                EZ Khata is built on a robust, scalable stack ensuring speed and security.
-              </p>
-              <ul className="list-none p-0">
-                {["Next.js 16 (App Router)", "Supabase (Custom Schema)", "Postgres Database", "bcrypt + jose (Secure JWT Auth)"].map((tech, i) => (
-                  <li key={i} className="flex items-center gap-3 mb-4 text-[1.1rem] font-medium">
-                    <span className="w-2 h-2 bg-primary rounded-full"></span> {tech}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className={styles.mdHalf + " " + styles.techGrid}>
-              <div className={styles.techItem}>
-                <Database className={styles.textPrimary + " " + styles.mb1} size={32} />
-                <span>Postgres</span>
-              </div>
-              <div className={styles.techItem}>
-                <ShieldCheck className={styles.textPrimary + " " + styles.mb1} size={32} />
-                <span>JWT Auth</span>
-              </div>
-              <div className={styles.techItem}>
-                <Zap className={styles.textPrimary + " " + styles.mb1} size={32} />
-                <span>Next.js</span>
-              </div>
-              <div className={styles.techItem}>
-                <Lock className={styles.textPrimary + " " + styles.mb1} size={32} />
-                <span>RLS Policies</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
-      <section className="py-24 px-6 bg-surface text-center">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-[2.5rem] font-extrabold mb-4">Start Your Digital Journey Today</h2>
-          <p className="text-xl text-text-secondary mb-10">
+      <section className={styles.ctaSection}>
+        <div className={styles.ctaContainer}>
+          <h2 className={styles.ctaTitle}>Start Your Digital Journey Today</h2>
+          <p className={styles.ctaDescription}>
             Join the community of smart shopkeepers.
           </p>
-          <Link
-            href="/dashboard"
-            className="bg-gradient-to-br from-primary to-primary-dark text-white py-4 px-8 rounded-[50px] font-bold text-[1.125rem] border-none cursor-pointer flex items-center justify-center gap-3 transition-all duration-300 shadow-glow hover:-translate-y-0.5 hover:shadow-xl w-fit mx-auto"
-          >
+          <Link href="/dashboard" className={styles.ctaButton}>
             Get Started for Free <ArrowRight size={20} />
           </Link>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-border pt-16 pb-8">
-        <div className="max-w-[1200px] mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr] gap-12 mb-16">
+      <footer className={styles.footer}>
+        <div className={styles.footerContainer}>
+          <div className={styles.footerGrid}>
             <div>
-              <div className="flex items-center gap-3 text-text-primary no-underline font-bold text-xl">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-[10px] flex items-center justify-center text-white font-extrabold text-xl shadow-glow">
-                  <span>D</span>
+              <div className={styles.footerBrand}>
+                <div className={styles.footerLogo}>
+                  <span>EZ</span>
                 </div>
                 <span className={styles.logoText}>EZ Khata</span>
               </div>
-              <p className="text-text-secondary mt-4 leading-relaxed">
+              <p className={styles.footerDescription}>
                 The best companion for your business. Secure, fast, and reliable.
               </p>
-              <p className="font-[family-name:var(--font-urdu)] text-[1.1rem] text-primary mt-4 font-semibold" dir="rtl">
+              <p className={styles.footerUrdu} dir="rtl">
                 کاروبار میں برکت، ڈیجیٹل دکان کی حرکت
               </p>
             </div>
@@ -381,14 +329,14 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left text-text-secondary text-sm">
+          <div className={styles.footerBottom}>
             <p>
               © {new Date().getFullYear()} EZ Khata. All rights reserved.
             </p>
-            <div className="flex items-center gap-4">
+            <div className={styles.socialIcons}>
               {/* Social Icons placeholders */}
-              <div className="w-8 h-8 bg-background rounded-full flex items-center justify-center text-text-secondary transition-all duration-200 cursor-pointer hover:bg-primary hover:text-white">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" /></svg>
+              <div className={styles.socialIcon}>
+                <svg className={styles.w4h4} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" /></svg>
               </div>
               <div className={styles.socialIcon}>
                 <svg className={styles.w4h4} fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg>
@@ -401,16 +349,18 @@ export default function LandingPage() {
   );
 }
 
+
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
   return (
-    <div className="bg-surface border border-border p-8 rounded-[24px] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary">
-      <div className="w-[60px] h-[60px] bg-[rgba(16,185,129,0.1)] text-primary rounded-[16px] flex items-center justify-center mb-6">
+    <div className={styles.featureCard}>
+      <div className={styles.featureIcon}>
         {icon}
       </div>
-      <h3 className="text-xl font-bold mb-3">{title}</h3>
-      <p className="text-text-secondary leading-relaxed">
+      <h3 className={styles.featureTitle}>{title}</h3>
+      <p className={styles.featureDescription}>
         {description}
       </p>
     </div>
   );
 }
+

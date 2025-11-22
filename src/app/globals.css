@@ -27,9 +27,9 @@
 
 :root {
   /* Light Mode Defaults */
-  --primary: #10B981;
-  --primary-dark: #059669;
-  --primary-light: #34D399;
+  --primary: #059669;
+  --primary-dark: #047857;
+  --primary-light: #10B981;
   --secondary: #3B82F6;
   --secondary-dark: #2563EB;
   --accent: #8B5CF6;
@@ -37,7 +37,7 @@
   --background: #F8FAFC;
   --surface: #FFFFFF;
   --text-primary: #0F172A;
-  --text-secondary: #64748B;
+  --text-secondary: #475569;
   --danger: #EF4444;
   --danger-dark: #DC2626;
   --success: #10B981;
