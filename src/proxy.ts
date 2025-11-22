@@ -6,9 +6,25 @@ import { updateSession } from '@/lib/auth'
 export async function proxy(request: NextRequest) {
     // Check for session cookie
     const session = request.cookies.get('session')
+    const { pathname } = request.nextUrl
+
+    // If trying to access login page while authenticated, redirect to dashboard
+    if (session && pathname.startsWith('/login')) {
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+
+    // If trying to access root page while authenticated, redirect to dashboard
+    // This is optional: maybe you want logged-in users to see the landing page too?
+    // Usually for apps, logged in users go straight to dashboard.
+    if (session && pathname === '/') {
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
 
     // If no session and trying to access protected route, redirect to login
-    if (!session && !request.nextUrl.pathname.startsWith('/login')) {
+    // Protected routes: everything EXCEPT /, /login, /_next, static files
+    const isPublicRoute = pathname === '/' || pathname.startsWith('/login');
+
+    if (!session && !isPublicRoute) {
         return NextResponse.redirect(new URL('/login', request.url))
     }
 
