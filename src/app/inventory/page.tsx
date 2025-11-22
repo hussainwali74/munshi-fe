@@ -50,8 +50,8 @@ export default function InventoryPage() {
     return (
         <DashboardLayout>
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-3xl font-bold mb-0">{t('inventory.title')}</h1>
-                <button className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold text-white bg-primary hover:bg-primary-dark transition-colors" onClick={() => setIsModalOpen(true)}>
+                <h1 className="text-3xl font-bold mb-0 tracking-tight">{t('inventory.title')}</h1>
+                <button className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px" onClick={() => setIsModalOpen(true)}>
                     <Plus size={20} /> {t('inventory.addItem')}
                 </button>
             </div>
@@ -66,8 +66,8 @@ export default function InventoryPage() {
 
             {/* Add Item Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                    <div className="bg-surface rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setIsModalOpen(false)}>
+                    <div className="bg-surface rounded-[0.75rem] w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-4 border-b border-border">
                             <h2 className="text-xl font-bold">{t('inventory.addItem')}</h2>
                             <button onClick={() => setIsModalOpen(false)} className="text-text-secondary hover:text-text-primary">
@@ -132,7 +132,7 @@ export default function InventoryPage() {
                             </div>
 
                             <div className="pt-4">
-                                <button type="submit" className="w-full py-3 px-4 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors shadow-md">
+                                <button type="submit" className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px">
                                     {t('common.save')}
                                 </button>
                             </div>
@@ -141,31 +141,31 @@ export default function InventoryPage() {
                 </div>
             )}
 
-            <div className="bg-surface rounded-xl border border-border shadow-sm mb-6 overflow-hidden">
+            <div className="bg-surface rounded-[0.75rem] border border-border shadow-md mb-6 overflow-hidden">
                 <div className="p-4 flex items-center gap-4">
-                    <div className="flex items-center gap-2 rounded-lg p-2 flex-1 border border-border bg-background focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all">
-                        <Search size={20} className="text-text-secondary" />
+                    <div className="relative flex-1">
                         <input
                             type="text"
                             placeholder={t('common.search')}
-                            className="w-full outline-none border-none bg-transparent text-text-primary placeholder:text-text-secondary"
+                            className="w-full p-3 pl-10 rounded-[0.75rem] border border-border bg-background text-text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
                         />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" size={20} />
                     </div>
-                    <button className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-surface text-text-primary hover:bg-gray-50 transition-colors">
+                    <button className="inline-flex items-center gap-2 px-4 py-3 rounded-[0.75rem] border border-border bg-surface text-text-primary hover:bg-gray-50 transition-colors font-medium">
                         <Filter size={20} /> Filter
                     </button>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
-                        <thead className="bg-gray-50/50 dark:bg-gray-800/60">
+                        <thead className="bg-gray-50 text-text-secondary font-medium border-b border-border">
                             <tr className="border-b border-border">
-                                <th className="p-3 font-medium text-gray-700 dark:text-gray-100 text-left">{t('inventory.itemName')}</th>
-                                <th className="p-3 font-medium text-gray-700 dark:text-gray-100 text-left">{t('inventory.category')}</th>
-                                <th className="p-3 font-medium text-gray-700 dark:text-gray-100 text-left">{t('inventory.stock')}</th>
-                                <th className="p-3 font-medium text-gray-700 dark:text-gray-100 text-left">{t('inventory.price')}</th>
-                                <th className="p-3 font-medium text-gray-700 dark:text-gray-100 text-left">{t('inventory.status')}</th>
-                                <th className="p-3 font-medium text-gray-700 dark:text-gray-100 text-left">{t('common.actions')}</th>
+                                <th className="p-3 font-medium text-left">{t('inventory.itemName')}</th>
+                                <th className="p-3 font-medium text-left">{t('inventory.category')}</th>
+                                <th className="p-3 font-medium text-left">{t('inventory.stock')}</th>
+                                <th className="p-3 font-medium text-left">{t('inventory.price')}</th>
+                                <th className="p-3 font-medium text-left">{t('inventory.status')}</th>
+                                <th className="p-3 font-medium text-left">{t('common.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">

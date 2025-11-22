@@ -12,7 +12,7 @@ export default function SettingsPage() {
                 <p className="text-text-secondary">Update your shop information</p>
             </div>
 
-            <div className="bg-surface rounded-xl p-8 shadow-sm border border-border max-w-2xl">
+            <div className="bg-surface rounded-[0.75rem] p-8 shadow-md border border-border max-w-2xl">
                 <div className="flex items-center gap-4 mb-8 pb-6 border-b border-border">
                     <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary/10">
                         <SettingsIcon className="text-primary" size={24} />
@@ -29,7 +29,7 @@ export default function SettingsPage() {
                         <input
                             name="businessName"
                             type="text"
-                            className="w-full p-3 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
+                            className="w-full p-3 rounded-[0.75rem] border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
                             placeholder="e.g. Bismillah General Store"
                             required
                         />
@@ -40,7 +40,7 @@ export default function SettingsPage() {
                         <input
                             name="fullName"
                             type="text"
-                            className="w-full p-3 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
+                            className="w-full p-3 rounded-[0.75rem] border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
                             placeholder="Your full name"
                             required
                         />
@@ -52,7 +52,7 @@ export default function SettingsPage() {
                             <input
                                 name="shopPhone"
                                 type="tel"
-                                className="w-full p-3 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
+                                className="w-full p-3 rounded-[0.75rem] border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
                                 placeholder="0300-1234567"
                             />
                         </div>
@@ -61,14 +61,14 @@ export default function SettingsPage() {
                             <input
                                 name="shopAddress"
                                 type="text"
-                                className="w-full p-3 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
+                                className="w-full p-3 rounded-[0.75rem] border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
                                 placeholder="Street, City"
                             />
                         </div>
                     </div>
 
                     <div className="pt-4">
-                        <button type="submit" className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold text-white bg-primary hover:bg-primary-dark transition-colors shadow-md">
+                        <button type="submit" className="inline-flex items-center justify-center px-6 py-3 rounded-[0.75rem] font-semibold text-white bg-primary hover:bg-primary-dark transition-colors shadow-sm hover:-translate-y-px">
                             Save Changes
                         </button>
                     </div>

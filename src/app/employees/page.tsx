@@ -7,15 +7,15 @@ export default function EmployeesPage() {
     return (
         <DashboardLayout>
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-3xl font-bold mb-0">Employees</h1>
-                <button className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold text-white bg-primary hover:bg-primary-dark transition-colors">
+                <h1 className="text-3xl font-bold mb-0 tracking-tight">Employees</h1>
+                <button className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px">
                     <Plus size={20} /> Add Employee
                 </button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="bg-surface rounded-xl p-6 shadow-sm border border-border hover:shadow-md transition-all">
+                    <div key={i} className="bg-surface rounded-[0.75rem] p-6 shadow-md border border-border hover:bg-gray-50 transition-colors">
                         <div className="flex items-start justify-between mb-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 rounded-full flex items-center justify-center text-text-secondary bg-gray-100">
@@ -45,8 +45,8 @@ export default function EmployeesPage() {
                         </div>
 
                         <div className="flex gap-3">
-                            <button className="flex-1 py-2 px-3 rounded-lg border border-border text-text-secondary hover:bg-gray-50 hover:text-text-primary transition-colors text-sm font-medium">View Profile</button>
-                            <button className="flex-1 py-2 px-3 rounded-lg border border-border text-text-secondary hover:bg-gray-50 hover:text-text-primary transition-colors text-sm font-medium">Attendance</button>
+                            <button className="flex-1 py-2 px-3 rounded-[0.75rem] border border-border text-text-secondary hover:bg-background hover:text-text-primary transition-colors text-sm font-medium">View Profile</button>
+                            <button className="flex-1 py-2 px-3 rounded-[0.75rem] border border-border text-text-secondary hover:bg-background hover:text-text-primary transition-colors text-sm font-medium">Attendance</button>
                         </div>
                     </div>
                 ))}

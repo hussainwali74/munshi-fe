@@ -1,7 +1,7 @@
 
 'use client';
 import DashboardLayout from '@/components/DashboardLayout';
-import { Search, Plus, User, ChevronRight, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { Search, Plus, User, ChevronRight, ArrowUpRight, ArrowDownLeft, X } from 'lucide-react';
 import { useState } from 'react';
 import { addCustomer } from './actions';
 import Link from 'next/link';
@@ -20,16 +20,16 @@ export default function KhataPage() {
 
     return (
         <DashboardLayout>
-            {/* Header Section with Gradient */}
-            <div className="flex items-center justify-between mb-8 animate-in slide-in-from-bottom-5 duration-500">
+            {/* Header Section */}
+            <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="text-3xl font-extrabold mb-2 bg-gradient-to-br from-primary to-primary-dark bg-clip-text text-transparent">
+                    <h1 className="text-3xl font-extrabold mb-2 tracking-tight">
                         Khata (Ledger)
                     </h1>
-                    <p className="text-text-secondary text-lg">Manage customer credit accounts</p>
+                    <p className="text-text-secondary">Manage customer credit accounts</p>
                 </div>
                 <button
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-300 border-none outline-none bg-gradient-to-br from-primary to-primary-dark text-white shadow-md shadow-primary/30 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/40 overflow-hidden relative"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px"
                     onClick={() => setIsModalOpen(true)}
                 >
                     <Plus size={20} /> Add Customer
@@ -38,19 +38,17 @@ export default function KhataPage() {
 
             {/* Add Customer Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
-                    <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-xl w-full max-w-md shadow-2xl">
-                        {/* Modal Header with Gradient */}
-                        <div className="bg-gradient-to-br from-primary to-primary-dark p-4 rounded-t-xl">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-xl font-bold text-white">Add New Customer</h2>
-                                <button
-                                    onClick={() => setIsModalOpen(false)}
-                                    className="text-white hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200"
-                                >
-                                    ✕
-                                </button>
-                            </div>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setIsModalOpen(false)}>
+                    <div className="bg-surface rounded-[0.75rem] w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
+                        {/* Modal Header */}
+                        <div className="p-4 border-b border-border flex items-center justify-between bg-gray-50">
+                            <h2 className="text-lg font-bold">Add New Customer</h2>
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="text-text-secondary hover:text-text-primary transition-colors"
+                            >
+                                <X size={20} />
+                            </button>
                         </div>
 
                         <form action={async (formData) => {
@@ -95,7 +93,7 @@ export default function KhataPage() {
                             </div>
 
                             <div className="pt-2">
-                                <button type="submit" className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-300 border-none outline-none bg-gradient-to-br from-primary to-primary-dark text-white shadow-md shadow-primary/30 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/40">
+                                <button type="submit" className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px">
                                     Add Customer
                                 </button>
                             </div>
@@ -104,33 +102,33 @@ export default function KhataPage() {
                 </div>
             )}
 
-            {/* Search Section with Glass Effect */}
-            <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-xl p-6 mb-6 shadow-lg animate-in slide-in-from-bottom-5 duration-500 delay-100">
-                <div className="flex items-center gap-3 rounded-lg p-3 border-2 border-border bg-surface transition-all duration-200 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20">
-                    <Search size={22} className="text-primary" />
+            {/* Search Section */}
+            <div className="mb-6 relative">
+                <div className="relative">
                     <input
                         type="text"
+                        className="w-full p-3 pl-12 h-14 text-lg rounded-[0.75rem] border border-border bg-surface text-text-primary shadow-sm focus:shadow-md transition-shadow focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                         placeholder="Search customer by name or phone..."
-                        className="w-full text-base outline-none border-none bg-transparent text-text-primary placeholder:text-text-secondary"
                     />
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" size={24} />
                 </div>
             </div>
 
-            {/* Customer List with Premium Cards */}
-            <div className="space-y-4 animate-in slide-in-from-bottom-5 duration-500 delay-200">
+            {/* Customer List */}
+            <div className="space-y-4">
                 {customers.map((customer, index) => (
                     <Link
                         key={customer.id}
                         href={`/khata/${customer.id}`}
-                        className="block transition-transform duration-300"
+                        className="block"
                     >
-                        <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-xl p-5 shadow-lg hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300">
+                        <div className="bg-surface rounded-[0.75rem] p-5 shadow-md border border-border hover:bg-gray-50 transition-colors">
                             <div className="flex items-center justify-between gap-4">
                                 {/* Customer Info */}
                                 <div className="flex items-center gap-4 flex-1 min-w-0">
-                                    {/* Avatar with Gradient */}
-                                    <div className="w-14 h-14 rounded-full flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark shadow-glow flex-shrink-0">
-                                        <User size={28} color="white" />
+                                    {/* Avatar */}
+                                    <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary/10 text-primary font-bold flex-shrink-0">
+                                        <User size={24} />
                                     </div>
 
                                     <div className="flex-1 min-w-0">
@@ -147,31 +145,31 @@ export default function KhataPage() {
                                         <p className="text-xs text-text-secondary mb-1 font-medium">Balance</p>
 
                                         {customer.balance === 0 ? (
-                                            <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">
+                                            <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200">
                                                 Settled ✓
                                             </div>
                                         ) : (
                                             <>
-                                                <p className={`text-2xl font-bold mb-1 ${customer.balance > 0 ? 'text-red-500' : 'text-green-500'
+                                                <p className={`text-xl font-bold mb-1 ${customer.balance > 0 ? 'text-danger' : 'text-success'
                                                     }`}>
                                                     Rs {Math.abs(customer.balance).toLocaleString()}
                                                 </p>
                                                 {customer.balance > 0 && (
-                                                    <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-br from-red-500/10 to-orange-500/10 text-red-500 border border-red-500/20">
-                                                        <ArrowUpRight size={14} />
+                                                    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-danger">
+                                                        <ArrowUpRight size={12} />
                                                         Udhar
                                                     </div>
                                                 )}
                                                 {customer.balance < 0 && (
-                                                    <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-br from-green-500/10 to-teal-500/10 text-green-500 border border-green-500/20">
-                                                        <ArrowDownLeft size={14} />
+                                                    <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-success">
+                                                        <ArrowDownLeft size={12} />
                                                         Advance
                                                     </div>
                                                 )}
                                             </>
                                         )}
                                     </div>
-                                    <ChevronRight size={24} className="text-text-secondary" />
+                                    <ChevronRight size={20} className="text-text-secondary" />
                                 </div>
                             </div>
                         </div>
@@ -181,14 +179,14 @@ export default function KhataPage() {
 
             {/* Empty State (if no customers) */}
             {customers.length === 0 && (
-                <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-xl p-12 text-center shadow-lg">
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary-dark mx-auto mb-4 flex items-center justify-center shadow-glow">
-                        <User size={40} color="white" />
+                <div className="bg-surface rounded-[0.75rem] p-12 text-center shadow-md border border-border">
+                    <div className="w-20 h-20 rounded-full bg-primary/10 mx-auto mb-4 flex items-center justify-center text-primary">
+                        <User size={40} />
                     </div>
                     <h3 className="text-xl font-bold mb-2">No Customers Yet</h3>
                     <p className="text-text-secondary mb-6">Start by adding your first customer</p>
                     <button
-                        className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-300 border-none outline-none bg-gradient-to-br from-primary to-primary-dark text-white shadow-md shadow-primary/30 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/40"
+                        className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px"
                         onClick={() => setIsModalOpen(true)}
                     >
                         <Plus size={20} /> Add First Customer
