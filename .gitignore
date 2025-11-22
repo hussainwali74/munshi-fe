@@ -16,6 +16,12 @@
 # production
 /build
 
+# opennext / cloudflare
+/.open-next/
+/.wrangler/
+/dist/
+.dev.vars
+
 # misc
 .DS_Store
 *.pem
