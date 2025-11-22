@@ -62,7 +62,7 @@ export default function LandingPage() {
             </div>
 
             <h1 className={styles.heroTitle}>
-              Digital Dukan – The <br />
+              EZ Khata – The <br />
               <span>Smart Online Khata App</span>
             </h1>
 
@@ -187,7 +187,7 @@ export default function LandingPage() {
           <div className={styles.sectionTitle}>
             <h2>Everything You Need to Run Your Shop</h2>
             <p>
-              Digital Dukan replaces your paper registers with a secure, easy-to-use mobile app.
+              EZ Khata replaces your paper registers with a secure, easy-to-use mobile app.
             </p>
           </div>
 
@@ -230,7 +230,7 @@ export default function LandingPage() {
       <section className={`${styles.section} ${styles.whySection}`}>
         <div className={styles.container}>
           <div className={styles.sectionTitle}>
-            <h2>Why Pakistani Shopkeepers Love Digital Dukan</h2>
+            <h2>Why Pakistani Shopkeepers Love EZ Khata</h2>
           </div>
           <div className={styles.whyGrid}>
             {[
@@ -290,7 +290,7 @@ export default function LandingPage() {
                 <Server className={styles.textPrimary} /> Built with Modern Tech
               </h2>
               <p className={styles.textTextSecondary + " " + styles.mb6 + " " + styles.leadingRelaxed}>
-                Digital Dukan is built on a robust, scalable stack ensuring speed and security.
+                EZ Khata is built on a robust, scalable stack ensuring speed and security.
               </p>
               <ul className={styles.techList}>
                 <li><span className={styles.dot}></span> Next.js 16 (App Router)</li>
@@ -347,7 +347,7 @@ export default function LandingPage() {
                 <div className={styles.logoIcon}>
                   <span>D</span>
                 </div>
-                <span className={styles.logoText}>Digital Dukan</span>
+                <span className={styles.logoText}>EZ Khata</span>
               </div>
               <p>
                 The best companion for your business. Secure, fast, and reliable.
@@ -384,7 +384,7 @@ export default function LandingPage() {
 
           <div className={styles.footerBottom}>
             <p>
-              © {new Date().getFullYear()} Digital Dukan. All rights reserved.
+              © {new Date().getFullYear()} EZ Khata. All rights reserved.
             </p>
             <div className={styles.flexCenter + " " + styles.gap4}>
               {/* Social Icons placeholders */}
