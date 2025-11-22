@@ -19,6 +19,7 @@ export default function InventoryPage() {
     const [items, setItems] = useState<any[]>([]);
     const [editingItem, setEditingItem] = useState<any | null>(null);
     const [addImagePreview, setAddImagePreview] = useState<string | null>(null);
+    const [addImageFile, setAddImageFile] = useState<File | null>(null);
     const { t } = useLanguage();
 
     const fetchInventory = async () => {
@@ -37,14 +38,17 @@ export default function InventoryPage() {
     const handleAddImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            console.log('📸 Image selected:', file.name, file.size, file.type);
             const url = URL.createObjectURL(file);
             setAddImagePreview(url);
+            setAddImageFile(file);
         }
     };
 
     const handleCloseAddModal = () => {
         setIsModalOpen(false);
         setAddImagePreview(null);
+        setAddImageFile(null);
     };
 
     // Fetch inventory items
@@ -72,7 +76,7 @@ export default function InventoryPage() {
         <DashboardLayout>
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-3xl font-bold mb-0 tracking-tight">{t('inventory.title')}</h1>
-                <button className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px" onClick={() => setIsModalOpen(true)}>
+                <button className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px" onClick={() => setIsModalOpen(true)}>
                     <Plus size={20} /> {t('inventory.addItem')}
                 </button>
             </div>
@@ -89,7 +93,7 @@ export default function InventoryPage() {
             {/* Add Item Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={handleCloseAddModal}>
-                    <div className="bg-surface rounded-[0.75rem] w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                    <div className="bg-surface rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-4 border-b border-border">
                             <h2 className="text-xl font-bold">{t('inventory.addItem')}</h2>
                             <button onClick={handleCloseAddModal} className="text-text-secondary hover:text-text-primary">
@@ -97,12 +101,40 @@ export default function InventoryPage() {
                             </button>
                         </div>
 
-                        <form action={async (formData) => {
-                            await addInventoryItem(formData);
-                            handleCloseAddModal();
-                            // Refresh list
-                            const data = await getInventoryItems();
-                            setItems(data || []);
+                        <form onSubmit={async (e) => {
+                            e.preventDefault();
+                            const formElement = e.currentTarget;
+                            const formData = new FormData(formElement);
+
+                            // Manually append the file from state if it exists
+                            if (addImageFile) {
+                                console.log('📎 Appending image file to formData:', addImageFile.name, addImageFile.size, addImageFile.type);
+                                formData.set('image', addImageFile);
+                            } else {
+                                console.log('⚠️ No image file in state to upload');
+                            }
+
+                            // Debug: Log all FormData entries
+                            console.log('📋 FormData contents:');
+                            for (let [key, value] of formData.entries()) {
+                                if (value instanceof File) {
+                                    console.log(`  ${key}:`, value.name, value.size, 'bytes', value.type);
+                                } else {
+                                    console.log(`  ${key}:`, value);
+                                }
+                            }
+
+                            try {
+                                await addInventoryItem(formData);
+                                console.log('✅ Item added successfully');
+                                handleCloseAddModal();
+                                // Refresh list
+                                const data = await getInventoryItems();
+                                setItems(data || []);
+                            } catch (error) {
+                                console.error('❌ Error adding item:', error);
+                                alert('Error: ' + (error as Error).message);
+                            }
                         }} className="p-4 space-y-4">
 
                             {/* Image Upload */}
@@ -111,11 +143,14 @@ export default function InventoryPage() {
 
                                 {addImagePreview ? (
                                     <div className="flex flex-col gap-3">
-                                        <div className="relative w-full h-48 rounded-[0.75rem] overflow-hidden border border-border bg-gray-50">
+                                        <div className="relative w-full h-48 rounded-xl overflow-hidden border border-border bg-gray-50">
                                             <img src={addImagePreview} alt="Preview" className="w-full h-full object-contain" />
                                             <button
                                                 type="button"
-                                                onClick={() => setAddImagePreview(null)}
+                                                onClick={() => {
+                                                    setAddImagePreview(null);
+                                                    setAddImageFile(null);
+                                                }}
                                                 className="absolute top-2 right-2 p-2 bg-white/80 hover:bg-white text-red-500 rounded-full shadow-sm transition-colors backdrop-blur-sm"
                                                 title={t('inventory.deleteImage')}
                                             >
@@ -195,7 +230,7 @@ export default function InventoryPage() {
                             </div>
 
                             <div className="pt-4">
-                                <button type="submit" className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px">
+                                <button type="submit" className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px">
                                     {t('common.save')}
                                 </button>
                             </div>
@@ -204,17 +239,17 @@ export default function InventoryPage() {
                 </div>
             )}
 
-            <div className="bg-surface rounded-[0.75rem] border border-border shadow-md mb-6 overflow-hidden">
+            <div className="bg-surface rounded-xl border border-border shadow-md mb-6 overflow-hidden">
                 <div className="p-4 flex items-center gap-4">
                     <div className="relative flex-1">
                         <input
                             type="text"
                             placeholder={t('common.search')}
-                            className="w-full p-3 pl-10 rounded-[0.75rem] border border-border bg-background text-text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
+                            className="w-full p-3 pl-10 rounded-xl border border-border bg-background text-text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
                         />
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" size={20} />
                     </div>
-                    <button className="inline-flex items-center gap-2 px-4 py-3 rounded-[0.75rem] border border-border bg-surface text-text-primary hover:bg-gray-50 transition-colors font-medium">
+                    <button className="inline-flex items-center gap-2 px-4 py-3 rounded-xl border border-border bg-surface text-text-primary hover:bg-gray-50 transition-colors font-medium">
                         <Filter size={20} /> Filter
                     </button>
                 </div>
@@ -254,7 +289,7 @@ export default function InventoryPage() {
                                                         }}
                                                     />
                                                 ) : null}
-                                                <div className={`hidden ${!item.image_url ? '!block' : ''} fallback-icon`}>
+                                                <div className={`hidden ${!item.image_url ? 'block!' : ''} fallback-icon`}>
                                                     <Package size={20} />
                                                 </div>
                                             </div>

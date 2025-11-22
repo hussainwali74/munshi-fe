@@ -35,13 +35,24 @@ export async function addInventoryItem(formData: FormData) {
     const color = formData.get('color') as string
     const imageFile = formData.get('image') as File
 
+    console.log('🔍 Image file from formData:', {
+        exists: !!imageFile,
+        name: imageFile?.name,
+        size: imageFile?.size,
+        type: imageFile?.type
+    })
+
     let imageUrl = null
     if (imageFile && imageFile.size > 0) {
+        console.log('📤 Attempting to upload image to R2...')
         try {
             imageUrl = await uploadImageToR2(imageFile)
+            console.log('✅ Image uploaded successfully:', imageUrl)
         } catch (error) {
-            console.error('Upload failed:', error)
+            console.error('❌ Upload failed:', error)
         }
+    } else {
+        console.log('⚠️ No image file to upload (file missing or size is 0)')
     }
 
     const { error } = await db.from('inventory').insert({
@@ -60,6 +71,7 @@ export async function addInventoryItem(formData: FormData) {
         throw new Error('Failed to add item')
     }
 
+    console.log('✅ Item added to database with image_url:', imageUrl)
     revalidatePath('/inventory')
 }
 
