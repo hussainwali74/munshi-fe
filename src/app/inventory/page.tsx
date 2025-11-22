@@ -158,14 +158,14 @@ export default function InventoryPage() {
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
-                        <thead className="bg-gray-50/50">
+                        <thead className="bg-gray-50/50 dark:bg-gray-800/60">
                             <tr className="border-b border-border">
-                                <th className="p-3 font-medium text-text-secondary text-left">{t('inventory.itemName')}</th>
-                                <th className="p-3 font-medium text-text-secondary text-left">{t('inventory.category')}</th>
-                                <th className="p-3 font-medium text-text-secondary text-left">{t('inventory.stock')}</th>
-                                <th className="p-3 font-medium text-text-secondary text-left">{t('inventory.price')}</th>
-                                <th className="p-3 font-medium text-text-secondary text-left">{t('inventory.status')}</th>
-                                <th className="p-3 font-medium text-text-secondary text-left">{t('common.actions')}</th>
+                                <th className="p-3 font-medium text-gray-700 dark:text-gray-100 text-left">{t('inventory.itemName')}</th>
+                                <th className="p-3 font-medium text-gray-700 dark:text-gray-100 text-left">{t('inventory.category')}</th>
+                                <th className="p-3 font-medium text-gray-700 dark:text-gray-100 text-left">{t('inventory.stock')}</th>
+                                <th className="p-3 font-medium text-gray-700 dark:text-gray-100 text-left">{t('inventory.price')}</th>
+                                <th className="p-3 font-medium text-gray-700 dark:text-gray-100 text-left">{t('inventory.status')}</th>
+                                <th className="p-3 font-medium text-gray-700 dark:text-gray-100 text-left">{t('common.actions')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border">

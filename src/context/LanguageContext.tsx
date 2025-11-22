@@ -13,24 +13,32 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>('ur'); // Default to Urdu as requested
+  // Always start with the same default for both SSR and client to avoid hydration mismatch
+  const [language, setLanguageState] = useState<Language>('ur');
+  const [mounted, setMounted] = useState(false);
 
+  // Load from localStorage after component mounts
   useEffect(() => {
-    const savedLang = localStorage.getItem('language') as Language | null;
-    if (savedLang) {
-      setLanguage(savedLang);
+    setMounted(true);
+    if (typeof window !== 'undefined') {
+      const savedLang = localStorage.getItem('language') as Language | null;
+      if (savedLang) {
+        setLanguageState(savedLang);
+      }
     }
   }, []);
 
   const handleSetLanguage = (lang: Language) => {
-    setLanguage(lang);
-    localStorage.setItem('language', lang);
-    document.documentElement.dir = lang === 'ur' ? 'rtl' : 'ltr';
-    document.documentElement.lang = lang;
+    setLanguageState(lang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('language', lang);
+    }
   };
 
-  // Initial direction set
+  // Update DOM when language changes (only on client after mount)
   useEffect(() => {
+    if (!mounted) return;
+
     document.documentElement.dir = language === 'ur' ? 'rtl' : 'ltr';
     document.documentElement.lang = language;
     if (language === 'ur') {
@@ -38,7 +46,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     } else {
       document.body.classList.remove('urdu-text');
     }
-  }, [language]);
+  }, [language, mounted]);
 
   const t = (path: string) => {
     const keys = path.split('.');

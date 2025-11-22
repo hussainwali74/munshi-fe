@@ -69,6 +69,10 @@
   --radius-xl: 1.5rem;
 }
 
+.urdu-text {
+  font-family: var(--font-urdu);
+}
+
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
     --background: #0F172A;

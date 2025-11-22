@@ -32,6 +32,8 @@ describe('LanguageContext', () => {
     expect(screen.getByTestId('dir').textContent).toBe('rtl');
     // Check translation for Urdu
     expect(screen.getByTestId('translation').textContent).toBe('ڈیش بورڈ');
+    // Check body class
+    expect(document.body.classList.contains('urdu-text')).toBe(true);
   });
 
   it('can switch to english', () => {
@@ -46,5 +48,7 @@ describe('LanguageContext', () => {
     expect(screen.getByTestId('dir').textContent).toBe('ltr');
     expect(screen.getByTestId('translation').textContent).toBe('Dashboard');
     expect(localStorage.getItem('language')).toBe('en');
+    // Check body class removed
+    expect(document.body.classList.contains('urdu-text')).toBe(false);
   });
 });
