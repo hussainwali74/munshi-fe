@@ -32,6 +32,12 @@ export default function EditInventoryModal({ item, onClose, onUpdate }: EditInve
         setDeleteImage(true);
     };
 
+    const getImageUrl = (url: string) => {
+        if (!url) return '';
+        if (url.startsWith('http') || url.startsWith('blob:')) return url;
+        return `https://${url}`;
+    };
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <div className="bg-surface rounded-[0.75rem] w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-border animate-in fade-in zoom-in-95 duration-200">
@@ -57,50 +63,57 @@ export default function EditInventoryModal({ item, onClose, onUpdate }: EditInve
                         <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.productImage')}</label>
 
                         {previewUrl ? (
-                            <div className="relative w-full h-48 rounded-[0.75rem] overflow-hidden border border-border group">
-                                <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <div className="flex flex-col gap-3">
+                                <div className="relative w-full h-48 rounded-[0.75rem] overflow-hidden border border-border bg-gray-50">
+                                    <img
+                                        src={getImageUrl(previewUrl)}
+                                        alt="Preview"
+                                        className="w-full h-full object-contain"
+                                        onError={(e) => {
+                                            e.currentTarget.style.display = 'none';
+                                            e.currentTarget.parentElement?.classList.add('bg-gray-100', 'flex', 'items-center', 'justify-center');
+                                            e.currentTarget.parentElement!.innerHTML = '<div class="text-text-secondary flex flex-col items-center"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-off mb-2"><line x1="2" x2="22" y1="2" y2="22"/><path d="M10.41 6.69C11.24 5.77 12.6 5.77 13.41 6.69L15 8.28 18 5.27L20 7.27"/><path d="M18.22 18.22L12.13 12.13"/><path d="M2 12L5 15L6.3 13.7"/><path d="M22 15.89V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 1.18-.39"/></svg><span>Image not found</span></div>';
+                                        }}
+                                    />
                                     <button
                                         type="button"
                                         onClick={handleDeleteImage}
-                                        className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                                        className="absolute top-2 right-2 p-2 bg-white/80 hover:bg-white text-red-500 rounded-full shadow-sm transition-colors backdrop-blur-sm"
                                         title={t('inventory.deleteImage')}
                                     >
-                                        <Trash2 size={20} />
+                                        <Trash2 size={18} />
                                     </button>
+                                </div>
+                                <div className="flex justify-end">
+                                    <label htmlFor="edit-image-replace" className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-lg cursor-pointer transition-colors">
+                                        <Upload size={16} />
+                                        {t('inventory.changeImage')}
+                                    </label>
+                                    <input
+                                        type="file"
+                                        id="edit-image-replace"
+                                        name="image"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleImageChange}
+                                    />
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-border rounded-[0.75rem] bg-background hover:bg-surface transition-colors">
-                                <Upload size={32} className="text-text-secondary mb-2" />
-                                <label htmlFor="edit-image" className="text-primary font-medium cursor-pointer hover:underline">
+                            <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-border rounded-[0.75rem] bg-background hover:bg-surface transition-colors group cursor-pointer relative">
+                                <Upload size={32} className="text-text-secondary mb-2 group-hover:text-primary transition-colors" />
+                                <span className="text-primary font-medium group-hover:underline">
                                     {t('inventory.uploadNewImage')}
-                                </label>
+                                </span>
                                 <input
                                     type="file"
                                     id="edit-image"
                                     name="image"
                                     accept="image/*"
-                                    className="hidden"
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                     onChange={handleImageChange}
                                 />
                                 <p className="text-xs text-text-secondary mt-1">PNG, JPG up to 5MB</p>
-                            </div>
-                        )}
-
-                        {previewUrl && !deleteImage && (
-                            <div className="flex justify-end">
-                                <label htmlFor="edit-image-replace" className="text-xs text-primary cursor-pointer hover:underline">
-                                    {t('inventory.changeImage')}
-                                </label>
-                                <input
-                                    type="file"
-                                    id="edit-image-replace"
-                                    name="image"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={handleImageChange}
-                                />
                             </div>
                         )}
                     </div>

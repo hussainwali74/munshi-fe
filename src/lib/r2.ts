@@ -29,5 +29,6 @@ export async function uploadImageToR2(file: File, folder: string = 'products'): 
         ContentType: file.type,
     }));
 
-    return `${R2_PUBLIC_URL}/${fileName}`;
+    const publicUrl = R2_PUBLIC_URL.startsWith('http') ? R2_PUBLIC_URL : `https://${R2_PUBLIC_URL}`;
+    return `${publicUrl}/${fileName}`;
 }

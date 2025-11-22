@@ -18,12 +18,33 @@ export default function InventoryPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [items, setItems] = useState<any[]>([]);
     const [editingItem, setEditingItem] = useState<any | null>(null);
+    const [addImagePreview, setAddImagePreview] = useState<string | null>(null);
     const { t } = useLanguage();
 
     const fetchInventory = async () => {
         // Use Server Action to fetch data securely with cookies
         const data = await getInventoryItems();
+        console.log('Inventory items:', data);
         setItems(data || []);
+    };
+
+    const getImageUrl = (url: string) => {
+        if (!url) return '';
+        if (url.startsWith('http')) return url;
+        return `https://${url}`;
+    };
+
+    const handleAddImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            setAddImagePreview(url);
+        }
+    };
+
+    const handleCloseAddModal = () => {
+        setIsModalOpen(false);
+        setAddImagePreview(null);
     };
 
     // Fetch inventory items
@@ -67,31 +88,72 @@ export default function InventoryPage() {
 
             {/* Add Item Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setIsModalOpen(false)}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={handleCloseAddModal}>
                     <div className="bg-surface rounded-[0.75rem] w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-4 border-b border-border">
                             <h2 className="text-xl font-bold">{t('inventory.addItem')}</h2>
-                            <button onClick={() => setIsModalOpen(false)} className="text-text-secondary hover:text-text-primary">
+                            <button onClick={handleCloseAddModal} className="text-text-secondary hover:text-text-primary">
                                 <X size={24} />
                             </button>
                         </div>
 
                         <form action={async (formData) => {
                             await addInventoryItem(formData);
-                            setIsModalOpen(false);
+                            handleCloseAddModal();
                             // Refresh list
                             const data = await getInventoryItems();
                             setItems(data || []);
                         }} className="p-4 space-y-4">
 
                             {/* Image Upload */}
-                            <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-border rounded-lg bg-background hover:bg-gray-50 transition-colors">
-                                <Upload size={32} className="text-text-secondary mb-2" />
-                                <label htmlFor="image" className="text-primary font-medium cursor-pointer hover:underline">
-                                    {t('inventory.uploadImage')}
-                                </label>
-                                <input type="file" id="image" name="image" accept="image/*" className="hidden" />
-                                <p className="text-xs text-text-secondary mt-1">PNG, JPG up to 5MB</p>
+                            <div className="space-y-2">
+                                <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.productImage')}</label>
+
+                                {addImagePreview ? (
+                                    <div className="flex flex-col gap-3">
+                                        <div className="relative w-full h-48 rounded-[0.75rem] overflow-hidden border border-border bg-gray-50">
+                                            <img src={addImagePreview} alt="Preview" className="w-full h-full object-contain" />
+                                            <button
+                                                type="button"
+                                                onClick={() => setAddImagePreview(null)}
+                                                className="absolute top-2 right-2 p-2 bg-white/80 hover:bg-white text-red-500 rounded-full shadow-sm transition-colors backdrop-blur-sm"
+                                                title={t('inventory.deleteImage')}
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
+                                        <div className="flex justify-end">
+                                            <label htmlFor="image-replace" className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-lg cursor-pointer transition-colors">
+                                                <Upload size={16} />
+                                                {t('inventory.changeImage')}
+                                            </label>
+                                            <input
+                                                type="file"
+                                                id="image-replace"
+                                                name="image"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={handleAddImageChange}
+                                            />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-border rounded-lg bg-background hover:bg-gray-50 transition-colors group cursor-pointer relative">
+                                        <Upload size={32} className="text-text-secondary mb-2 group-hover:text-primary transition-colors" />
+                                        <span className="text-primary font-medium group-hover:underline">
+                                            {t('inventory.uploadImage')}
+                                        </span>
+                                        <input
+                                            type="file"
+                                            id="image"
+                                            name="image"
+                                            accept="image/*"
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                            onChange={handleAddImageChange}
+                                        />
+                                        <p className="text-xs text-text-secondary mt-1">PNG, JPG up to 5MB</p>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
@@ -180,12 +242,21 @@ export default function InventoryPage() {
                                 <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                                     <td className="p-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded flex items-center justify-center text-text-secondary overflow-hidden bg-gray-100">
+                                            <div className="w-12 h-12 rounded-lg flex items-center justify-center text-text-secondary overflow-hidden bg-gray-100 border border-border shrink-0">
                                                 {item.image_url ? (
-                                                    <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <Package size={16} />
-                                                )}
+                                                    <img
+                                                        src={getImageUrl(item.image_url)}
+                                                        alt={item.name}
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => {
+                                                            e.currentTarget.style.display = 'none';
+                                                            e.currentTarget.parentElement?.classList.add('fallback-icon');
+                                                        }}
+                                                    />
+                                                ) : null}
+                                                <div className={`hidden ${!item.image_url ? '!block' : ''} fallback-icon`}>
+                                                    <Package size={20} />
+                                                </div>
                                             </div>
                                             <span className="font-medium text-text-primary">{item.name}</span>
                                         </div>

@@ -40,6 +40,20 @@ describe('uploadImageToR2', () => {
         }));
     });
 
+    it('should handle R2_PUBLIC_URL without protocol', async () => {
+        process.env.R2_PUBLIC_URL = 'cdn.ezkhata.com';
+        const mockFile = new File(['test content'], 'test-image.png', { type: 'image/png' });
+        Object.defineProperty(mockFile, 'arrayBuffer', {
+            value: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
+        });
+
+        (mockS3Client.send as jest.Mock).mockResolvedValue({});
+
+        const url = await uploadImageToR2(mockFile);
+
+        expect(url).toContain('https://cdn.ezkhata.com/products/');
+    });
+
     it('should handle upload errors', async () => {
         const mockFile = new File(['test content'], 'test-image.png', { type: 'image/png' });
         Object.defineProperty(mockFile, 'arrayBuffer', {
