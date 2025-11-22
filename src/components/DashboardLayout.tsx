@@ -13,7 +13,7 @@ import { useLanguage } from '@/context/LanguageContext';
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const pathname = usePathname();
-    const { t } = useLanguage();
+    const { t, dir } = useLanguage();
 
     const navItems = [
         { name: t('common.home'), icon: Home, href: '/' },
@@ -24,7 +24,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     ];
 
     return (
-        <div className={styles.container}>
+        <div className={styles.container} style={{ direction: dir === 'rtl' ? 'ltr' : undefined }}>
             {/* Mobile Overlay */}
             {isSidebarOpen && (
                 <div
@@ -34,7 +34,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             )}
 
             {/* Sidebar */}
-            <aside className={`${styles.sidebar} ${isSidebarOpen ? styles.open : ''}`}>
+            <aside
+                className={`${styles.sidebar} ${isSidebarOpen ? styles.open : ''}`}
+                style={{ direction: dir }}
+            >
                 <div className={styles.brand}>
                     <span className={styles.brandTitle}>Ezekata<span style={{ color: 'var(--text-primary)' }}>App</span></span>
                     <button className={styles.closeBtn} onClick={() => setSidebarOpen(false)}>
@@ -77,8 +80,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </aside>
 
             {/* Main Content */}
-            <div className={styles.main}>
-                <header className={styles.header}>
+            <div className={styles.main} style={{ direction: dir }}>
+                <header className={styles.header} style={{ direction: 'ltr' }}>
                     <button className={styles.menuBtn} onClick={() => setSidebarOpen(true)}>
                         <Menu size={24} />
                     </button>
