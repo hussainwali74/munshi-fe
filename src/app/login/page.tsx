@@ -3,7 +3,7 @@
 import { login, signup } from './actions'
 import { useState, useActionState } from 'react'
 import { useLanguage } from '@/context/LanguageContext'
-import { Loader2, Store, User, Lock, Mail } from 'lucide-react'
+import { Loader2, Store, User, Lock, Mail, ShieldCheck } from 'lucide-react'
 
 export default function LoginPage() {
     const [isLogin, setIsLogin] = useState(true)
@@ -17,32 +17,33 @@ export default function LoginPage() {
     const state = isLogin ? loginState : signupState
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-background relative overflow-hidden">
-            {/* Background Elements */}
+        <div className="min-h-screen w-full flex items-center justify-center bg-[#0F172A] relative overflow-hidden font-sans">
+            {/* Background Elements - Subtle */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute -top-1/2 -right-1/4 w-[800px] h-[800px] rounded-full bg-gradient-primary opacity-10 blur-3xl" />
-                <div className="absolute -bottom-1/2 -left-1/4 w-[600px] h-[600px] rounded-full bg-gradient-accent opacity-10 blur-3xl" />
+                <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-[#0FAE7C] opacity-[0.03] blur-[100px]" />
+                <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] rounded-full bg-[#0C8A68] opacity-[0.03] blur-[100px]" />
             </div>
 
-            <div className="w-full max-w-md p-4 relative z-10">
-                <div className="text-center mb-8 fade-in">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-primary mb-4 shadow-glow">
-                        <Store className="w-8 h-8 text-white" />
-                    </div>
-                    <h1 className="text-4xl font-bold gradient-text mb-2">Ezekata</h1>
-                    <p className="text-muted text-lg">E-Z-Khata - {t('login.signIn')}</p>
+            <div className="w-full max-w-[400px] p-4 relative z-10">
+                {/* Header */}
+                <div className="text-center mb-8">
+                    <h1 className="text-4xl font-bold text-[#0FAE7C] mb-3 tracking-tight">Ezekata</h1>
+                    <p className="text-slate-400 text-sm font-medium">
+                        E-Z-Khata – Sign in to manage your shop
+                    </p>
                 </div>
 
-                <div className="glass-card rounded-2xl p-8 slide-up">
+                {/* Card */}
+                <div className="bg-[#1E293B] rounded-2xl p-8 shadow-xl border border-slate-700/50">
                     {/* Tabs */}
-                    <div className="flex p-1 bg-surface/50 rounded-xl mb-8 border border-border relative">
+                    <div className="grid grid-cols-2 p-1 bg-[#0F172A]/50 rounded-xl mb-8 border border-slate-700/50">
                         <button
                             type="button"
                             onClick={() => setIsLogin(true)}
-                            className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                            className={`py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
                                 isLogin
-                                    ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
-                                    : 'text-text-secondary hover:text-text-primary'
+                                    ? 'bg-[#1E293B] text-[#0FAE7C] shadow-sm ring-1 ring-black/5'
+                                    : 'text-slate-400 hover:text-slate-200'
                             }`}
                         >
                             {t('login.login')}
@@ -50,39 +51,41 @@ export default function LoginPage() {
                         <button
                             type="button"
                             onClick={() => setIsLogin(false)}
-                            className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                            className={`py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
                                 !isLogin
-                                    ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
-                                    : 'text-text-secondary hover:text-text-primary'
+                                    ? 'bg-[#1E293B] text-[#0FAE7C] shadow-sm ring-1 ring-black/5'
+                                    : 'text-slate-400 hover:text-slate-200'
                             }`}
                         >
                             {t('login.createAccount')}
                         </button>
                     </div>
 
+                    {/* Error Message */}
                     {state?.error && (
-                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl mb-6 flex items-center gap-2 animate-shake">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl mb-6 flex items-center gap-3 text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                             </svg>
-                            <span className="text-sm font-medium">{state.error}</span>
+                            <span>{state.error}</span>
                         </div>
                     )}
 
+                    {/* Success Message */}
                     {state?.message && (
-                        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 rounded-xl mb-6 flex items-center gap-2 fade-in">
-                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-xl mb-6 flex items-center gap-3 text-sm">
+                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>
-                            <span className="text-sm font-medium">{state.message}</span>
+                            <span>{state.message}</span>
                         </div>
                     )}
 
-                    <form action={isLogin ? loginAction : signupAction} className="space-y-5">
+                    <form action={isLogin ? loginAction : signupAction} className="space-y-4">
                         {!isLogin && (
-                            <div className="space-y-5 fade-in">
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary">
+                            <>
+                                <div className="relative group">
+                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#0FAE7C] transition-colors">
                                         <User className="h-5 w-5" />
                                     </div>
                                     <input
@@ -90,12 +93,12 @@ export default function LoginPage() {
                                         name="fullName"
                                         type="text"
                                         required
-                                        className="input w-full pl-10 bg-background/50 focus:bg-background transition-colors"
+                                        className="w-full h-12 pl-11 pr-4 bg-[#0F172A] border border-slate-700 rounded-xl text-slate-200 placeholder:text-slate-500 focus:border-[#0FAE7C] focus:ring-1 focus:ring-[#0FAE7C] focus:outline-none transition-all"
                                         placeholder={t('login.placeholders.fullName')}
                                     />
                                 </div>
-                                <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary">
+                                <div className="relative group">
+                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#0FAE7C] transition-colors">
                                         <Store className="h-5 w-5" />
                                     </div>
                                     <input
@@ -103,15 +106,15 @@ export default function LoginPage() {
                                         name="businessName"
                                         type="text"
                                         required
-                                        className="input w-full pl-10 bg-background/50 focus:bg-background transition-colors"
+                                        className="w-full h-12 pl-11 pr-4 bg-[#0F172A] border border-slate-700 rounded-xl text-slate-200 placeholder:text-slate-500 focus:border-[#0FAE7C] focus:ring-1 focus:ring-[#0FAE7C] focus:outline-none transition-all"
                                         placeholder={t('login.placeholders.shopName')}
                                     />
                                 </div>
-                            </div>
+                            </>
                         )}
 
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary">
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#0FAE7C] transition-colors">
                                 <Mail className="h-5 w-5" />
                             </div>
                             <input
@@ -120,13 +123,13 @@ export default function LoginPage() {
                                 type="email"
                                 autoComplete="email"
                                 required
-                                className="input w-full pl-10 bg-background/50 focus:bg-background transition-colors"
+                                className="w-full h-12 pl-11 pr-4 bg-[#0F172A] border border-slate-700 rounded-xl text-slate-200 placeholder:text-slate-500 focus:border-[#0FAE7C] focus:ring-1 focus:ring-[#0FAE7C] focus:outline-none transition-all"
                                 placeholder={t('login.placeholders.email')}
                             />
                         </div>
 
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary">
+                        <div className="relative group">
+                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#0FAE7C] transition-colors">
                                 <Lock className="h-5 w-5" />
                             </div>
                             <input
@@ -135,23 +138,31 @@ export default function LoginPage() {
                                 type="password"
                                 autoComplete={isLogin ? "current-password" : "new-password"}
                                 required
-                                className="input w-full pl-10 bg-background/50 focus:bg-background transition-colors"
+                                className="w-full h-12 pl-11 pr-4 bg-[#0F172A] border border-slate-700 rounded-xl text-slate-200 placeholder:text-slate-500 focus:border-[#0FAE7C] focus:ring-1 focus:ring-[#0FAE7C] focus:outline-none transition-all"
                                 placeholder={t('login.placeholders.password')}
                             />
                         </div>
 
-                        <button
-                            type="submit"
-                            disabled={isLoginPending || isSignupPending}
-                            className="btn btn-gradient w-full justify-center h-11 mt-2"
-                        >
-                            {(isLoginPending || isSignupPending) ? (
-                                <Loader2 className="h-5 w-5 animate-spin" />
-                            ) : (
-                                isLogin ? t('login.login') : t('login.createAccount')
-                            )}
-                        </button>
+                        <div className="pt-4">
+                            <button
+                                type="submit"
+                                disabled={isLoginPending || isSignupPending}
+                                className="w-full h-12 rounded-xl bg-gradient-to-r from-[#0FAE7C] to-[#0C8A68] hover:from-[#10B981] hover:to-[#059669] text-white font-bold shadow-lg shadow-emerald-900/20 transition-all duration-200 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+                            >
+                                {(isLoginPending || isSignupPending) ? (
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                ) : (
+                                    isLogin ? t('login.login') : t('login.createAccount')
+                                )}
+                            </button>
+                        </div>
                     </form>
+
+                    {/* Trust Line */}
+                    <div className="mt-8 flex items-center justify-center gap-2 text-slate-500 text-xs">
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        <span>Your data is securely encrypted.</span>
+                    </div>
                 </div>
             </div>
         </div>
