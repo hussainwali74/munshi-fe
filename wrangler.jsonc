@@ -1,25 +1,23 @@
 {
-	"$schema": "node_modules/wrangler/config-schema.json",
+	"$schema": "./node_modules/wrangler/config-schema.json",
 	"main": ".open-next/worker.js",
-	"name": "khata-app",
+	"name": "ez-khata",
 	"compatibility_date": "2025-11-21",
 	"compatibility_flags": [
-		"nodejs_compat",
-		"global_fetch_strictly_public"
+		"nodejs_compat"
 	],
 	"assets": {
 		"directory": ".open-next/assets",
 		"binding": "ASSETS"
 	},
-	"r2_buckets": [
-		// Use R2 incremental cache
-		// See https://opennext.js.org/cloudflare/caching
+	"routes": [
 		{
-			"binding": "NEXT_INC_CACHE_R2_BUCKET",
-			// Create the bucket before deploying
-			// You can change the bucket name if you want
-			// See https://developers.cloudflare.com/workers/wrangler/commands/#r2-bucket-create
-			"bucket_name": "cache"
+			"pattern": "ezkhata.com/*",
+			"zone_name": "ezkhata.com"
+		},
+		{
+			"pattern": "www.ezkhata.com/*",
+			"zone_name": "ezkhata.com"
 		}
 	]
 }
