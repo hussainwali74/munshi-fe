@@ -35,7 +35,7 @@ export default function EditInventoryModal({ item, onClose }: EditInventoryModal
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <div className="bg-surface rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-border animate-in fade-in zoom-in-95 duration-200">
                 <div className="flex items-center justify-between p-4 border-b border-border">
-                    <h2 className="text-xl font-bold">{t('common.edit')} Item</h2>
+                    <h2 className="text-xl font-bold text-text-primary">{t('common.edit')} Item</h2>
                     <button onClick={onClose} className="text-text-secondary hover:text-text-primary transition-colors">
                         <X size={24} />
                     </button>
@@ -57,7 +57,7 @@ export default function EditInventoryModal({ item, onClose }: EditInventoryModal
 
                     {/* Image Upload */}
                     <div className="space-y-2">
-                        <label className="block text-sm font-medium mb-1">{t('inventory.productImage')}</label>
+                        <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.productImage')}</label>
 
                         {previewUrl ? (
                             <div className="relative w-full h-48 rounded-lg overflow-hidden border border-border group">
@@ -87,7 +87,7 @@ export default function EditInventoryModal({ item, onClose }: EditInventoryModal
                                     className="hidden"
                                     onChange={handleImageChange}
                                 />
-                                <p className="text-xs text-muted mt-1">PNG, JPG up to 5MB</p>
+                                <p className="text-xs text-text-secondary mt-1">PNG, JPG up to 5MB</p>
                             </div>
                         )}
 
@@ -110,12 +110,12 @@ export default function EditInventoryModal({ item, onClose }: EditInventoryModal
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1">{t('inventory.itemName')}</label>
-                            <input name="name" type="text" required defaultValue={item.name} className="input" />
+                            <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.itemName')}</label>
+                            <input name="name" type="text" required defaultValue={item.name} className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">{t('inventory.category')}</label>
-                            <select name="category" defaultValue={item.category} className="input">
+                            <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.category')}</label>
+                            <select name="category" defaultValue={item.category} className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none">
                                 <option value="sanitary">{t('inventory.categories.sanitary')}</option>
                                 <option value="electrical">{t('inventory.categories.electrical')}</option>
                                 <option value="plumbing">{t('inventory.categories.plumbing')}</option>
@@ -126,31 +126,31 @@ export default function EditInventoryModal({ item, onClose }: EditInventoryModal
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1">{t('inventory.price')} (Rs)</label>
-                            <input name="price" type="number" required defaultValue={item.selling_price} className="input" />
+                            <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.price')} (Rs)</label>
+                            <input name="price" type="number" required defaultValue={item.selling_price} className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">{t('inventory.quantity')}</label>
-                            <input name="quantity" type="number" required defaultValue={item.quantity} className="input" />
+                            <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.quantity')}</label>
+                            <input name="quantity" type="number" required defaultValue={item.quantity} className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1">{t('inventory.size')}</label>
-                            <input name="size" type="text" defaultValue={item.size} className="input" />
+                            <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.size')}</label>
+                            <input name="size" type="text" defaultValue={item.size} className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">{t('inventory.color')}</label>
-                            <input name="color" type="text" defaultValue={item.color} className="input" />
+                            <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.color')}</label>
+                            <input name="color" type="text" defaultValue={item.color} className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" />
                         </div>
                     </div>
 
                     <div className="pt-2 flex gap-3">
-                        <button type="button" onClick={onClose} className="btn btn-secondary flex-1 justify-center">
+                        <button type="button" onClick={onClose} className="flex-1 py-3 px-4 rounded-lg border border-border text-text-primary hover:bg-gray-50 transition-colors shadow-sm font-medium">
                             {t('common.cancel')}
                         </button>
-                        <button type="submit" className="btn btn-primary flex-1 justify-center">
+                        <button type="submit" className="flex-1 py-3 px-4 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors shadow-md">
                             {t('common.save')}
                         </button>
                     </div>

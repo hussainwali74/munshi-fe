@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, Home, Users, Package, FileText, Settings, LogOut } from 'lucide-react';
-import styles from './DashboardLayout.module.css';
 import { signOut } from '@/app/login/actions';
 import ThemeToggle from './ThemeToggle';
 import LanguageToggle from './LanguageToggle';
@@ -24,28 +23,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     ];
 
     return (
-        <div className={styles.container} style={{ direction: dir === 'rtl' ? 'ltr' : undefined }}>
+        <div className="flex min-h-screen relative" style={{ direction: dir === 'rtl' ? 'ltr' : undefined }}>
             {/* Mobile Overlay */}
             {isSidebarOpen && (
                 <div
-                    className={styles.overlay}
+                    className="fixed inset-0 bg-black/50 z-40 md:hidden"
                     onClick={() => setSidebarOpen(false)}
                 />
             )}
 
             {/* Sidebar */}
             <aside
-                className={`${styles.sidebar} ${isSidebarOpen ? styles.open : ''}`}
+                className={`fixed inset-y-0 left-0 z-50 w-[260px] bg-surface border-r border-border transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${
+                    isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                }`}
                 style={{ direction: dir }}
             >
-                <div className={styles.brand}>
-                    <span className={styles.brandTitle}>Ezekata<span style={{ color: 'var(--text-primary)' }}>App</span></span>
-                    <button className={styles.closeBtn} onClick={() => setSidebarOpen(false)}>
+                <div className="p-6 flex items-center justify-between">
+                    <span className="text-2xl font-extrabold text-primary">Ezekata<span className="text-text-primary">App</span></span>
+                    <button className="md:hidden text-text-primary" onClick={() => setSidebarOpen(false)}>
                         <X size={24} />
                     </button>
                 </div>
 
-                <nav className={styles.nav}>
+                <nav className="px-4 flex flex-col gap-2 h-[calc(100%-88px)] overflow-y-auto">
                     {navItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = pathname === item.href;
@@ -53,7 +54,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`${styles.navItem} ${isActive ? styles.active : ''}`}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-[0.75rem] font-medium transition-all duration-200 ${
+                                    isActive
+                                        ? 'bg-primary/10 text-primary'
+                                        : 'text-text-secondary hover:bg-background hover:text-text-primary'
+                                }`}
                                 onClick={() => setSidebarOpen(false)}
                             >
                                 <Icon size={20} />
@@ -70,8 +75,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </div>
                     <button
                         onClick={() => signOut()}
-                        className={`${styles.navItem} w-full text-left`}
-                        style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}
+                        className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-[0.75rem] font-medium text-text-secondary hover:bg-background hover:text-text-primary bg-transparent border-none cursor-pointer"
                     >
                         <LogOut size={20} />
                         <span>{t('common.signOut')}</span>
@@ -80,20 +84,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </aside>
 
             {/* Main Content */}
-            <div className={styles.main} style={{ direction: dir }}>
-                <header className={styles.header} style={{ direction: 'ltr' }}>
-                    <button className={styles.menuBtn} onClick={() => setSidebarOpen(true)}>
+            <div className="flex-1 flex flex-col min-w-0 bg-background" style={{ direction: dir }}>
+                <header className="md:hidden bg-surface border-b border-border p-4 flex items-center gap-4" style={{ direction: 'ltr' }}>
+                    <button className="text-text-primary bg-transparent border-none cursor-pointer" onClick={() => setSidebarOpen(true)}>
                         <Menu size={24} />
                     </button>
-                    <span style={{ fontWeight: 600 }}>{t('common.dashboard')}</span>
+                    <span className="font-semibold text-lg">{t('common.dashboard')}</span>
                 </header>
 
-                <main className={styles.content} style={{ paddingBottom: '5rem' }}>
+                <main className="flex-1 p-4 md:p-8 overflow-y-auto pb-20 md:pb-8">
                     {children}
                 </main>
 
                 {/* Mobile Bottom Nav */}
-                <div className={styles.bottomNav}>
+                <div className="md:hidden fixed bottom-0 left-0 right-0 bg-surface border-t border-border p-2 flex justify-around z-40">
                     {navItems.slice(0, 4).map((item) => {
                         const Icon = item.icon;
                         const isActive = pathname === item.href;
@@ -101,10 +105,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`${styles.bottomNavItem} ${isActive ? styles.active : ''}`}
+                                className={`flex flex-col items-center gap-1 p-2 rounded-[0.75rem] text-xs ${
+                                    isActive ? 'text-primary' : 'text-text-secondary'
+                                }`}
                             >
                                 <Icon size={24} />
-                                <span className="text-xs">{item.name}</span>
+                                <span>{item.name}</span>
                             </Link>
                         );
                     })}
