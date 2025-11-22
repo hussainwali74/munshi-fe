@@ -5,6 +5,7 @@ import { Search, Plus, User, ChevronRight, ArrowUpRight, ArrowDownLeft, X } from
 import { useState } from 'react';
 import { addCustomer } from './actions';
 import Link from 'next/link';
+import AddCustomerModal from '@/components/AddCustomerModal';
 
 export default function KhataPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,70 +38,10 @@ export default function KhataPage() {
             </div>
 
             {/* Add Customer Modal */}
-            {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setIsModalOpen(false)}>
-                    <div className="bg-surface rounded-[0.75rem] w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
-                        {/* Modal Header */}
-                        <div className="p-4 border-b border-border flex items-center justify-between bg-gray-50">
-                            <h2 className="text-lg font-bold">Add New Customer</h2>
-                            <button
-                                onClick={() => setIsModalOpen(false)}
-                                className="text-text-secondary hover:text-text-primary transition-colors"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
-
-                        <form action={async (formData) => {
-                            await addCustomer(formData);
-                            setIsModalOpen(false);
-                        }} className="p-6 space-y-5">
-                            <div>
-                                <label className="block text-sm font-semibold mb-2 text-text-primary">
-                                    Customer Name *
-                                </label>
-                                <input
-                                    name="name"
-                                    type="text"
-                                    required
-                                    className="w-full p-3 rounded-[0.75rem] border border-border bg-surface text-text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all duration-200"
-                                    placeholder="Ahmed Ali"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-semibold mb-2 text-text-primary">
-                                    Phone Number
-                                </label>
-                                <input
-                                    name="phone"
-                                    type="tel"
-                                    className="w-full p-3 rounded-[0.75rem] border border-border bg-surface text-text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all duration-200"
-                                    placeholder="0300-1234567"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-semibold mb-2 text-text-primary">
-                                    Address
-                                </label>
-                                <input
-                                    name="address"
-                                    type="text"
-                                    className="w-full p-3 rounded-[0.75rem] border border-border bg-surface text-text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all duration-200"
-                                    placeholder="Street, Area, City"
-                                />
-                            </div>
-
-                            <div className="pt-2">
-                                <button type="submit" className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px">
-                                    Add Customer
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+            <AddCustomerModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+            />
 
             {/* Search Section */}
             <div className="mb-6 relative">
