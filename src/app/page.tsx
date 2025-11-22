@@ -1,17 +1,102 @@
 
 'use client';
 import DashboardLayout from '@/components/DashboardLayout';
-import { ArrowUpRight, ArrowDownLeft, AlertTriangle, Users } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, AlertTriangle, Users, Search } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useState, useEffect, useRef } from 'react';
+import { searchCustomers } from './search-actions';
+import Link from 'next/link';
 
 export default function Home() {
   const { t } = useLanguage();
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (query.trim().length > 0) {
+        setLoading(true);
+        try {
+          const data = await searchCustomers(query);
+          setResults(data);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [query]);
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setResults([]);
+        setQuery(''); // Optional: Clear query on close or just hide results
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [searchRef]);
 
   return (
     <DashboardLayout>
       <div className="mb-8">
         <h1 className="heading-1">{t('common.dashboard')}</h1>
         <p className="text-muted">{t('common.welcomeBack')} Ezekata</p>
+      </div>
+
+      {/* Main Search Bar */}
+      <div className="mb-8 relative z-20" ref={searchRef}>
+        <div className="relative">
+            <input
+                type="text"
+                className="input pl-12 h-14 text-lg shadow-sm focus:shadow-md transition-shadow w-full"
+                placeholder={t('common.search') || "Search customers by name or phone..."}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+            />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" size={24} />
+            {loading && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                </div>
+            )}
+        </div>
+
+        {/* Search Results Dropdown */}
+        {results.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-surface rounded-xl shadow-xl border border-border overflow-hidden max-h-80 overflow-y-auto">
+                {results.map((customer) => (
+                    <Link
+                        href={`/khata/${customer.id}`}
+                        key={customer.id}
+                        className="flex items-center gap-4 p-4 hover:bg-background transition-colors border-b border-border last:border-0"
+                        onClick={() => {
+                            setResults([]);
+                            setQuery('');
+                        }}
+                    >
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                            {customer.name.charAt(0)}
+                        </div>
+                        <div>
+                            <p className="font-semibold text-text-primary">{customer.name}</p>
+                            <p className="text-sm text-text-secondary">{customer.phone} • {customer.address}</p>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+        )}
       </div>
 
       {/* Stats Grid */}

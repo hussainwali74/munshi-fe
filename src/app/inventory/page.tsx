@@ -3,12 +3,12 @@
 import DashboardLayout from '@/components/DashboardLayout';
 import { Search, Plus, Package, Filter, X, Upload, Edit } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { addInventoryItem } from './actions';
+import { addInventoryItem, getInventoryItems } from './actions';
 import { createClient } from '@supabase/supabase-js';
 import EditInventoryModal from '@/components/EditInventoryModal';
 import { useLanguage } from '@/context/LanguageContext';
 
-// Initialize supabase client for client-side fetching
+// Initialize supabase client for realtime subscriptions ONLY
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -23,17 +23,18 @@ export default function InventoryPage() {
     // Fetch inventory items
     useEffect(() => {
         const fetchInventory = async () => {
-            // In a real app, you would filter by the logged-in user
-            // For now, assuming RLS or manual filtering on server, but here we just fetch all for demo
-            // or fetch by user_id if we had the user context available here easily.
-            // Actually, RLS policies should handle it if configured.
-            const { data, error } = await supabase.from('inventory').select('*').order('created_at', { ascending: false });
-            if (data) setItems(data);
+            // Use Server Action to fetch data securely with cookies
+            const data = await getInventoryItems();
+            setItems(data || []);
         };
 
         fetchInventory();
 
         // Subscribe to changes
+        // Note: Realtime subscriptions in Supabase JS client don't need auth if RLS allows reading public rows or if policy allows.
+        // Since we have "No public access" policies, this subscription might fail without a session in the client.
+        // However, for now, we rely on Server Action for initial fetch and re-fetch on updates manually or optimistic UI.
+        // But let's keep it for now. If it fails, it just won't auto-update.
         const channel = supabase
             .channel('inventory_changes')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, () => {
@@ -77,6 +78,9 @@ export default function InventoryPage() {
                         <form action={async (formData) => {
                             await addInventoryItem(formData);
                             setIsModalOpen(false);
+                            // Refresh list
+                            const data = await getInventoryItems();
+                            setItems(data || []);
                         }} className="p-4 space-y-4">
 
                             {/* Image Upload */}

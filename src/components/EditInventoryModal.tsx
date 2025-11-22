@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { X, Upload, Trash2 } from 'lucide-react';
 import { updateInventoryItem } from '@/app/inventory/actions';
 import { useLanguage } from '@/context/LanguageContext';
+import { useRouter } from 'next/navigation';
 
 interface EditInventoryModalProps {
     item: any;
@@ -12,6 +13,7 @@ interface EditInventoryModalProps {
 
 export default function EditInventoryModal({ item, onClose }: EditInventoryModalProps) {
     const { t } = useLanguage();
+    const router = useRouter();
     const [previewUrl, setPreviewUrl] = useState<string | null>(item.image_url);
     const [deleteImage, setDeleteImage] = useState(false);
 
@@ -46,6 +48,11 @@ export default function EditInventoryModal({ item, onClose }: EditInventoryModal
                     }
                     await updateInventoryItem(formData);
                     onClose();
+                    // Force refresh of the page/data since we can't easily pass setItems here without prop drilling
+                    // or we could assume Realtime works, but router.refresh() is safer for server components.
+                    // Since Page is client-side fetching, router.refresh won't help unless we move fetch to server component.
+                    // But we added window.location.reload() as a fallback or just rely on parent re-fetch if we passed a callback.
+                    window.location.reload();
                 }} className="p-6 space-y-6">
 
                     {/* Image Upload */}

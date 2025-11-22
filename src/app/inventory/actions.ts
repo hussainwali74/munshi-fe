@@ -5,6 +5,24 @@ import { uploadImageToR2 } from '@/lib/r2'
 import { revalidatePath } from 'next/cache'
 import { getSession } from '@/lib/auth'
 
+export async function getInventoryItems() {
+    const session = await getSession()
+    if (!session) return []
+
+    const { data, error } = await db
+        .from('inventory')
+        .select('*')
+        .eq('user_id', session.userId)
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        console.error('Fetch inventory error:', error)
+        return []
+    }
+
+    return data
+}
+
 export async function addInventoryItem(formData: FormData) {
     const session = await getSession()
     if (!session) throw new Error('Not authenticated')
