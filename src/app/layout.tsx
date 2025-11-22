@@ -1,5 +1,6 @@
 
 import type { Metadata } from "next";
+import { Toaster } from 'react-hot-toast';
 import { Inter, Noto_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -26,6 +27,7 @@ export default function RootLayout({
             <main className="min-h-screen bg-background text-text-primary">
               {children}
             </main>
+            <Toaster position="top-right" />
           </LanguageProvider>
         </ThemeProvider>
       </body>

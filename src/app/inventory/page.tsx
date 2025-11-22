@@ -1,7 +1,7 @@
-
 'use client';
 import DashboardLayout from '@/components/DashboardLayout';
-import { Search, Plus, Package, Filter, X, Upload, Edit, Trash2 } from 'lucide-react';
+import { Search, Plus, Package, Filter, X, Upload, Edit, Trash2, Loader2 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import { addInventoryItem, getInventoryItems, deleteInventoryItem } from './actions';
 import { createClient } from '@supabase/supabase-js';
@@ -21,6 +21,7 @@ export default function InventoryPage() {
     const [addImagePreview, setAddImagePreview] = useState<string | null>(null);
     const [addImageFile, setAddImageFile] = useState<File | null>(null);
     const { t } = useLanguage();
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const fetchInventory = async () => {
         // Use Server Action to fetch data securely with cookies
@@ -125,7 +126,10 @@ export default function InventoryPage() {
                             }
 
                             try {
+                                setIsSubmitting(true);               // ← start spinner
+                                // Show a toast on success/failure
                                 await addInventoryItem(formData);
+                                toast.success('✅ Item added successfully');
                                 console.log('✅ Item added successfully');
                                 handleCloseAddModal();
                                 // Refresh list
@@ -133,9 +137,18 @@ export default function InventoryPage() {
                                 setItems(data || []);
                             } catch (error) {
                                 console.error('❌ Error adding item:', error);
+                                toast.error('❌ Error adding item');
                                 alert('Error: ' + (error as Error).message);
+                            } finally {
+                                setIsSubmitting(false);              // ← stop spinner
                             }
                         }} className="p-4 space-y-4">
+                            {/* Progress bar (indeterminate) */}
+                            {isSubmitting && (
+                                <div className="w-full bg-gray-200 rounded h-2 mb-4 overflow-hidden">
+                                    <div className="h-full w-1/3 bg-primary animate-pulse"></div>
+                                </div>
+                            )}
 
                             {/* Image Upload */}
                             <div className="space-y-2">
@@ -168,6 +181,7 @@ export default function InventoryPage() {
                                                 name="image"
                                                 accept="image/*"
                                                 className="hidden"
+                                                disabled={isSubmitting}
                                                 onChange={handleAddImageChange}
                                             />
                                         </div>
@@ -184,6 +198,7 @@ export default function InventoryPage() {
                                             name="image"
                                             accept="image/*"
                                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                            disabled={isSubmitting}
                                             onChange={handleAddImageChange}
                                         />
                                         <p className="text-xs text-text-secondary mt-1">PNG, JPG up to 5MB</p>
@@ -194,11 +209,11 @@ export default function InventoryPage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.itemName')}</label>
-                                    <input name="name" type="text" required className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder={t('inventory.placeholders.itemName')} />
+                                    <input name="name" type="text" required disabled={isSubmitting} className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder={t('inventory.placeholders.itemName')} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.category')}</label>
-                                    <select name="category" className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none">
+                                    <select name="category" disabled={isSubmitting} className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none">
                                         <option value="sanitary">{t('inventory.categories.sanitary')}</option>
                                         <option value="electrical">{t('inventory.categories.electrical')}</option>
                                         <option value="plumbing">{t('inventory.categories.plumbing')}</option>
@@ -210,28 +225,28 @@ export default function InventoryPage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.price')} (Rs)</label>
-                                    <input name="price" type="number" required className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder={t('inventory.placeholders.price')} />
+                                    <input name="price" type="number" required disabled={isSubmitting} className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder={t('inventory.placeholders.price')} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.quantity')}</label>
-                                    <input name="quantity" type="number" required className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder={t('inventory.placeholders.quantity')} />
+                                    <input name="quantity" type="number" required disabled={isSubmitting} className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder={t('inventory.placeholders.quantity')} />
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.size')}</label>
-                                    <input name="size" type="text" className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder={t('inventory.placeholders.size')} />
+                                    <input name="size" type="text" disabled={isSubmitting} className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder={t('inventory.placeholders.size')} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.color')}</label>
-                                    <input name="color" type="text" className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder={t('inventory.placeholders.color')} />
+                                    <input name="color" type="text" disabled={isSubmitting} className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder={t('inventory.placeholders.color')} />
                                 </div>
                             </div>
 
                             <div className="pt-4">
-                                <button type="submit" className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px">
-                                    {t('common.save')}
+                                <button type="submit" disabled={isSubmitting} className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px">
+                                    {isSubmitting ? <Loader2 className="animate-spin" data-testid="loader" /> : t('common.save')}
                                 </button>
                             </div>
                         </form>
@@ -289,7 +304,7 @@ export default function InventoryPage() {
                                                         }}
                                                     />
                                                 ) : null}
-                                                <div className={`hidden ${!item.image_url ? 'block!' : ''} fallback-icon`}>
+                                                <div className={`hidden ${!item.image_url ? 'block' : ''} fallback-icon`}>
                                                     <Package size={20} />
                                                 </div>
                                             </div>
