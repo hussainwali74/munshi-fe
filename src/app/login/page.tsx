@@ -3,7 +3,7 @@
 import { login, signup } from './actions'
 import { useState, useActionState } from 'react'
 import { useLanguage } from '@/context/LanguageContext'
-import { Loader2, Store, User, Lock, Mail, ShieldCheck } from 'lucide-react'
+import { Loader2, Facebook, Twitter, Linkedin } from 'lucide-react'
 
 export default function LoginPage() {
     const [isLogin, setIsLogin] = useState(true)
@@ -17,151 +17,160 @@ export default function LoginPage() {
     const state = isLogin ? loginState : signupState
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-background relative overflow-hidden font-sans">
-            {/* Background Elements - Subtle */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] rounded-full bg-primary opacity-[0.03] blur-[100px]" />
-                <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] rounded-full bg-primary-dark opacity-[0.03] blur-[100px]" />
-            </div>
-
-            <div className="w-full max-w-[400px] p-4 relative z-10">
-                {/* Header */}
-                <div className="text-center mb-8">
-                    <h1 className="text-4xl font-bold text-primary mb-3 tracking-tight">Ezekata</h1>
-                    <p className="text-text-secondary text-sm font-medium">
-                        E-Z-Khata – Sign in to manage your shop
-                    </p>
-                </div>
-
-                {/* Card */}
-                <div className="bg-surface rounded-2xl p-8 shadow-xl border border-border">
-                    {/* Tabs */}
-                    <div className="grid grid-cols-2 p-1 bg-background rounded-xl mb-8 border border-border">
-                        <button
-                            type="button"
-                            onClick={() => setIsLogin(true)}
-                            className={`py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-                                isLogin
-                                    ? 'bg-surface text-primary shadow-sm ring-1 ring-black/5'
-                                    : 'text-text-secondary hover:text-text-primary'
-                            }`}
-                        >
-                            {t('login.login')}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setIsLogin(false)}
-                            className={`py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-                                !isLogin
-                                    ? 'bg-surface text-primary shadow-sm ring-1 ring-black/5'
-                                    : 'text-text-secondary hover:text-text-primary'
-                            }`}
-                        >
-                            {t('login.createAccount')}
-                        </button>
+        <div className="min-h-screen w-full flex items-center justify-center bg-gray-100 p-4 sm:p-6 lg:p-8">
+            <div className="w-full max-w-4xl flex rounded-2xl overflow-hidden shadow-2xl bg-white">
+                {/* Left Side - Form */}
+                <div className="w-full lg:w-1/2 p-8 sm:p-12">
+                    {/* Header */}
+                    <div className="mb-8">
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2">Signin</h1>
                     </div>
 
                     {/* Error Message */}
                     {state?.error && (
-                        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl mb-6 flex items-center gap-3 text-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                            </svg>
-                            <span>{state.error}</span>
+                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
+                            {state.error}
                         </div>
                     )}
 
                     {/* Success Message */}
                     {state?.message && (
-                        <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-xl mb-6 flex items-center gap-3 text-sm">
-                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                            <span>{state.message}</span>
+                        <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 text-sm">
+                            {state.message}
                         </div>
                     )}
 
                     <form action={isLogin ? loginAction : signupAction} className="space-y-4">
                         {!isLogin && (
                             <>
-                                <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-secondary group-focus-within:text-primary transition-colors">
-                                        <User className="h-5 w-5" />
-                                    </div>
+                                <div>
+                                    <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+                                        Full Name
+                                    </label>
                                     <input
                                         id="fullName"
                                         name="fullName"
                                         type="text"
                                         required
-                                        className="w-full h-12 pl-11 pr-4 bg-background border border-border rounded-xl text-text-primary placeholder:text-text-secondary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
-                                        placeholder={t('login.placeholders.fullName')}
+                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 text-sm"
+                                        placeholder="Enter your full name"
                                     />
                                 </div>
-                                <div className="relative group">
-                                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-secondary group-focus-within:text-primary transition-colors">
-                                        <Store className="h-5 w-5" />
-                                    </div>
+
+                                <div>
+                                    <label htmlFor="businessName" className="block text-sm font-medium text-gray-700 mb-1">
+                                        Business Name
+                                    </label>
                                     <input
                                         id="businessName"
                                         name="businessName"
                                         type="text"
                                         required
-                                        className="w-full h-12 pl-11 pr-4 bg-background border border-border rounded-xl text-text-primary placeholder:text-text-secondary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
-                                        placeholder={t('login.placeholders.shopName')}
+                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 text-sm"
+                                        placeholder="Enter your business name"
                                     />
                                 </div>
                             </>
                         )}
 
-                        <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-secondary group-focus-within:text-primary transition-colors">
-                                <Mail className="h-5 w-5" />
-                            </div>
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                                Email/Username
+                            </label>
                             <input
                                 id="email"
                                 name="email"
                                 type="email"
                                 autoComplete="email"
                                 required
-                                className="w-full h-12 pl-11 pr-4 bg-background border border-border rounded-xl text-text-primary placeholder:text-text-secondary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
-                                placeholder={t('login.placeholders.email')}
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 text-sm"
+                                placeholder="Enter your email"
                             />
                         </div>
 
-                        <div className="relative group">
-                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-secondary group-focus-within:text-primary transition-colors">
-                                <Lock className="h-5 w-5" />
-                            </div>
+                        <div>
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                                Password
+                            </label>
                             <input
                                 id="password"
                                 name="password"
                                 type="password"
                                 autoComplete={isLogin ? "current-password" : "new-password"}
                                 required
-                                className="w-full h-12 pl-11 pr-4 bg-background border border-border rounded-xl text-text-primary placeholder:text-text-secondary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
-                                placeholder={t('login.placeholders.password')}
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-gray-900 text-sm"
+                                placeholder="Enter your password"
                             />
                         </div>
 
-                        <div className="pt-4">
+                        <div>
                             <button
                                 type="submit"
                                 disabled={isLoginPending || isSignupPending}
-                                className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-primary-dark hover:from-primary-light hover:to-primary text-white font-bold shadow-lg shadow-primary/20 transition-all duration-200 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+                                className="w-full py-3 rounded-lg text-white font-semibold shadow-md transition-all duration-300 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed hover:shadow-lg text-sm bg-emerald-600 hover:bg-emerald-700"
                             >
                                 {(isLoginPending || isSignupPending) ? (
                                     <Loader2 className="h-5 w-5 animate-spin" />
                                 ) : (
-                                    isLogin ? t('login.login') : t('login.createAccount')
+                                    isLogin ? 'login' : 'Sign Up'
                                 )}
                             </button>
                         </div>
                     </form>
 
-                    {/* Trust Line */}
-                    <div className="mt-8 flex items-center justify-center gap-2 text-text-secondary text-xs">
-                        <ShieldCheck className="w-3.5 h-3.5" />
-                        <span>Your data is securely encrypted.</span>
+                    {/* Social Login */}
+                    <div className="mt-6">
+                        <div className="flex items-center justify-center gap-4">
+                            <button className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white hover:bg-blue-700 transition-colors">
+                                <Facebook className="w-5 h-5" />
+                            </button>
+                            <button className="w-10 h-10 rounded-full bg-sky-500 flex items-center justify-center text-white hover:bg-sky-600 transition-colors">
+                                <Twitter className="w-5 h-5" />
+                            </button>
+                            <button className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white hover:bg-blue-800 transition-colors">
+                                <Linkedin className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Switch between Login/Signup */}
+                    <div className="mt-6 text-center text-sm text-gray-600">
+                        {isLogin ? (
+                            <span>
+                                Don't have an account?{' '}
+                                <button
+                                    type="button"
+                                    onClick={() => setIsLogin(false)}
+                                    className="font-medium text-emerald-600 hover:text-emerald-700 focus:outline-none"
+                                >
+                                    Sign Up
+                                </button>
+                            </span>
+                        ) : (
+                            <span>
+                                Already have an account?{' '}
+                                <button
+                                    type="button"
+                                    onClick={() => setIsLogin(true)}
+                                    className="font-medium text-emerald-600 hover:text-emerald-700 focus:outline-none"
+                                >
+                                    Login
+                                </button>
+                            </span>
+                        )}
+                    </div>
+                </div>
+
+                {/* Right Side - Welcome Panel */}
+                <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-emerald-500 to-emerald-600 p-12 flex-col justify-center items-center text-white">
+                    <div className="text-center">
+                        <h2 className="text-3xl font-bold mb-4">Welcome back!</h2>
+                        <p className="text-emerald-50 text-sm leading-relaxed mb-8">
+                            To keep connected with us please login with your personal info
+                        </p>
+                        <div className="inline-block px-8 py-2.5 border-2 border-white rounded-full text-sm font-semibold hover:bg-white hover:text-emerald-600 transition-all cursor-pointer">
+                            No account yet?
+                        </div>
                     </div>
                 </div>
             </div>
