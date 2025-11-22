@@ -6,7 +6,12 @@ import { redirect } from 'next/navigation'
 import { db } from '@/lib/db'
 import { hashPassword, verifyPassword, createSession, deleteSession } from '@/lib/auth'
 
-export async function login(formData: FormData) {
+export type AuthState = {
+    error?: string
+    message?: string
+}
+
+export async function login(prevState: AuthState, formData: FormData): Promise<AuthState> {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
 
@@ -18,13 +23,13 @@ export async function login(formData: FormData) {
         .single()
 
     if (error || !user) {
-        redirect('/login?error=Invalid credentials')
+        return { error: 'Invalid credentials' }
     }
 
     const isValid = await verifyPassword(password, user.password_hash)
 
     if (!isValid) {
-        redirect('/login?error=Invalid credentials')
+        return { error: 'Invalid credentials' }
     }
 
     // Create Session
@@ -34,7 +39,7 @@ export async function login(formData: FormData) {
     redirect('/')
 }
 
-export async function signup(formData: FormData) {
+export async function signup(prevState: AuthState, formData: FormData): Promise<AuthState> {
     const email = formData.get('email') as string
     const password = formData.get('password') as string
     const fullName = formData.get('fullName') as string
@@ -43,7 +48,7 @@ export async function signup(formData: FormData) {
     // Check if user exists
     const { data: existingUser } = await db.from('users').select('id').eq('email', email).single()
     if (existingUser) {
-        redirect('/login?error=User already exists')
+        return { error: 'User already exists' }
     }
 
     const hashedPassword = await hashPassword(password)
@@ -57,7 +62,7 @@ export async function signup(formData: FormData) {
 
     if (error) {
         console.error('Signup error:', error)
-        redirect('/login?error=Could not create user')
+        return { error: 'Could not create user' }
     }
 
     await createSession({ userId: newUser.id, email: newUser.email, name: newUser.full_name })

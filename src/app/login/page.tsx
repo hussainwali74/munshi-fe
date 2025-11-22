@@ -1,106 +1,156 @@
 'use client'
 
 import { login, signup } from './actions'
-import { useState, use } from 'react'
+import { useState, useActionState } from 'react'
 import { useLanguage } from '@/context/LanguageContext'
+import { Loader2, Store, User, Lock, Mail } from 'lucide-react'
 
-export default function LoginPage({ searchParams }: { searchParams: Promise<{ message: string, error: string }> }) {
+export default function LoginPage() {
     const [isLogin, setIsLogin] = useState(true)
-    const params = use(searchParams)
     const { t } = useLanguage()
 
+    // Use separate states for login and signup
+    const [loginState, loginAction, isLoginPending] = useActionState(login, {})
+    const [signupState, signupAction, isSignupPending] = useActionState(signup, {})
+
+    // Determine which state to show
+    const state = isLogin ? loginState : signupState
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-background p-4">
-            <div className="w-full max-w-md space-y-8">
-                <div className="text-center">
-                    <h1 className="text-4xl font-bold text-primary mb-2">Ezekata</h1>
+        <div className="min-h-screen w-full flex items-center justify-center bg-background relative overflow-hidden">
+            {/* Background Elements */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute -top-1/2 -right-1/4 w-[800px] h-[800px] rounded-full bg-gradient-primary opacity-10 blur-3xl" />
+                <div className="absolute -bottom-1/2 -left-1/4 w-[600px] h-[600px] rounded-full bg-gradient-accent opacity-10 blur-3xl" />
+            </div>
+
+            <div className="w-full max-w-md p-4 relative z-10">
+                <div className="text-center mb-8 fade-in">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-primary mb-4 shadow-glow">
+                        <Store className="w-8 h-8 text-white" />
+                    </div>
+                    <h1 className="text-4xl font-bold gradient-text mb-2">Ezekata</h1>
                     <p className="text-muted text-lg">E-Z-Khata - {t('login.signIn')}</p>
                 </div>
 
-                <div className="card bg-surface p-8 rounded-xl shadow-lg border border-border">
-                    {params?.error && (
-                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
-                            <span className="block sm:inline">{params.error}</span>
-                        </div>
-                    )}
-                    {params?.message && (
-                        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-                            <span className="block sm:inline">{params.message}</span>
+                <div className="glass-card rounded-2xl p-8 slide-up">
+                    {/* Tabs */}
+                    <div className="flex p-1 bg-surface/50 rounded-xl mb-8 border border-border relative">
+                        <button
+                            type="button"
+                            onClick={() => setIsLogin(true)}
+                            className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                                isLogin
+                                    ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
+                                    : 'text-text-secondary hover:text-text-primary'
+                            }`}
+                        >
+                            {t('login.login')}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setIsLogin(false)}
+                            className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
+                                !isLogin
+                                    ? 'bg-white dark:bg-slate-700 text-primary shadow-sm'
+                                    : 'text-text-secondary hover:text-text-primary'
+                            }`}
+                        >
+                            {t('login.createAccount')}
+                        </button>
+                    </div>
+
+                    {state?.error && (
+                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl mb-6 flex items-center gap-2 animate-shake">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                            <span className="text-sm font-medium">{state.error}</span>
                         </div>
                     )}
 
-                    <form className="space-y-6">
+                    {state?.message && (
+                        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 rounded-xl mb-6 flex items-center gap-2 fade-in">
+                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            <span className="text-sm font-medium">{state.message}</span>
+                        </div>
+                    )}
+
+                    <form action={isLogin ? loginAction : signupAction} className="space-y-5">
                         {!isLogin && (
-                            <>
-                                <div>
-                                    <label htmlFor="fullName" className="block text-sm font-medium text-text-secondary mb-1">{t('login.fullName')}</label>
-                                    <input id="fullName" name="fullName" type="text" required className="input w-full" placeholder={t('login.placeholders.fullName')} />
+                            <div className="space-y-5 fade-in">
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary">
+                                        <User className="h-5 w-5" />
+                                    </div>
+                                    <input
+                                        id="fullName"
+                                        name="fullName"
+                                        type="text"
+                                        required
+                                        className="input w-full pl-10 bg-background/50 focus:bg-background transition-colors"
+                                        placeholder={t('login.placeholders.fullName')}
+                                    />
                                 </div>
-                                <div>
-                                    <label htmlFor="businessName" className="block text-sm font-medium text-text-secondary mb-1">{t('login.shopName')}</label>
-                                    <input id="businessName" name="businessName" type="text" required className="input w-full" placeholder={t('login.placeholders.shopName')} />
+                                <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary">
+                                        <Store className="h-5 w-5" />
+                                    </div>
+                                    <input
+                                        id="businessName"
+                                        name="businessName"
+                                        type="text"
+                                        required
+                                        className="input w-full pl-10 bg-background/50 focus:bg-background transition-colors"
+                                        placeholder={t('login.placeholders.shopName')}
+                                    />
                                 </div>
-                            </>
+                            </div>
                         )}
 
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-text-secondary mb-1">
-                                {t('login.email')}
-                            </label>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary">
+                                <Mail className="h-5 w-5" />
+                            </div>
                             <input
                                 id="email"
                                 name="email"
                                 type="email"
                                 autoComplete="email"
                                 required
-                                className="input w-full"
+                                className="input w-full pl-10 bg-background/50 focus:bg-background transition-colors"
                                 placeholder={t('login.placeholders.email')}
                             />
                         </div>
 
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-text-secondary mb-1">
-                                {t('login.password')}
-                            </label>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary">
+                                <Lock className="h-5 w-5" />
+                            </div>
                             <input
                                 id="password"
                                 name="password"
                                 type="password"
-                                autoComplete="current-password"
+                                autoComplete={isLogin ? "current-password" : "new-password"}
                                 required
-                                className="input w-full"
+                                className="input w-full pl-10 bg-background/50 focus:bg-background transition-colors"
                                 placeholder={t('login.placeholders.password')}
                             />
                         </div>
 
-                        <div className="flex flex-col gap-4">
-                            {isLogin ? (
-                                <button formAction={login} className="btn btn-primary w-full justify-center">
-                                    {t('login.login')}
-                                </button>
+                        <button
+                            type="submit"
+                            disabled={isLoginPending || isSignupPending}
+                            className="btn btn-gradient w-full justify-center h-11 mt-2"
+                        >
+                            {(isLoginPending || isSignupPending) ? (
+                                <Loader2 className="h-5 w-5 animate-spin" />
                             ) : (
-                                <button formAction={signup} className="btn btn-primary w-full justify-center">
-                                    {t('login.createAccount')}
-                                </button>
+                                isLogin ? t('login.login') : t('login.createAccount')
                             )}
-
-                            <div className="relative">
-                                <div className="absolute inset-0 flex items-center">
-                                    <div className="w-full border-t border-border"></div>
-                                </div>
-                                <div className="relative flex justify-center text-sm">
-                                    <span className="px-2 bg-surface text-muted">{t('common.or')}</span>
-                                </div>
-                            </div>
-
-                            <button
-                                type="button"
-                                onClick={() => setIsLogin(!isLogin)}
-                                className="btn btn-secondary w-full justify-center"
-                            >
-                                {isLogin ? t('login.createNewAccount') : t('login.alreadyHaveAccount')}
-                            </button>
-                        </div>
+                        </button>
                     </form>
                 </div>
             </div>
