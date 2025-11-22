@@ -50,8 +50,8 @@ export default function InventoryPage() {
     return (
         <DashboardLayout>
             <div className="flex items-center justify-between mb-6">
-                <h1 className="heading-1" style={{ marginBottom: 0 }}>{t('inventory.title')}</h1>
-                <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+                <h1 className="text-3xl font-bold mb-0">{t('inventory.title')}</h1>
+                <button className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold text-white bg-primary hover:bg-primary-dark transition-colors" onClick={() => setIsModalOpen(true)}>
                     <Plus size={20} /> {t('inventory.addItem')}
                 </button>
             </div>
@@ -67,10 +67,10 @@ export default function InventoryPage() {
             {/* Add Item Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                    <div className="bg-surface rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+                    <div className="bg-surface rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
                         <div className="flex items-center justify-between p-4 border-b border-border">
                             <h2 className="text-xl font-bold">{t('inventory.addItem')}</h2>
-                            <button onClick={() => setIsModalOpen(false)} className="text-text-secondary">
+                            <button onClick={() => setIsModalOpen(false)} className="text-text-secondary hover:text-text-primary">
                                 <X size={24} />
                             </button>
                         </div>
@@ -84,23 +84,23 @@ export default function InventoryPage() {
                         }} className="p-4 space-y-4">
 
                             {/* Image Upload */}
-                            <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-border rounded-lg bg-background">
+                            <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-border rounded-lg bg-background hover:bg-gray-50 transition-colors">
                                 <Upload size={32} className="text-text-secondary mb-2" />
-                                <label htmlFor="image" className="text-primary font-medium cursor-pointer">
+                                <label htmlFor="image" className="text-primary font-medium cursor-pointer hover:underline">
                                     {t('inventory.uploadImage')}
                                 </label>
                                 <input type="file" id="image" name="image" accept="image/*" className="hidden" />
-                                <p className="text-xs text-muted mt-1">PNG, JPG up to 5MB</p>
+                                <p className="text-xs text-text-secondary mt-1">PNG, JPG up to 5MB</p>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">{t('inventory.itemName')}</label>
-                                    <input name="name" type="text" required className="input" placeholder={t('inventory.placeholders.itemName')} />
+                                    <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.itemName')}</label>
+                                    <input name="name" type="text" required className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder={t('inventory.placeholders.itemName')} />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">{t('inventory.category')}</label>
-                                    <select name="category" className="input">
+                                    <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.category')}</label>
+                                    <select name="category" className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none">
                                         <option value="sanitary">{t('inventory.categories.sanitary')}</option>
                                         <option value="electrical">{t('inventory.categories.electrical')}</option>
                                         <option value="plumbing">{t('inventory.categories.plumbing')}</option>
@@ -111,28 +111,28 @@ export default function InventoryPage() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">{t('inventory.price')} (Rs)</label>
-                                    <input name="price" type="number" required className="input" placeholder={t('inventory.placeholders.price')} />
+                                    <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.price')} (Rs)</label>
+                                    <input name="price" type="number" required className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder={t('inventory.placeholders.price')} />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">{t('inventory.quantity')}</label>
-                                    <input name="quantity" type="number" required className="input" placeholder={t('inventory.placeholders.quantity')} />
+                                    <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.quantity')}</label>
+                                    <input name="quantity" type="number" required className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder={t('inventory.placeholders.quantity')} />
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">{t('inventory.size')}</label>
-                                    <input name="size" type="text" className="input" placeholder={t('inventory.placeholders.size')} />
+                                    <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.size')}</label>
+                                    <input name="size" type="text" className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder={t('inventory.placeholders.size')} />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">{t('inventory.color')}</label>
-                                    <input name="color" type="text" className="input" placeholder={t('inventory.placeholders.color')} />
+                                    <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.color')}</label>
+                                    <input name="color" type="text" className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" placeholder={t('inventory.placeholders.color')} />
                                 </div>
                             </div>
 
                             <div className="pt-4">
-                                <button type="submit" className="btn btn-primary w-full justify-center">
+                                <button type="submit" className="w-full py-3 px-4 bg-primary text-white font-bold rounded-lg hover:bg-primary-dark transition-colors shadow-md">
                                     {t('common.save')}
                                 </button>
                             </div>
@@ -141,60 +141,59 @@ export default function InventoryPage() {
                 </div>
             )}
 
-            <div className="card mb-6">
-                <div className="flex items-center gap-4 mb-4">
-                    <div className="flex items-center gap-2 rounded-lg p-2 flex-1" style={{ border: '1px solid var(--border)' }}>
-                        <Search size={20} className="text-muted" />
+            <div className="bg-surface rounded-xl border border-border shadow-sm mb-6 overflow-hidden">
+                <div className="p-4 flex items-center gap-4">
+                    <div className="flex items-center gap-2 rounded-lg p-2 flex-1 border border-border bg-background focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+                        <Search size={20} className="text-text-secondary" />
                         <input
                             type="text"
                             placeholder={t('common.search')}
-                            className="w-full"
-                            style={{ outline: 'none', border: 'none', background: 'transparent' }}
+                            className="w-full outline-none border-none bg-transparent text-text-primary placeholder:text-text-secondary"
                         />
                     </div>
-                    <button className="btn btn-secondary">
+                    <button className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border bg-surface text-text-primary hover:bg-gray-50 transition-colors">
                         <Filter size={20} /> Filter
                     </button>
                 </div>
 
-                <div style={{ overflowX: 'auto' }}>
-                    <table className="w-full text-start" style={{ borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr className="border-b">
-                                <th className="p-3 font-medium text-muted text-start">{t('inventory.itemName')}</th>
-                                <th className="p-3 font-medium text-muted text-start">{t('inventory.category')}</th>
-                                <th className="p-3 font-medium text-muted text-start">{t('inventory.stock')}</th>
-                                <th className="p-3 font-medium text-muted text-start">{t('inventory.price')}</th>
-                                <th className="p-3 font-medium text-muted text-start">{t('inventory.status')}</th>
-                                <th className="p-3 font-medium text-muted text-start">{t('common.actions')}</th>
+                <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                        <thead className="bg-gray-50/50">
+                            <tr className="border-b border-border">
+                                <th className="p-3 font-medium text-text-secondary text-left">{t('inventory.itemName')}</th>
+                                <th className="p-3 font-medium text-text-secondary text-left">{t('inventory.category')}</th>
+                                <th className="p-3 font-medium text-text-secondary text-left">{t('inventory.stock')}</th>
+                                <th className="p-3 font-medium text-text-secondary text-left">{t('inventory.price')}</th>
+                                <th className="p-3 font-medium text-text-secondary text-left">{t('inventory.status')}</th>
+                                <th className="p-3 font-medium text-text-secondary text-left">{t('common.actions')}</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-border">
                             {items.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="p-8 text-center text-muted">
+                                    <td colSpan={6} className="p-8 text-center text-text-secondary">
                                         {t('inventory.noItems')}
                                     </td>
                                 </tr>
                             ) : items.map((item) => (
-                                <tr key={item.id} className="border-b hover:bg-gray-50/50 transition-colors" style={{ borderBottom: '1px solid var(--border)' }}>
+                                <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
                                     <td className="p-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded flex items-center justify-center text-muted overflow-hidden" style={{ backgroundColor: '#F3F4F6' }}>
+                                            <div className="w-8 h-8 rounded flex items-center justify-center text-text-secondary overflow-hidden bg-gray-100">
                                                 {item.image_url ? (
                                                     <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <Package size={16} />
                                                 )}
                                             </div>
-                                            <span className="font-medium">{item.name}</span>
+                                            <span className="font-medium text-text-primary">{item.name}</span>
                                         </div>
                                     </td>
-                                    <td className="p-3 text-muted capitalize">{t(`inventory.categories.${item.category}`)}</td>
-                                    <td className="p-3 font-medium">{item.quantity}</td>
-                                    <td className="p-3">Rs {item.selling_price}</td>
+                                    <td className="p-3 text-text-secondary capitalize">{t(`inventory.categories.${item.category}`)}</td>
+                                    <td className="p-3 font-medium text-text-primary">{item.quantity}</td>
+                                    <td className="p-3 text-text-primary">Rs {item.selling_price}</td>
                                     <td className="p-3">
-                                        <span className={`px-2 py-1 rounded-full font-medium ${item.quantity < 10 ? 'bg-red-100 text-danger' : 'bg-green-100 text-success'}`} style={{ fontSize: '0.75rem' }}>
+                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.quantity < 10 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
                                             {item.quantity < 10 ? t('inventory.lowStock') : t('inventory.inStock')}
                                         </span>
                                     </td>

@@ -21,15 +21,15 @@ export default function KhataPage() {
     return (
         <DashboardLayout>
             {/* Header Section with Gradient */}
-            <div className="flex items-center justify-between mb-8 slide-up">
+            <div className="flex items-center justify-between mb-8 animate-in slide-in-from-bottom-5 duration-500">
                 <div>
-                    <h1 className="heading-1 gradient-text" style={{ marginBottom: '0.5rem' }}>
+                    <h1 className="text-3xl font-extrabold mb-2 bg-gradient-to-br from-primary to-primary-dark bg-clip-text text-transparent">
                         Khata (Ledger)
                     </h1>
-                    <p className="text-muted text-lg">Manage customer credit accounts</p>
+                    <p className="text-text-secondary text-lg">Manage customer credit accounts</p>
                 </div>
                 <button
-                    className="btn btn-gradient hover-scale transition-smooth"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-300 border-none outline-none bg-gradient-to-br from-primary to-primary-dark text-white shadow-md shadow-primary/30 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/40 overflow-hidden relative"
                     onClick={() => setIsModalOpen(true)}
                 >
                     <Plus size={20} /> Add Customer
@@ -38,20 +38,15 @@ export default function KhataPage() {
 
             {/* Add Customer Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-heavy scale-in">
-                    <div className="glass-strong rounded-xl w-full max-w-md shadow-2xl">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-300">
+                    <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-xl w-full max-w-md shadow-2xl">
                         {/* Modal Header with Gradient */}
-                        <div
-                            className="gradient-primary p-4 rounded-t-xl"
-                            style={{
-                                background: 'var(--gradient-primary)',
-                            }}
-                        >
+                        <div className="bg-gradient-to-br from-primary to-primary-dark p-4 rounded-t-xl">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-xl font-bold text-white">Add New Customer</h2>
                                 <button
                                     onClick={() => setIsModalOpen(false)}
-                                    className="text-white hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center transition-smooth"
+                                    className="text-white hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200"
                                 >
                                     ✕
                                 </button>
@@ -70,7 +65,7 @@ export default function KhataPage() {
                                     name="name"
                                     type="text"
                                     required
-                                    className="input w-full input-focus"
+                                    className="w-full p-3 rounded-[0.75rem] border border-border bg-surface text-text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all duration-200"
                                     placeholder="Ahmed Ali"
                                 />
                             </div>
@@ -82,7 +77,7 @@ export default function KhataPage() {
                                 <input
                                     name="phone"
                                     type="tel"
-                                    className="input w-full input-focus"
+                                    className="w-full p-3 rounded-[0.75rem] border border-border bg-surface text-text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all duration-200"
                                     placeholder="0300-1234567"
                                 />
                             </div>
@@ -94,13 +89,13 @@ export default function KhataPage() {
                                 <input
                                     name="address"
                                     type="text"
-                                    className="input w-full input-focus"
+                                    className="w-full p-3 rounded-[0.75rem] border border-border bg-surface text-text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all duration-200"
                                     placeholder="Street, Area, City"
                                 />
                             </div>
 
                             <div className="pt-2">
-                                <button type="submit" className="btn btn-gradient w-full justify-center">
+                                <button type="submit" className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-300 border-none outline-none bg-gradient-to-br from-primary to-primary-dark text-white shadow-md shadow-primary/30 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/40">
                                     Add Customer
                                 </button>
                             </div>
@@ -110,90 +105,65 @@ export default function KhataPage() {
             )}
 
             {/* Search Section with Glass Effect */}
-            <div className="glass-card rounded-xl p-6 mb-6 slide-up stagger-1">
-                <div
-                    className="flex items-center gap-3 rounded-lg p-3 transition-smooth"
-                    style={{
-                        border: '2px solid var(--border)',
-                        background: 'var(--surface)'
-                    }}
-                >
+            <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-xl p-6 mb-6 shadow-lg animate-in slide-in-from-bottom-5 duration-500 delay-100">
+                <div className="flex items-center gap-3 rounded-lg p-3 border-2 border-border bg-surface transition-all duration-200 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20">
                     <Search size={22} className="text-primary" />
                     <input
                         type="text"
                         placeholder="Search customer by name or phone..."
-                        className="w-full text-base"
-                        style={{
-                            outline: 'none',
-                            border: 'none',
-                            background: 'transparent',
-                            color: 'var(--text-primary)'
-                        }}
+                        className="w-full text-base outline-none border-none bg-transparent text-text-primary placeholder:text-text-secondary"
                     />
                 </div>
             </div>
 
             {/* Customer List with Premium Cards */}
-            <div className="space-y-4 slide-up stagger-2">
+            <div className="space-y-4 animate-in slide-in-from-bottom-5 duration-500 delay-200">
                 {customers.map((customer, index) => (
                     <Link
                         key={customer.id}
                         href={`/khata/${customer.id}`}
-                        className="block"
-                        style={{
-                            animation: `slideUp 0.5s ease-out ${0.1 * (index + 3)}s backwards`
-                        }}
+                        className="block transition-transform duration-300"
                     >
-                        <div className="glass-card rounded-xl p-5 card-hover transition-smooth hover-glow">
+                        <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-xl p-5 shadow-lg hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300">
                             <div className="flex items-center justify-between gap-4">
                                 {/* Customer Info */}
                                 <div className="flex items-center gap-4 flex-1 min-w-0">
                                     {/* Avatar with Gradient */}
-                                    <div
-                                        className="w-14 h-14 rounded-full flex items-center justify-center gradient-primary flex-shrink-0"
-                                        style={{
-                                            background: 'var(--gradient-primary)',
-                                            boxShadow: 'var(--shadow-glow)'
-                                        }}
-                                    >
+                                    <div className="w-14 h-14 rounded-full flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark shadow-glow flex-shrink-0">
                                         <User size={28} color="white" />
                                     </div>
 
                                     <div className="flex-1 min-w-0">
-                                        <h3 className="font-bold text-lg text-text-primary mb-1">
+                                        <h3 className="font-bold text-lg text-text-primary mb-1 truncate">
                                             {customer.name}
                                         </h3>
-                                        <p className="text-muted text-sm">{customer.phone}</p>
+                                        <p className="text-text-secondary text-sm">{customer.phone}</p>
                                     </div>
                                 </div>
 
                                 {/* Balance Section */}
                                 <div className="flex items-center gap-3 flex-shrink-0">
                                     <div className="text-right">
-                                        <p className="text-xs text-muted mb-1 font-medium">Balance</p>
+                                        <p className="text-xs text-text-secondary mb-1 font-medium">Balance</p>
 
                                         {customer.balance === 0 ? (
-                                            <div className="balance-badge" style={{
-                                                background: 'rgba(100, 116, 139, 0.1)',
-                                                color: 'var(--text-secondary)',
-                                                border: '1px solid rgba(100, 116, 139, 0.2)'
-                                            }}>
+                                            <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-500 border border-slate-200">
                                                 Settled ✓
                                             </div>
                                         ) : (
                                             <>
-                                                <p className={`text-2xl font-bold mb-1 ${customer.balance > 0 ? 'text-danger' : 'text-success'
+                                                <p className={`text-2xl font-bold mb-1 ${customer.balance > 0 ? 'text-red-500' : 'text-green-500'
                                                     }`}>
                                                     Rs {Math.abs(customer.balance).toLocaleString()}
                                                 </p>
                                                 {customer.balance > 0 && (
-                                                    <div className="balance-badge balance-badge-danger">
+                                                    <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-br from-red-500/10 to-orange-500/10 text-red-500 border border-red-500/20">
                                                         <ArrowUpRight size={14} />
                                                         Udhar
                                                     </div>
                                                 )}
                                                 {customer.balance < 0 && (
-                                                    <div className="balance-badge balance-badge-success">
+                                                    <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-br from-green-500/10 to-teal-500/10 text-green-500 border border-green-500/20">
                                                         <ArrowDownLeft size={14} />
                                                         Advance
                                                     </div>
@@ -201,7 +171,7 @@ export default function KhataPage() {
                                             </>
                                         )}
                                     </div>
-                                    <ChevronRight size={24} className="text-muted" />
+                                    <ChevronRight size={24} className="text-text-secondary" />
                                 </div>
                             </div>
                         </div>
@@ -211,14 +181,14 @@ export default function KhataPage() {
 
             {/* Empty State (if no customers) */}
             {customers.length === 0 && (
-                <div className="glass-card rounded-xl p-12 text-center">
-                    <div className="w-20 h-20 rounded-full gradient-primary mx-auto mb-4 flex items-center justify-center">
+                <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-xl p-12 text-center shadow-lg">
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary-dark mx-auto mb-4 flex items-center justify-center shadow-glow">
                         <User size={40} color="white" />
                     </div>
                     <h3 className="text-xl font-bold mb-2">No Customers Yet</h3>
-                    <p className="text-muted mb-6">Start by adding your first customer</p>
+                    <p className="text-text-secondary mb-6">Start by adding your first customer</p>
                     <button
-                        className="btn btn-gradient"
+                        className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-300 border-none outline-none bg-gradient-to-br from-primary to-primary-dark text-white shadow-md shadow-primary/30 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/40"
                         onClick={() => setIsModalOpen(true)}
                     >
                         <Plus size={20} /> Add First Customer

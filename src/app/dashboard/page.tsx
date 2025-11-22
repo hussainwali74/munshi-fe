@@ -133,8 +133,8 @@ export default function Home() {
   return (
     <DashboardLayout>
       <div className="mb-8">
-        <h1 className="heading-1">{t('common.dashboard')}</h1>
-        <p className="text-muted">{t('common.welcomeBack')} Ezekata</p>
+        <h1 className="text-3xl font-extrabold mb-4 tracking-tight">{t('common.dashboard')}</h1>
+        <p className="text-text-secondary">{t('common.welcomeBack')} Ezekata</p>
       </div>
 
       {/* Main Search Bar */}
@@ -142,7 +142,7 @@ export default function Home() {
         <div className="relative">
             <input
                 type="text"
-                className="input pl-12 h-14 text-lg shadow-sm focus:shadow-md transition-shadow w-full"
+                className="w-full p-3 pl-12 h-14 text-lg rounded-[0.75rem] border border-border bg-surface text-text-primary shadow-sm focus:shadow-md transition-shadow focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 placeholder={t('common.search') || "Search customers by name or phone..."}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -182,7 +182,7 @@ export default function Home() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 grid-cols-2 grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard
           title="Total Udhar (Receivable)"
           value="Rs 45,200"
@@ -210,10 +210,10 @@ export default function Home() {
       </div>
 
       {/* Recent Transactions & Quick Actions */}
-      <div className="grid grid-cols-1 grid-cols-3 gap-8">
-        <div className="lg-col-span-2">
-          <div className="card">
-            <h2 className="heading-2 mb-4">Recent Transactions</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <div className="bg-surface rounded-[0.75rem] p-6 shadow-md border border-border">
+            <h2 className="text-2xl font-bold mb-3">Recent Transactions</h2>
             <div className="space-y-4">
               {recentTransactions.map((txn) => (
                 <div
@@ -227,14 +227,14 @@ export default function Home() {
                     </div>
                     <div>
                       <p className="font-semibold">{txn.customerName}</p>
-                      <p className="text-sm text-muted">{txn.description}</p>
+                      <p className="text-sm text-text-secondary">{txn.description}</p>
                     </div>
                   </div>
                   <div className="text-right">
                     <p className={`font-bold ${txn.type === 'credit' ? 'text-danger' : 'text-success'}`}>
                       {txn.type === 'credit' ? '-' : '+'} Rs {txn.amount}
                     </p>
-                    <p className="text-sm text-muted">{txn.date}, {txn.time}</p>
+                    <p className="text-sm text-text-secondary">{txn.date}, {txn.time}</p>
                   </div>
                 </div>
               ))}
@@ -243,16 +243,16 @@ export default function Home() {
         </div>
 
         <div>
-          <div className="card mb-6">
-            <h2 className="heading-2 mb-4">Quick Actions</h2>
+          <div className="bg-surface rounded-[0.75rem] p-6 shadow-md border border-border mb-6">
+            <h2 className="text-2xl font-bold mb-3">Quick Actions</h2>
             <div className="flex flex-col gap-3">
-              <button className="btn btn-primary w-full justify-start">
+              <button className="inline-flex items-center justify-start gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px w-full">
                 <ArrowUpRight size={20} /> Add Udhar (Credit)
               </button>
-              <button className="btn btn-secondary w-full justify-start">
+              <button className="inline-flex items-center justify-start gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-surface text-text-primary border border-border hover:bg-background w-full">
                 <ArrowDownLeft size={20} /> Add Payment
               </button>
-              <button className="btn btn-secondary w-full justify-start">
+              <button className="inline-flex items-center justify-start gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-surface text-text-primary border border-border hover:bg-background w-full">
                 <Users size={20} /> Add New Customer
               </button>
             </div>
@@ -361,7 +361,7 @@ export default function Home() {
                         </div>
 
                         <div className="mt-8">
-                             <button onClick={() => setSelectedTransaction(null)} className="btn btn-secondary w-full justify-center">
+                             <button onClick={() => setSelectedTransaction(null)} className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-surface text-text-primary border border-border hover:bg-background w-full">
                                 Close Details
                              </button>
                         </div>
@@ -375,13 +375,13 @@ export default function Home() {
 
 function StatCard({ title, value, icon, trend }: any) {
   return (
-    <div className="card">
+    <div className="bg-surface rounded-[0.75rem] p-6 shadow-md border border-border">
       <div className="flex items-start justify-between mb-2">
-        <p className="text-muted font-medium">{title}</p>
+        <p className="text-text-secondary font-medium">{title}</p>
         <div className="p-2 bg-gray-50 rounded-lg">{icon}</div>
       </div>
       <h3 className="text-2xl font-bold mb-1">{value}</h3>
-      <p className="text-sm text-muted">{trend}</p>
+      <p className="text-sm text-text-secondary">{trend}</p>
     </div>
   );
 }
