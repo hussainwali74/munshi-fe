@@ -122,3 +122,25 @@ export async function updateInventoryItem(formData: FormData) {
 
     revalidatePath('/inventory')
 }
+
+export async function deleteInventoryItem(id: string) {
+    const session = await getSession()
+    if (!session) throw new Error('Not authenticated')
+
+    // Optional: Get item first to delete image from R2 if needed
+    // const { data: item } = await db.from('inventory').select('image_url').eq('id', id).single()
+    // if (item?.image_url) await deleteFromR2(item.image_url)
+
+    const { error } = await db
+        .from('inventory')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', session.userId)
+
+    if (error) {
+        console.error('Delete error:', error)
+        throw new Error('Failed to delete item')
+    }
+
+    revalidatePath('/inventory')
+}

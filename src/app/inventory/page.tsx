@@ -1,9 +1,9 @@
 
 'use client';
 import DashboardLayout from '@/components/DashboardLayout';
-import { Search, Plus, Package, Filter, X, Upload, Edit } from 'lucide-react';
+import { Search, Plus, Package, Filter, X, Upload, Edit, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { addInventoryItem, getInventoryItems } from './actions';
+import { addInventoryItem, getInventoryItems, deleteInventoryItem } from './actions';
 import { createClient } from '@supabase/supabase-js';
 import EditInventoryModal from '@/components/EditInventoryModal';
 import { useLanguage } from '@/context/LanguageContext';
@@ -20,14 +20,14 @@ export default function InventoryPage() {
     const [editingItem, setEditingItem] = useState<any | null>(null);
     const { t } = useLanguage();
 
+    const fetchInventory = async () => {
+        // Use Server Action to fetch data securely with cookies
+        const data = await getInventoryItems();
+        setItems(data || []);
+    };
+
     // Fetch inventory items
     useEffect(() => {
-        const fetchInventory = async () => {
-            // Use Server Action to fetch data securely with cookies
-            const data = await getInventoryItems();
-            setItems(data || []);
-        };
-
         fetchInventory();
 
         // Subscribe to changes
@@ -61,6 +61,7 @@ export default function InventoryPage() {
                 <EditInventoryModal
                     item={editingItem}
                     onClose={() => setEditingItem(null)}
+                    onUpdate={fetchInventory}
                 />
             )}
 
@@ -204,6 +205,19 @@ export default function InventoryPage() {
                                             title={t('common.edit')}
                                         >
                                             <Edit size={18} />
+                                        </button>
+                                        <button
+                                            onClick={async () => {
+                                                if (confirm(t('inventory.confirmDelete') || 'Are you sure you want to delete this item?')) {
+                                                    await deleteInventoryItem(item.id);
+                                                    const data = await getInventoryItems();
+                                                    setItems(data || []);
+                                                }
+                                            }}
+                                            className="p-2 text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                                            title={t('common.delete')}
+                                        >
+                                            <Trash2 size={18} />
                                         </button>
                                     </td>
                                 </tr>
