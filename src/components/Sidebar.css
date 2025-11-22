@@ -1,0 +1,136 @@
+/* Sidebar Component Styles */
+/* These styles are specific to the Sidebar component and ensure visual consistency */
+
+.sidebar {
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-header {
+    background: linear-gradient(to bottom, var(--surface), var(--background));
+    min-height: 88px;
+}
+
+.sidebar-logo {
+    letter-spacing: -0.5px;
+    font-weight: 800;
+    user-select: none;
+}
+
+.sidebar-close-btn {
+    transition: all 0.2s ease;
+}
+
+.sidebar-close-btn:hover {
+    transform: rotate(90deg);
+}
+
+.sidebar-nav {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-secondary);
+}
+
+.sidebar-nav-item {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-nav-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--primary);
+    transform: scaleY(0);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 0 2px 2px 0;
+}
+
+.sidebar-nav-item-active::before {
+    transform: scaleY(1);
+}
+
+.sidebar-nav-item:hover {
+    transform: translateX(2px);
+}
+
+.sidebar-nav-item:active {
+    transform: translateX(1px) scale(0.98);
+}
+
+.sidebar-footer {
+    background: linear-gradient(to top, var(--surface), transparent);
+}
+
+.sidebar-signout-btn {
+    transition: all 0.2s ease;
+}
+
+.sidebar-signout-btn:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+    transform: translateX(2px);
+}
+
+.sidebar-signout-btn:active {
+    transform: translateX(1px) scale(0.98);
+}
+
+/* Mobile specific styles */
+@media (max-width: 768px) {
+    .sidebar {
+        box-shadow: 4px 0 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-nav-item:hover {
+        transform: none;
+    }
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+    :root:not(.light) .sidebar {
+        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.3);
+    }
+}
+
+:root.dark .sidebar {
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Animation for sidebar entrance */
+@keyframes slideInFromLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.sidebar.animate-in {
+    animation: slideInFromLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}

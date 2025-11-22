@@ -6,18 +6,26 @@ export default function LanguageToggle() {
   const { language, setLanguage } = useLanguage();
 
   return (
-    <div className="flex items-center bg-surface border border-border rounded-lg overflow-hidden">
+    <div className="flex items-center gap-2 p-1 bg-background border border-border rounded-xl">
       <button
         onClick={() => setLanguage('en')}
-        className={`px-3 py-1.5 text-sm font-medium transition-colors ${language === 'en' ? 'bg-primary text-white' : 'text-text-secondary hover:bg-background'
+        className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${language === 'en'
+            ? 'bg-primary text-white shadow-md transform scale-105'
+            : 'text-text-secondary hover:bg-surface hover:text-text-primary'
           }`}
+        aria-label="Switch to English"
+        aria-pressed={language === 'en'}
       >
-        English
+        EN
       </button>
       <button
         onClick={() => setLanguage('ur')}
-        className={`px-3 py-1.5 text-sm font-medium transition-colors urdu-text ${language === 'ur' ? 'bg-primary text-white' : 'text-text-secondary hover:bg-background'
+        className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200 urdu-text ${language === 'ur'
+            ? 'bg-primary text-white shadow-md transform scale-105'
+            : 'text-text-secondary hover:bg-surface hover:text-text-primary'
           }`}
+        aria-label="Switch to Urdu"
+        aria-pressed={language === 'ur'}
       >
         اردو
       </button>

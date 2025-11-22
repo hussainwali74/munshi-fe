@@ -19,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} ${noto.variable}`}>
+    <html lang="en" className={`${inter.className} ${noto.variable}`} suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <ThemeProvider>
           <LanguageProvider>
             <main className="min-h-screen bg-background text-text-primary">

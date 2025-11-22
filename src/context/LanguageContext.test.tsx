@@ -22,33 +22,33 @@ describe('LanguageContext', () => {
     localStorage.clear();
   });
 
-  it('defaults to urdu', () => {
+  it('defaults to english', () => {
     render(
       <LanguageProvider>
         <TestComponent />
       </LanguageProvider>
     );
-    expect(screen.getByTestId('language').textContent).toBe('ur');
-    expect(screen.getByTestId('dir').textContent).toBe('rtl');
-    // Check translation for Urdu
-    expect(screen.getByTestId('translation').textContent).toBe('ڈیش بورڈ');
-    // Check body class
-    expect(document.body.classList.contains('urdu-text')).toBe(true);
-  });
-
-  it('can switch to english', () => {
-    render(
-      <LanguageProvider>
-        <TestComponent />
-      </LanguageProvider>
-    );
-
-    fireEvent.click(screen.getByText('Set English'));
     expect(screen.getByTestId('language').textContent).toBe('en');
     expect(screen.getByTestId('dir').textContent).toBe('ltr');
+    // Check translation for English
     expect(screen.getByTestId('translation').textContent).toBe('Dashboard');
-    expect(localStorage.getItem('language')).toBe('en');
-    // Check body class removed
-    expect(document.body.classList.contains('urdu-text')).toBe(false);
+    // Check urdu-text class not present
+    expect(document.documentElement.classList.contains('urdu-text')).toBe(false);
+  });
+
+  it('can switch to urdu', () => {
+    render(
+      <LanguageProvider>
+        <TestComponent />
+      </LanguageProvider>
+    );
+
+    fireEvent.click(screen.getByText('Set Urdu'));
+    expect(screen.getByTestId('language').textContent).toBe('ur');
+    expect(screen.getByTestId('dir').textContent).toBe('rtl');
+    expect(screen.getByTestId('translation').textContent).toBe('ڈیش بورڈ');
+    expect(localStorage.getItem('language')).toBe('ur');
+    // Check urdu-text class added
+    expect(document.documentElement.classList.contains('urdu-text')).toBe(true);
   });
 });

@@ -14,7 +14,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   // Always start with the same default for both SSR and client to avoid hydration mismatch
-  const [language, setLanguageState] = useState<Language>('ur');
+  const [language, setLanguageState] = useState<Language>('en');
   const [mounted, setMounted] = useState(false);
 
   // Load from localStorage after component mounts
@@ -41,10 +41,13 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
     document.documentElement.dir = language === 'ur' ? 'rtl' : 'ltr';
     document.documentElement.lang = language;
+
+    // IMPORTANT: Apply urdu-text to html element, NOT body
+    // Applying to body causes hydration mismatch which breaks all event handlers
     if (language === 'ur') {
-      document.body.classList.add('urdu-text');
+      document.documentElement.classList.add('urdu-text');
     } else {
-      document.body.classList.remove('urdu-text');
+      document.documentElement.classList.remove('urdu-text');
     }
   }, [language, mounted]);
 
