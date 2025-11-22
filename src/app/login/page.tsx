@@ -34,11 +34,11 @@ export default function LoginPage({ searchParams }: { searchParams: Promise<{ me
                             <>
                                 <div>
                                     <label htmlFor="fullName" className="block text-sm font-medium text-text-secondary mb-1">{t('login.fullName')}</label>
-                                    <input id="fullName" name="fullName" type="text" required className="input w-full" placeholder="Ali Khan" />
+                                    <input id="fullName" name="fullName" type="text" required className="input w-full" placeholder={t('login.placeholders.fullName')} />
                                 </div>
                                 <div>
                                     <label htmlFor="businessName" className="block text-sm font-medium text-text-secondary mb-1">{t('login.shopName')}</label>
-                                    <input id="businessName" name="businessName" type="text" required className="input w-full" placeholder="Bismillah General Store" />
+                                    <input id="businessName" name="businessName" type="text" required className="input w-full" placeholder={t('login.placeholders.shopName')} />
                                 </div>
                             </>
                         )}
@@ -54,7 +54,7 @@ export default function LoginPage({ searchParams }: { searchParams: Promise<{ me
                                 autoComplete="email"
                                 required
                                 className="input w-full"
-                                placeholder="you@example.com"
+                                placeholder={t('login.placeholders.email')}
                             />
                         </div>
 
@@ -69,7 +69,7 @@ export default function LoginPage({ searchParams }: { searchParams: Promise<{ me
                                 autoComplete="current-password"
                                 required
                                 className="input w-full"
-                                placeholder="••••••••"
+                                placeholder={t('login.placeholders.password')}
                             />
                         </div>
 

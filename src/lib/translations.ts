@@ -49,6 +49,13 @@ export const translations = {
         electrical: "Electrical",
         plumbing: "Plumbing",
         other: "Other",
+      },
+      placeholders: {
+        itemName: "e.g. PVC Pipe",
+        price: "0.00",
+        quantity: "0",
+        size: "e.g. 4 inch",
+        color: "e.g. White",
       }
     },
     login: {
@@ -64,6 +71,12 @@ export const translations = {
       shopName: "Shop Name",
       createNewAccount: "Create new account",
       alreadyHaveAccount: "I already have an account",
+      placeholders: {
+        fullName: "Ali Khan",
+        shopName: "Bismillah General Store",
+        email: "you@example.com",
+        password: "••••••••",
+      }
     }
   },
   ur: {
@@ -116,6 +129,13 @@ export const translations = {
         electrical: "الیکٹریکل",
         plumbing: "پلمبنگ",
         other: "دیگر",
+      },
+      placeholders: {
+        itemName: "مثلاً پی وی سی پائپ",
+        price: "0.00",
+        quantity: "0",
+        size: "مثلاً 4 انچ",
+        color: "مثلاً سفید",
       }
     },
     login: {
@@ -131,6 +151,12 @@ export const translations = {
       shopName: "دکان کا نام",
       createNewAccount: "نیا اکاونٹ بنائیں",
       alreadyHaveAccount: "پہلے سے اکاونٹ موجود ہے",
+      placeholders: {
+        fullName: "علی خان",
+        shopName: "بسم اللہ جنرل اسٹور",
+        email: "you@example.com",
+        password: "••••••••",
+      }
     }
   }
 };

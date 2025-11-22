@@ -92,7 +92,7 @@ export default function InventoryPage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium mb-1">{t('inventory.itemName')}</label>
-                                    <input name="name" type="text" required className="input" placeholder="e.g. PVC Pipe" />
+                                    <input name="name" type="text" required className="input" placeholder={t('inventory.placeholders.itemName')} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium mb-1">{t('inventory.category')}</label>
@@ -108,22 +108,22 @@ export default function InventoryPage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium mb-1">{t('inventory.price')} (Rs)</label>
-                                    <input name="price" type="number" required className="input" placeholder="0.00" />
+                                    <input name="price" type="number" required className="input" placeholder={t('inventory.placeholders.price')} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium mb-1">{t('inventory.quantity')}</label>
-                                    <input name="quantity" type="number" required className="input" placeholder="0" />
+                                    <input name="quantity" type="number" required className="input" placeholder={t('inventory.placeholders.quantity')} />
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium mb-1">{t('inventory.size')}</label>
-                                    <input name="size" type="text" className="input" placeholder="e.g. 4 inch" />
+                                    <input name="size" type="text" className="input" placeholder={t('inventory.placeholders.size')} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium mb-1">{t('inventory.color')}</label>
-                                    <input name="color" type="text" className="input" placeholder="e.g. White" />
+                                    <input name="color" type="text" className="input" placeholder={t('inventory.placeholders.color')} />
                                 </div>
                             </div>
 
