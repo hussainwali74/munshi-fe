@@ -2,17 +2,19 @@
 
 import { login, signup } from './actions'
 import { useState, use } from 'react'
+import { useLanguage } from '@/context/LanguageContext'
 
 export default function LoginPage({ searchParams }: { searchParams: Promise<{ message: string, error: string }> }) {
     const [isLogin, setIsLogin] = useState(true)
     const params = use(searchParams)
+    const { t } = useLanguage()
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-background p-4">
             <div className="w-full max-w-md space-y-8">
                 <div className="text-center">
-                    <h1 className="text-4xl font-bold text-primary mb-2">Digital Dukan</h1>
-                    <p className="text-muted">{isLogin ? 'Sign in to manage your shop' : 'Create your digital dukan'}</p>
+                    <h1 className="text-4xl font-bold text-primary mb-2">Ezekata</h1>
+                    <p className="text-muted text-lg">E-Z-Khata - {t('login.signIn')}</p>
                 </div>
 
                 <div className="card bg-surface p-8 rounded-xl shadow-lg border border-border">
@@ -31,19 +33,19 @@ export default function LoginPage({ searchParams }: { searchParams: Promise<{ me
                         {!isLogin && (
                             <>
                                 <div>
-                                    <label htmlFor="fullName" className="block text-sm font-medium text-text-secondary mb-1">Full Name</label>
-                                    <input id="fullName" name="fullName" type="text" required className="input w-full" placeholder="Ali Khan" />
+                                    <label htmlFor="fullName" className="block text-sm font-medium text-text-secondary mb-1">{t('login.fullName')}</label>
+                                    <input id="fullName" name="fullName" type="text" required className="input w-full" placeholder={t('login.placeholders.fullName')} />
                                 </div>
                                 <div>
-                                    <label htmlFor="businessName" className="block text-sm font-medium text-text-secondary mb-1">Shop Name</label>
-                                    <input id="businessName" name="businessName" type="text" required className="input w-full" placeholder="Bismillah General Store" />
+                                    <label htmlFor="businessName" className="block text-sm font-medium text-text-secondary mb-1">{t('login.shopName')}</label>
+                                    <input id="businessName" name="businessName" type="text" required className="input w-full" placeholder={t('login.placeholders.shopName')} />
                                 </div>
                             </>
                         )}
 
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-text-secondary mb-1">
-                                Email address
+                                {t('login.email')}
                             </label>
                             <input
                                 id="email"
@@ -52,13 +54,13 @@ export default function LoginPage({ searchParams }: { searchParams: Promise<{ me
                                 autoComplete="email"
                                 required
                                 className="input w-full"
-                                placeholder="you@example.com"
+                                placeholder={t('login.placeholders.email')}
                             />
                         </div>
 
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-text-secondary mb-1">
-                                Password
+                                {t('login.password')}
                             </label>
                             <input
                                 id="password"
@@ -67,18 +69,18 @@ export default function LoginPage({ searchParams }: { searchParams: Promise<{ me
                                 autoComplete="current-password"
                                 required
                                 className="input w-full"
-                                placeholder="••••••••"
+                                placeholder={t('login.placeholders.password')}
                             />
                         </div>
 
                         <div className="flex flex-col gap-4">
                             {isLogin ? (
                                 <button formAction={login} className="btn btn-primary w-full justify-center">
-                                    Sign in
+                                    {t('login.login')}
                                 </button>
                             ) : (
                                 <button formAction={signup} className="btn btn-primary w-full justify-center">
-                                    Create Account
+                                    {t('login.createAccount')}
                                 </button>
                             )}
 
@@ -87,7 +89,7 @@ export default function LoginPage({ searchParams }: { searchParams: Promise<{ me
                                     <div className="w-full border-t border-border"></div>
                                 </div>
                                 <div className="relative flex justify-center text-sm">
-                                    <span className="px-2 bg-surface text-muted">Or</span>
+                                    <span className="px-2 bg-surface text-muted">{t('common.or')}</span>
                                 </div>
                             </div>
 
@@ -96,7 +98,7 @@ export default function LoginPage({ searchParams }: { searchParams: Promise<{ me
                                 onClick={() => setIsLogin(!isLogin)}
                                 className="btn btn-secondary w-full justify-center"
                             >
-                                {isLogin ? 'Create new account' : 'I already have an account'}
+                                {isLogin ? t('login.createNewAccount') : t('login.alreadyHaveAccount')}
                             </button>
                         </div>
                     </form>

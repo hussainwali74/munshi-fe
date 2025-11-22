@@ -1,28 +1,75 @@
 
 'use client';
 import DashboardLayout from '@/components/DashboardLayout';
-import { Search, Plus, Package, Filter, X, Upload } from 'lucide-react';
-import { useState } from 'react';
-import { addInventoryItem } from './actions';
+import { Search, Plus, Package, Filter, X, Upload, Edit } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { addInventoryItem, getInventoryItems } from './actions';
+import { createClient } from '@supabase/supabase-js';
+import EditInventoryModal from '@/components/EditInventoryModal';
+import { useLanguage } from '@/context/LanguageContext';
+
+// Initialize supabase client for realtime subscriptions ONLY
+const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function InventoryPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [items, setItems] = useState<any[]>([]);
+    const [editingItem, setEditingItem] = useState<any | null>(null);
+    const { t } = useLanguage();
+
+    // Fetch inventory items
+    useEffect(() => {
+        const fetchInventory = async () => {
+            // Use Server Action to fetch data securely with cookies
+            const data = await getInventoryItems();
+            setItems(data || []);
+        };
+
+        fetchInventory();
+
+        // Subscribe to changes
+        // Note: Realtime subscriptions in Supabase JS client don't need auth if RLS allows reading public rows or if policy allows.
+        // Since we have "No public access" policies, this subscription might fail without a session in the client.
+        // However, for now, we rely on Server Action for initial fetch and re-fetch on updates manually or optimistic UI.
+        // But let's keep it for now. If it fails, it just won't auto-update.
+        const channel = supabase
+            .channel('inventory_changes')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, () => {
+                fetchInventory();
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, []);
 
     return (
         <DashboardLayout>
             <div className="flex items-center justify-between mb-6">
-                <h1 className="heading-1" style={{ marginBottom: 0 }}>Inventory</h1>
+                <h1 className="heading-1" style={{ marginBottom: 0 }}>{t('inventory.title')}</h1>
                 <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
-                    <Plus size={20} /> Add Item
+                    <Plus size={20} /> {t('inventory.addItem')}
                 </button>
             </div>
 
+            {/* Edit Modal */}
+            {editingItem && (
+                <EditInventoryModal
+                    item={editingItem}
+                    onClose={() => setEditingItem(null)}
+                />
+            )}
+
             {/* Add Item Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                     <div className="bg-surface rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
                         <div className="flex items-center justify-between p-4 border-b border-border">
-                            <h2 className="text-xl font-bold">Add New Item</h2>
+                            <h2 className="text-xl font-bold">{t('inventory.addItem')}</h2>
                             <button onClick={() => setIsModalOpen(false)} className="text-text-secondary">
                                 <X size={24} />
                             </button>
@@ -31,13 +78,16 @@ export default function InventoryPage() {
                         <form action={async (formData) => {
                             await addInventoryItem(formData);
                             setIsModalOpen(false);
+                            // Refresh list
+                            const data = await getInventoryItems();
+                            setItems(data || []);
                         }} className="p-4 space-y-4">
 
                             {/* Image Upload */}
                             <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-border rounded-lg bg-background">
                                 <Upload size={32} className="text-text-secondary mb-2" />
                                 <label htmlFor="image" className="text-primary font-medium cursor-pointer">
-                                    Upload Product Image
+                                    {t('inventory.uploadImage')}
                                 </label>
                                 <input type="file" id="image" name="image" accept="image/*" className="hidden" />
                                 <p className="text-xs text-muted mt-1">PNG, JPG up to 5MB</p>
@@ -45,45 +95,45 @@ export default function InventoryPage() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Item Name</label>
-                                    <input name="name" type="text" required className="input" placeholder="e.g. PVC Pipe" />
+                                    <label className="block text-sm font-medium mb-1">{t('inventory.itemName')}</label>
+                                    <input name="name" type="text" required className="input" placeholder={t('inventory.placeholders.itemName')} />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Category</label>
+                                    <label className="block text-sm font-medium mb-1">{t('inventory.category')}</label>
                                     <select name="category" className="input">
-                                        <option value="sanitary">Sanitary</option>
-                                        <option value="electrical">Electrical</option>
-                                        <option value="plumbing">Plumbing</option>
-                                        <option value="other">Other</option>
+                                        <option value="sanitary">{t('inventory.categories.sanitary')}</option>
+                                        <option value="electrical">{t('inventory.categories.electrical')}</option>
+                                        <option value="plumbing">{t('inventory.categories.plumbing')}</option>
+                                        <option value="other">{t('inventory.categories.other')}</option>
                                     </select>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Price (Rs)</label>
-                                    <input name="price" type="number" required className="input" placeholder="0.00" />
+                                    <label className="block text-sm font-medium mb-1">{t('inventory.price')} (Rs)</label>
+                                    <input name="price" type="number" required className="input" placeholder={t('inventory.placeholders.price')} />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Quantity</label>
-                                    <input name="quantity" type="number" required className="input" placeholder="0" />
+                                    <label className="block text-sm font-medium mb-1">{t('inventory.quantity')}</label>
+                                    <input name="quantity" type="number" required className="input" placeholder={t('inventory.placeholders.quantity')} />
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Size</label>
-                                    <input name="size" type="text" className="input" placeholder="e.g. 4 inch" />
+                                    <label className="block text-sm font-medium mb-1">{t('inventory.size')}</label>
+                                    <input name="size" type="text" className="input" placeholder={t('inventory.placeholders.size')} />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Color</label>
-                                    <input name="color" type="text" className="input" placeholder="e.g. White" />
+                                    <label className="block text-sm font-medium mb-1">{t('inventory.color')}</label>
+                                    <input name="color" type="text" className="input" placeholder={t('inventory.placeholders.color')} />
                                 </div>
                             </div>
 
                             <div className="pt-4">
                                 <button type="submit" className="btn btn-primary w-full justify-center">
-                                    Save Item
+                                    {t('common.save')}
                                 </button>
                             </div>
                         </form>
@@ -97,7 +147,7 @@ export default function InventoryPage() {
                         <Search size={20} className="text-muted" />
                         <input
                             type="text"
-                            placeholder="Search items..."
+                            placeholder={t('common.search')}
                             className="w-full"
                             style={{ outline: 'none', border: 'none', background: 'transparent' }}
                         />
@@ -108,34 +158,54 @@ export default function InventoryPage() {
                 </div>
 
                 <div style={{ overflowX: 'auto' }}>
-                    <table className="w-full text-left" style={{ borderCollapse: 'collapse' }}>
+                    <table className="w-full text-start" style={{ borderCollapse: 'collapse' }}>
                         <thead>
                             <tr className="border-b">
-                                <th className="p-3 font-medium text-muted">Item Name</th>
-                                <th className="p-3 font-medium text-muted">Category</th>
-                                <th className="p-3 font-medium text-muted">Stock</th>
-                                <th className="p-3 font-medium text-muted">Price</th>
-                                <th className="p-3 font-medium text-muted">Status</th>
+                                <th className="p-3 font-medium text-muted text-start">{t('inventory.itemName')}</th>
+                                <th className="p-3 font-medium text-muted text-start">{t('inventory.category')}</th>
+                                <th className="p-3 font-medium text-muted text-start">{t('inventory.stock')}</th>
+                                <th className="p-3 font-medium text-muted text-start">{t('inventory.price')}</th>
+                                <th className="p-3 font-medium text-muted text-start">{t('inventory.status')}</th>
+                                <th className="p-3 font-medium text-muted text-start">{t('common.actions')}</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {[1, 2, 3, 4, 5].map((i) => (
-                                <tr key={i} className="border-b" style={{ borderBottom: '1px solid var(--border)' }}>
+                            {items.length === 0 ? (
+                                <tr>
+                                    <td colSpan={6} className="p-8 text-center text-muted">
+                                        {t('inventory.noItems')}
+                                    </td>
+                                </tr>
+                            ) : items.map((item) => (
+                                <tr key={item.id} className="border-b hover:bg-gray-50/50 transition-colors" style={{ borderBottom: '1px solid var(--border)' }}>
                                     <td className="p-3">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded flex items-center justify-center text-muted" style={{ backgroundColor: '#F3F4F6' }}>
-                                                <Package size={16} />
+                                            <div className="w-8 h-8 rounded flex items-center justify-center text-muted overflow-hidden" style={{ backgroundColor: '#F3F4F6' }}>
+                                                {item.image_url ? (
+                                                    <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <Package size={16} />
+                                                )}
                                             </div>
-                                            <span className="font-medium">Item {i}</span>
+                                            <span className="font-medium">{item.name}</span>
                                         </div>
                                     </td>
-                                    <td className="p-3 text-muted">Sanitary</td>
-                                    <td className="p-3 font-medium">{100 - i * 10} pcs</td>
-                                    <td className="p-3">Rs {500 + i * 50}</td>
+                                    <td className="p-3 text-muted capitalize">{t(`inventory.categories.${item.category}`)}</td>
+                                    <td className="p-3 font-medium">{item.quantity}</td>
+                                    <td className="p-3">Rs {item.selling_price}</td>
                                     <td className="p-3">
-                                        <span className={`px-2 py-1 rounded-full font-medium ${i === 4 ? 'bg-red-100 text-danger' : 'bg-green-100 text-success'}`} style={{ fontSize: '0.75rem' }}>
-                                            {i === 4 ? 'Low Stock' : 'In Stock'}
+                                        <span className={`px-2 py-1 rounded-full font-medium ${item.quantity < 10 ? 'bg-red-100 text-danger' : 'bg-green-100 text-success'}`} style={{ fontSize: '0.75rem' }}>
+                                            {item.quantity < 10 ? t('inventory.lowStock') : t('inventory.inStock')}
                                         </span>
+                                    </td>
+                                    <td className="p-3">
+                                        <button
+                                            onClick={() => setEditingItem(item)}
+                                            className="p-2 text-primary hover:bg-primary/10 rounded-full transition-colors"
+                                            title={t('common.edit')}
+                                        >
+                                            <Edit size={18} />
+                                        </button>
                                     </td>
                                 </tr>
                             ))}

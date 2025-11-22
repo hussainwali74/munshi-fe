@@ -33,6 +33,9 @@
   --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.3);
   --shadow-glow-accent: 0 0 20px rgba(139, 92, 246, 0.3);
 
+  /* Fonts */
+  --font-urdu: var(--font-noto);
+
   /* Border Radius */
   --radius: 0.75rem;
   --radius-lg: 1rem;
@@ -40,7 +43,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.light) {
     --background: #0F172A;
     --surface: #1E293B;
     --text-primary: #F1F5F9;
@@ -48,6 +51,15 @@
     --border: #334155;
     --gradient-bg: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
   }
+}
+
+:root.dark {
+  --background: #0F172A;
+  --surface: #1E293B;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --border: #334155;
+  --gradient-bg: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
 }
 
 * {
@@ -206,7 +218,7 @@ a {
 
 /* Urdu Specific */
 .urdu-text {
-  font-family: 'Noto Sans Arabic', sans-serif;
+  font-family: var(--font-urdu), 'Noto Sans Arabic', sans-serif;
   direction: rtl;
 }
 
@@ -339,10 +351,15 @@ a {
 }
 
 @media (prefers-color-scheme: dark) {
-  .glass-card {
+  :root:not(.light) .glass-card {
     background: rgba(30, 41, 59, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
+}
+
+:root.dark .glass-card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .glass-strong {
@@ -352,9 +369,13 @@ a {
 }
 
 @media (prefers-color-scheme: dark) {
-  .glass-strong {
+  :root:not(.light) .glass-strong {
     background: rgba(30, 41, 59, 0.9);
   }
+}
+
+:root.dark .glass-strong {
+  background: rgba(30, 41, 59, 0.9);
 }
 
 /* Gradient Utilities */

@@ -6,17 +6,21 @@ import { usePathname } from 'next/navigation';
 import { Menu, X, Home, Users, Package, FileText, Settings, LogOut } from 'lucide-react';
 import styles from './DashboardLayout.module.css';
 import { signOut } from '@/app/login/actions';
+import ThemeToggle from './ThemeToggle';
+import LanguageToggle from './LanguageToggle';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
     const pathname = usePathname();
+    const { t } = useLanguage();
 
     const navItems = [
-        { name: 'Home', icon: Home, href: '/' },
-        { name: 'Khata (Ledger)', icon: FileText, href: '/khata' },
-        { name: 'Inventory', icon: Package, href: '/inventory' },
-        { name: 'Employees', icon: Users, href: '/employees' },
-        { name: 'Settings', icon: Settings, href: '/settings' },
+        { name: t('common.home'), icon: Home, href: '/' },
+        { name: t('common.khata'), icon: FileText, href: '/khata' },
+        { name: t('common.inventory'), icon: Package, href: '/inventory' },
+        { name: t('common.employees'), icon: Users, href: '/employees' },
+        { name: t('common.settings'), icon: Settings, href: '/settings' },
     ];
 
     return (
@@ -32,7 +36,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {/* Sidebar */}
             <aside className={`${styles.sidebar} ${isSidebarOpen ? styles.open : ''}`}>
                 <div className={styles.brand}>
-                    <span className={styles.brandTitle}>Dukan<span style={{ color: 'var(--text-primary)' }}>App</span></span>
+                    <span className={styles.brandTitle}>Ezekata<span style={{ color: 'var(--text-primary)' }}>App</span></span>
                     <button className={styles.closeBtn} onClick={() => setSidebarOpen(false)}>
                         <X size={24} />
                     </button>
@@ -55,13 +59,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         );
                     })}
 
+                    <div className="mt-auto px-4 py-2 space-y-2">
+                        <div className="flex gap-2">
+                            <ThemeToggle />
+                            <LanguageToggle />
+                        </div>
+                    </div>
                     <button
                         onClick={() => signOut()}
-                        className={`${styles.navItem} w-full text-left mt-auto`}
-                        style={{ marginTop: 'auto', border: 'none', background: 'transparent', cursor: 'pointer' }}
+                        className={`${styles.navItem} w-full text-left`}
+                        style={{ border: 'none', background: 'transparent', cursor: 'pointer' }}
                     >
                         <LogOut size={20} />
-                        <span>Sign Out</span>
+                        <span>{t('common.signOut')}</span>
                     </button>
                 </nav>
             </aside>
@@ -72,7 +82,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <button className={styles.menuBtn} onClick={() => setSidebarOpen(true)}>
                         <Menu size={24} />
                     </button>
-                    <span style={{ fontWeight: 600 }}>Dashboard</span>
+                    <span style={{ fontWeight: 600 }}>{t('common.dashboard')}</span>
                 </header>
 
                 <main className={styles.content} style={{ paddingBottom: '5rem' }}>
