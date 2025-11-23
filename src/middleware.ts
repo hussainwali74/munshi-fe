@@ -38,8 +38,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Redirect to dashboard if accessing login page while logged in
-  if (request.nextUrl.pathname === '/login' && isValidSession) {
+  // Redirect to dashboard if accessing login page OR landing page while logged in
+  if ((request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/') && isValidSession) {
     console.log('[Middleware] Redirecting to dashboard - already logged in')
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }

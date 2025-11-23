@@ -74,6 +74,13 @@ export async function signup(prevState: AuthState, formData: FormData): Promise<
 }
 
 export async function signOut() {
-    await deleteSession()
+    console.log('Sign out action called')
+    try {
+        await deleteSession()
+        console.log('Session deleted successfully')
+    } catch (error) {
+        console.error('Error deleting session:', error)
+    }
+    console.log('Redirecting to login')
     redirect('/login')
 }

@@ -20,7 +20,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     const { t, dir } = useLanguage();
 
     const navItems = [
-        { name: t('common.home'), icon: Home, href: '/' },
+        { name: t('common.home'), icon: Home, href: '/dashboard' },
         { name: t('common.khata'), icon: FileText, href: '/khata' },
         { name: t('common.inventory'), icon: Package, href: '/inventory' },
         { name: t('common.employees'), icon: Users, href: '/employees' },
