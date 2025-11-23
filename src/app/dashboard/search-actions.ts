@@ -1,7 +1,7 @@
 
 'use server'
 
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { getSession } from '@/lib/auth'
 
 export async function searchCustomers(query: string) {
@@ -16,7 +16,7 @@ export async function searchCustomers(query: string) {
 
     if (sanitizedQuery.length === 0) return []
 
-    const { data, error } = await db
+    const { data, error } = await getDb()
         .from('customers')
         .select('id, name, phone, address')
         .eq('user_id', session.userId)

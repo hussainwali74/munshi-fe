@@ -3,20 +3,20 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { db } from '@/lib/db'
 import { hashPassword, verifyPassword, createSession, deleteSession } from '@/lib/auth'
-
+import { getDb } from '@/lib/db'
 export type AuthState = {
     error?: string
     message?: string
 }
+
 
 export async function login(prevState: AuthState, formData: FormData): Promise<AuthState> {
     const identifier = formData.get('identifier') as string
     const password = formData.get('password') as string
 
     // Fetch user from custom 'users' table by email or phone
-    const { data: user, error } = await db
+    const { data: user, error } = await getDb()
         .from('users')
         .select('*')
         .or(`email.eq.${identifier},phone_number.eq.${identifier}`)
@@ -36,7 +36,7 @@ export async function login(prevState: AuthState, formData: FormData): Promise<A
     await createSession({ userId: user.id, email: user.email, name: user.full_name })
 
     revalidatePath('/', 'layout')
-    redirect('/')
+    redirect('/dashboard')
 }
 
 export async function signup(prevState: AuthState, formData: FormData): Promise<AuthState> {
@@ -47,14 +47,14 @@ export async function signup(prevState: AuthState, formData: FormData): Promise<
     const phoneNumber = formData.get('phoneNumber') as string
 
     // Check if user exists
-    const { data: existingUser } = await db.from('users').select('id').or(`email.eq.${email},phone_number.eq.${phoneNumber}`).single()
+    const { data: existingUser } = await getDb().from('users').select('id').or(`email.eq.${email},phone_number.eq.${phoneNumber}`).single()
     if (existingUser) {
         return { error: 'User with this email or phone already exists' }
     }
 
     const hashedPassword = await hashPassword(password)
 
-    const { data: newUser, error } = await db.from('users').insert({
+    const { data: newUser, error } = await getDb().from('users').insert({
         email,
         password_hash: hashedPassword,
         full_name: fullName,
@@ -70,7 +70,7 @@ export async function signup(prevState: AuthState, formData: FormData): Promise<
     await createSession({ userId: newUser.id, email: newUser.email, name: newUser.full_name })
 
     revalidatePath('/', 'layout')
-    redirect('/')
+    redirect('/dashboard')
 }
 
 export async function signOut() {

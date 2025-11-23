@@ -1,6 +1,6 @@
 'use server'
 
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { uploadImageToR2 } from '@/lib/r2'
 import { revalidatePath } from 'next/cache'
 import { getSession } from '@/lib/auth'
@@ -9,7 +9,7 @@ export async function getInventoryItems() {
     const session = await getSession()
     if (!session) return []
 
-    const { data, error } = await db
+    const { data, error } = await getDb()
         .from('inventory')
         .select('*')
         .eq('user_id', session.userId)
@@ -55,7 +55,7 @@ export async function addInventoryItem(formData: FormData) {
         console.log('⚠️ No image file to upload (file missing or size is 0)')
     }
 
-    const { error } = await db.from('inventory').insert({
+    const { error } = await getDb().from('inventory').insert({
         user_id: session.userId, // Use ID from custom session
         name,
         category,
@@ -90,7 +90,7 @@ export async function updateInventoryItem(formData: FormData) {
     const deleteImage = formData.get('deleteImage') === 'true'
 
     // First get existing item to handle image logic
-    const { data: existingItem, error: fetchError } = await db
+    const { data: existingItem, error: fetchError } = await getDb()
         .from('inventory')
         .select('image_url')
         .eq('id', id)
@@ -117,7 +117,7 @@ export async function updateInventoryItem(formData: FormData) {
         }
     }
 
-    const { error } = await db.from('inventory').update({
+    const { error } = await getDb().from('inventory').update({
         name,
         category,
         selling_price: price,
@@ -143,7 +143,7 @@ export async function deleteInventoryItem(id: string) {
     // const { data: item } = await db.from('inventory').select('image_url').eq('id', id).single()
     // if (item?.image_url) await deleteFromR2(item.image_url)
 
-    const { error } = await db
+    const { error } = await getDb()
         .from('inventory')
         .delete()
         .eq('id', id)

@@ -1,6 +1,6 @@
 'use server'
 
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { getSession } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 
@@ -14,7 +14,7 @@ export async function searchInventoryItems(query: string) {
 
     if (sanitizedQuery.length === 0) return []
 
-    const { data, error } = await db
+    const { data, error } = await getDb()
         .from('inventory')
         .select('id, name, selling_price, quantity, category')
         .eq('user_id', session.userId)
@@ -80,7 +80,7 @@ export async function createBill(formData: FormData) {
 
     const transactionType = paymentMode === 'credit' ? 'credit' : 'debit'
 
-    const { data: transaction, error: txError } = await db.from('transactions').insert({
+    const { data: transaction, error: txError } = await getDb().from('transactions').insert({
         user_id: session.userId,
         customer_id: customerId,
         amount: finalAmount,
@@ -100,7 +100,7 @@ export async function createBill(formData: FormData) {
     for (const item of items) {
         if (item.id) {
             // Decrement stock
-            await db.rpc('decrement_stock', {
+            await getDb().rpc('decrement_stock', {
                 p_item_id: item.id,
                 p_quantity: item.qty
             })
@@ -111,7 +111,7 @@ export async function createBill(formData: FormData) {
     if (paymentMode === 'credit') {
         const balanceChange = finalAmount - paidAmount
         if (balanceChange > 0) {
-            await db.rpc('update_customer_balance', {
+            await getDb().rpc('update_customer_balance', {
                 p_customer_id: customerId,
                 p_amount: balanceChange
             })

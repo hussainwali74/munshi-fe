@@ -1,5 +1,5 @@
 import { deleteInventoryItem, getInventoryItems, addInventoryItem, updateInventoryItem } from './actions';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 
 // Create a mock query builder that returns itself for chaining
@@ -17,13 +17,18 @@ const mockQueryBuilder = {
 
 // Mock dependencies
 jest.mock('@/lib/db', () => ({
-    db: {
+    getDb: jest.fn(() => ({
         from: jest.fn(() => mockQueryBuilder),
-    },
+    })),
 }));
 
 jest.mock('@/lib/auth', () => ({
     getSession: jest.fn(),
+    // Mocking verifyPassword and hashPassword to avoid "not a function" errors if they are imported
+    verifyPassword: jest.fn(),
+    hashPassword: jest.fn(),
+    createSession: jest.fn(),
+    deleteSession: jest.fn(),
 }));
 
 jest.mock('@/lib/r2', () => ({
@@ -36,6 +41,8 @@ jest.mock('next/cache', () => ({
 
 describe('Inventory Actions', () => {
     const mockSession = { userId: 'user-123' };
+    // Helper to get the mocked instance
+    const mockGetDb = getDb as jest.Mock;
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -52,7 +59,8 @@ describe('Inventory Actions', () => {
 
             const result = await getInventoryItems();
             expect(result).toEqual(mockItems);
-            expect(db.from).toHaveBeenCalledWith('inventory');
+            expect(mockGetDb).toHaveBeenCalled();
+            expect(mockGetDb().from).toHaveBeenCalledWith('inventory');
             expect(mockQueryBuilder.select).toHaveBeenCalledWith('*');
             expect(mockQueryBuilder.eq).toHaveBeenCalledWith('user_id', mockSession.userId);
         });
@@ -75,7 +83,8 @@ describe('Inventory Actions', () => {
 
             await addInventoryItem(formData);
 
-            expect(db.from).toHaveBeenCalledWith('inventory');
+            expect(mockGetDb).toHaveBeenCalled();
+            expect(mockGetDb().from).toHaveBeenCalledWith('inventory');
             expect(mockQueryBuilder.insert).toHaveBeenCalled();
         });
     });
@@ -86,7 +95,8 @@ describe('Inventory Actions', () => {
 
             await deleteInventoryItem('1');
 
-            expect(db.from).toHaveBeenCalledWith('inventory');
+            expect(mockGetDb).toHaveBeenCalled();
+            expect(mockGetDb().from).toHaveBeenCalledWith('inventory');
             expect(mockQueryBuilder.delete).toHaveBeenCalled();
             expect(mockQueryBuilder.eq).toHaveBeenCalledWith('id', '1');
             expect(mockQueryBuilder.eq).toHaveBeenCalledWith('user_id', mockSession.userId);

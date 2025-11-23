@@ -1,7 +1,7 @@
 
 'use server'
 
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { getSession } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 
@@ -14,7 +14,7 @@ export async function updateShopDetails(formData: FormData) {
     const shopPhone = formData.get('shopPhone') as string
     const shopAddress = formData.get('shopAddress') as string
 
-    const { error } = await db.from('users').update({
+    const { error } = await getDb().from('users').update({
         business_name: businessName,
         full_name: fullName,
         shop_phone: shopPhone,

@@ -1,7 +1,7 @@
 
 'use server'
 
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { getSession } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 
@@ -13,7 +13,7 @@ export async function addCustomer(formData: FormData) {
     const phone = formData.get('phone') as string
     const address = formData.get('address') as string
 
-    const { error } = await db.from('customers').insert({
+    const { error } = await getDb().from('customers').insert({
         user_id: session.userId,
         name,
         phone,
@@ -51,7 +51,7 @@ export async function addTransaction(formData: FormData) {
     }
 
     // Insert transaction
-    const { error } = await db.from('transactions').insert({
+    const { error } = await getDb().from('transactions').insert({
         user_id: session.userId,
         customer_id: customerId,
         amount,
@@ -69,7 +69,7 @@ export async function addTransaction(formData: FormData) {
 
     // Update customer balance
     const balanceChange = type === 'credit' ? amount : -amount
-    await db.rpc('update_customer_balance', {
+    await getDb().rpc('update_customer_balance', {
         p_customer_id: customerId,
         p_amount: balanceChange
     })
