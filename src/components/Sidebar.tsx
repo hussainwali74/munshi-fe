@@ -77,13 +77,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     </div>
 
                     {/* Sign Out Button */}
-                    <button
-                        onClick={() => signOut()}
-                        className="sidebar-signout-btn w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-text-secondary hover:bg-background hover:text-danger transition-all duration-200 bg-transparent border-none cursor-pointer"
-                    >
-                        <LogOut size={20} />
-                        <span>{t('common.signOut')}</span>
-                    </button>
+                    <form action={signOut} className="w-full">
+                        <button
+                            type="submit"
+                            className="sidebar-signout-btn w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-text-secondary hover:bg-background hover:text-danger transition-all duration-200 bg-transparent border-none cursor-pointer"
+                        >
+                            <LogOut size={20} />
+                            <span>{t('common.signOut')}</span>
+                        </button>
+                    </form>
                 </div>
             </nav>
         </aside>

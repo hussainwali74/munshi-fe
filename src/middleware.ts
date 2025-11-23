@@ -5,14 +5,14 @@ import { jwtVerify } from 'jose'
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET_KEY || 'default-secret-key-change-me')
 
 export async function middleware(request: NextRequest) {
-  console.log('[Middleware] Processing request:', request.nextUrl.pathname)
+  // console.log('[Middleware] Processing request:', request.nextUrl.pathname)
   
   const session = request.cookies.get('session')?.value
-  console.log('[Middleware] Session cookie present:', !!session)
+  // console.log('[Middleware] Session cookie present:', !!session)
 
   // Define public paths
   const isPublicPath = request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/' || request.nextUrl.pathname.startsWith('/auth')
-  console.log('[Middleware] Is public path:', isPublicPath)
+  // console.log('[Middleware] Is public path:', isPublicPath)
 
   // If checking for session validity
   let isValidSession = false
@@ -20,7 +20,7 @@ export async function middleware(request: NextRequest) {
     try {
       await jwtVerify(session, SECRET_KEY)
       isValidSession = true
-      console.log('[Middleware] Session verified successfully')
+      // console.log('[Middleware] Session verified successfully')
     } catch (error) {
       console.log('[Middleware] Session verification failed:', error)
       // Invalid token
@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
   if (!isPublicPath && !isValidSession) {
     // Exclude static files, images, etc.
     if (request.nextUrl.pathname.match(/\.(svg|png|jpg|jpeg|gif|ico|css|js)$/)) {
-      console.log('[Middleware] Allowing static file:', request.nextUrl.pathname)
+      // console.log('[Middleware] Allowing static file:', request.nextUrl.pathname)
       return NextResponse.next()
     }
     console.log('[Middleware] Redirecting to login - protected route without valid session')
@@ -44,7 +44,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  console.log('[Middleware] Allowing request to proceed')
+  // console.log('[Middleware] Allowing request to proceed')
   return NextResponse.next()
 }
 

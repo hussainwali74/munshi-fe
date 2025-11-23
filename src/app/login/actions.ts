@@ -73,7 +73,7 @@ export async function signup(prevState: AuthState, formData: FormData): Promise<
     redirect('/dashboard')
 }
 
-export async function signOut() {
+export async function signOut(formData?: FormData) {
     console.log('Sign out action called')
     try {
         await deleteSession()
