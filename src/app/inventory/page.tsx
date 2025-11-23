@@ -2,17 +2,14 @@
 import DashboardLayout from '@/components/DashboardLayout';
 import { Search, Plus, Package, Filter, X, Upload, Edit, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { addInventoryItem, getInventoryItems, deleteInventoryItem } from './actions';
 import { createClient } from '@supabase/supabase-js';
 import EditInventoryModal from '@/components/EditInventoryModal';
 import { useLanguage } from '@/context/LanguageContext';
 
-// Initialize supabase client for realtime subscriptions ONLY
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Force dynamic rendering (no static generation)
+export const dynamic = 'force-dynamic';
 
 export default function InventoryPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -22,6 +19,20 @@ export default function InventoryPage() {
     const [addImageFile, setAddImageFile] = useState<File | null>(null);
     const { t } = useLanguage();
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Initialize supabase client for realtime subscriptions ONLY
+    // Create it inside the component to avoid build-time errors
+    const supabase = useMemo(() => {
+        const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+        const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+        if (!url || !key) {
+            console.warn('Supabase credentials not available, realtime updates disabled');
+            return null;
+        }
+
+        return createClient(url, key);
+    }, []);
 
     const fetchInventory = async () => {
         // Use Server Action to fetch data securely with cookies
@@ -56,7 +67,12 @@ export default function InventoryPage() {
     useEffect(() => {
         fetchInventory();
 
-        // Subscribe to changes
+        // Subscribe to changes only if supabase client is available
+        if (!supabase) {
+            console.log('Realtime updates disabled - Supabase client not initialized');
+            return;
+        }
+
         // Note: Realtime subscriptions in Supabase JS client don't need auth if RLS allows reading public rows or if policy allows.
         // Since we have "No public access" policies, this subscription might fail without a session in the client.
         // However, for now, we rely on Server Action for initial fetch and re-fetch on updates manually or optimistic UI.
@@ -71,7 +87,7 @@ export default function InventoryPage() {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, []);
+    }, [supabase]);
 
     return (
         <DashboardLayout>
