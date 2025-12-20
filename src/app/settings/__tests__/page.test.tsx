@@ -14,6 +14,9 @@ jest.mock('@/context/LanguageContext', () => ({
 // Mock server actions
 jest.mock('../actions', () => ({
     updateShopDetails: jest.fn(),
+    getCategories: jest.fn().mockResolvedValue([]),
+    addCategory: jest.fn(),
+    removeCategory: jest.fn(),
 }));
 
 // Mock DashboardLayout
@@ -35,6 +38,9 @@ jest.mock('lucide-react', () => ({
     ChevronDown: () => <span data-testid="chevron-down-icon" />,
     ChevronRight: () => <span data-testid="chevron-right-icon" />,
     RotateCcw: () => <span data-testid="rotate-ccw-icon" />,
+    Tags: () => <span data-testid="tags-icon" />,
+    Plus: () => <span data-testid="plus-icon" />,
+    Loader2: () => <span data-testid="loader-icon" />,
 }));
 
 describe('Settings Page - Urdu Support', () => {

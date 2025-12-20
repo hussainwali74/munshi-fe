@@ -130,7 +130,8 @@ describe('Khata Actions', () => {
             expect(getMockChain().update).toHaveBeenCalledWith({
                 name: 'Updated Name',
                 phone: '9876543210',
-                address: 'New Address'
+                address: 'New Address',
+                cnic: null
             });
             expect(getMockChain().eq).toHaveBeenCalledWith('id', 'cust-123');
             expect(getMockChain().eq).toHaveBeenCalledWith('user_id', 'user-123');
@@ -221,6 +222,7 @@ describe('Khata Actions', () => {
                 name: 'Test Customer',
                 phone: '1234567890',
                 address: '123 Street',
+                cnic: null,
                 balance: 0
             });
         });

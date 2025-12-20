@@ -18,6 +18,10 @@ jest.mock('../actions', () => ({
     deleteInventoryItem: jest.fn(),
 }));
 
+jest.mock('@/app/settings/actions', () => ({
+    getCategories: jest.fn().mockResolvedValue([]),
+}));
+
 // Mock DashboardLayout
 jest.mock('@/components/DashboardLayout', () => ({
     __esModule: true,

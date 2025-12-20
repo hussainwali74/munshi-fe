@@ -39,6 +39,13 @@ jest.mock('next/link', () => ({
     default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,
 }));
 
+// Mock actions
+jest.mock('../actions', () => ({
+    getCustomers: jest.fn().mockResolvedValue([]),
+    deleteCustomer: jest.fn().mockResolvedValue(undefined),
+    updateCustomer: jest.fn().mockResolvedValue(undefined),
+}));
+
 describe('Khata Page - Urdu Support', () => {
     const mockT = jest.fn((key) => key);
 
