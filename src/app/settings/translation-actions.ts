@@ -21,7 +21,7 @@ export async function getMergedTranslations(): Promise<{ system: CustomTranslati
             : Promise.resolve({ data: [] as CustomTranslation[], error: null })
     ])
 
-    if (systemRes.error) {
+    if (systemRes.error && systemRes.error.code !== 'PGRST205') {
         console.error('Error fetching system translations:', systemRes.error)
     }
     if (customRes.error) {

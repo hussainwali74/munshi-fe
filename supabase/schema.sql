@@ -189,6 +189,23 @@ end;
 $$;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_number TEXT UNIQUE;
 
+-- SYSTEM TRANSLATIONS
+create table if not exists system_translations (
+  id uuid default uuid_generate_v4() primary key,
+  key text not null,
+  lang text not null,
+  value text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  unique(key, lang)
+);
+
+alter table system_translations enable row level security;
+-- Allow public read access to system translations
+create policy "Public read access" on system_translations for select using (true);
+create policy "No public write access" on system_translations for insert with check (false);
+create policy "No public update access" on system_translations for update using (false);
+create policy "No public delete access" on system_translations for delete using (false);
+
 -- CUSTOM TRANSLATIONS
 create table if not exists custom_translations (
   id uuid default uuid_generate_v4() primary key,
