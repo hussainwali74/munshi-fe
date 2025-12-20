@@ -1,6 +1,6 @@
 
 'use client';
-import DashboardLayout from '@/components/DashboardLayout';
+
 import { Search, Plus, UserCheck, Phone, X, Trash2, Calendar, Briefcase, DollarSign, Edit } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useState, useEffect } from 'react';
@@ -102,7 +102,7 @@ export default function EmployeesPage() {
     };
 
     return (
-        <DashboardLayout>
+        <>
             <div className="flex items-center justify-between mb-6" dir={isRtl ? 'rtl' : 'ltr'}>
                 <h1 className="text-3xl font-bold mb-0 tracking-tight">{t('employees.title')}</h1>
                 <button
@@ -489,6 +489,6 @@ export default function EmployeesPage() {
                     </div>
                 </div>
             )}
-        </DashboardLayout>
+        </>
     );
 }

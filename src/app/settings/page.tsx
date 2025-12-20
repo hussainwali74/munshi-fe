@@ -1,5 +1,5 @@
 'use client';
-import DashboardLayout from '@/components/DashboardLayout';
+
 import { updateShopDetails, getCategories, addCategory, removeCategory } from './actions';
 import { Settings as SettingsIcon, Languages as LanguagesIcon, Store as StoreIcon, Tags as TagsIcon, Plus, X, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
@@ -81,7 +81,7 @@ export default function SettingsPage() {
     };
 
     return (
-        <DashboardLayout>
+        <>
             <div className="mb-8" dir={isRtl ? 'rtl' : 'ltr'}>
                 <h1 className="text-3xl font-bold mb-2">{t('settings.title')}</h1>
                 <p className="text-text-secondary">{t('settings.subtitle')}</p>
@@ -277,6 +277,6 @@ export default function SettingsPage() {
                     <TranslationManager />
                 )}
             </div>
-        </DashboardLayout>
+        </>
     );
 }

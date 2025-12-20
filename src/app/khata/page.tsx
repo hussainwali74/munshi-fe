@@ -1,5 +1,5 @@
 'use client';
-import DashboardLayout from '@/components/DashboardLayout';
+
 import { Search, Plus, User, ChevronRight, ArrowUpRight, ArrowDownLeft, X, Trash2, Edit } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getCustomers, deleteCustomer, updateCustomer } from './actions';
@@ -88,33 +88,35 @@ export default function KhataPage() {
         customer.address?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    return (
-        <DashboardLayout>
-            {/* Header Section */}
-            <div className={`flex items-center justify-between mb-8 ${isRtl ? 'flex-row-reverse' : ''}`} dir={isRtl ? 'rtl' : 'ltr'}>
-                <div>
-                    <h1 className="text-3xl font-extrabold mb-2 tracking-tight">
-                        {t('khata.title')}
-                    </h1>
-                    <p className="text-text-secondary">{t('khata.subtitle')}</p>
-                </div>
-                <button
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px"
-                    onClick={() => setIsModalOpen(true)}
-                >
-                    <Plus size={20} /> {t('khata.addCustomer')}
-                </button>
+    return (<>
+
+        {/* Header Section */}
+        < div className={`flex items-center justify-between mb-8 ${isRtl ? 'flex-row-reverse' : ''}`
+        } dir={isRtl ? 'rtl' : 'ltr'} >
+            <div>
+                <h1 className="text-3xl font-extrabold mb-2 tracking-tight">
+                    {t('khata.title')}
+                </h1>
+                <p className="text-text-secondary">{t('khata.subtitle')}</p>
             </div>
+            <button
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px"
+                onClick={() => setIsModalOpen(true)}
+            >
+                <Plus size={20} /> {t('khata.addCustomer')}
+            </button>
+        </div >
 
-            {/* Add Customer Modal */}
-            <AddCustomerModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSuccess={fetchCustomers}
-            />
+        {/* Add Customer Modal */}
+        < AddCustomerModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSuccess={fetchCustomers}
+        />
 
-            {/* Edit Customer Modal */}
-            {editingCustomer && (
+        {/* Edit Customer Modal */}
+        {
+            editingCustomer && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setEditingCustomer(null)}>
                     <div className="bg-surface rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-4 border-b border-border">
@@ -204,115 +206,117 @@ export default function KhataPage() {
                         </form>
                     </div>
                 </div>
-            )}
+            )
+        }
 
-            {/* Search Section */}
-            <div className="mb-6 relative" dir={isRtl ? 'rtl' : 'ltr'}>
-                <div className="relative">
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className={`w-full p-3 ${isRtl ? 'pr-12 pl-3' : 'pl-12 pr-3'} h-14 text-lg rounded-xl border border-border bg-surface text-text-primary shadow-sm focus:shadow-md transition-shadow focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary`}
-                        placeholder={t('khata.searchPlaceholder')}
-                    />
-                    <Search className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-text-secondary`} size={24} />
-                </div>
+        {/* Search Section */}
+        <div className="mb-6 relative" dir={isRtl ? 'rtl' : 'ltr'}>
+            <div className="relative">
+                <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className={`w-full p-3 ${isRtl ? 'pr-12 pl-3' : 'pl-12 pr-3'} h-14 text-lg rounded-xl border border-border bg-surface text-text-primary shadow-sm focus:shadow-md transition-shadow focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary`}
+                    placeholder={t('khata.searchPlaceholder')}
+                />
+                <Search className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-text-secondary`} size={24} />
             </div>
+        </div>
 
-            {/* Customer List */}
-            <div className="space-y-4">
-                {isLoading ? (
-                    // Skeleton loading state
-                    Array.from({ length: 5 }).map((_, i) => (
-                        <SkeletonCustomerRow key={i} />
-                    ))
-                ) : filteredCustomers.map((customer) => (
-                    <div key={customer.id} className="bg-surface rounded-xl p-5 shadow-md border border-border hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" dir={isRtl ? 'rtl' : 'ltr'}>
-                        <div className={`flex items-center justify-between gap-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
-                            {/* Customer Info */}
-                            <Link href={`/khata/${customer.id}`} className={`flex items-center gap-4 flex-1 min-w-0 ${isRtl ? 'flex-row-reverse' : ''}`}>
-                                {/* Avatar */}
-                                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary/10 text-primary font-bold shrink-0">
-                                    <User size={24} />
-                                </div>
+        {/* Customer List */}
+        <div className="space-y-4">
+            {isLoading ? (
+                // Skeleton loading state
+                Array.from({ length: 5 }).map((_, i) => (
+                    <SkeletonCustomerRow key={i} />
+                ))
+            ) : filteredCustomers.map((customer) => (
+                <div key={customer.id} className="bg-surface rounded-xl p-5 shadow-md border border-border hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" dir={isRtl ? 'rtl' : 'ltr'}>
+                    <div className={`flex items-center justify-between gap-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                        {/* Customer Info */}
+                        <Link href={`/khata/${customer.id}`} className={`flex items-center gap-4 flex-1 min-w-0 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                            {/* Avatar */}
+                            <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary/10 text-primary font-bold shrink-0">
+                                <User size={24} />
+                            </div>
 
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="font-bold text-lg text-text-primary mb-1 truncate">
-                                        {customer.name}
-                                    </h3>
-                                    <p className="text-text-secondary text-sm">
-                                        {customer.phone}
-                                        {customer.cnic && ` • ${formatCNIC(customer.cnic)}`}
-                                    </p>
-                                </div>
-                            </Link>
+                            <div className="flex-1 min-w-0">
+                                <h3 className="font-bold text-lg text-text-primary mb-1 truncate">
+                                    {customer.name}
+                                </h3>
+                                <p className="text-text-secondary text-sm">
+                                    {customer.phone}
+                                    {customer.cnic && ` • ${formatCNIC(customer.cnic)}`}
+                                </p>
+                            </div>
+                        </Link>
 
-                            {/* Balance Section */}
-                            <div className={`flex items-center gap-3 shrink-0 ${isRtl ? 'flex-row-reverse' : ''}`}>
-                                <div className={isRtl ? 'text-left' : 'text-right'}>
-                                    <p className="text-xs text-text-secondary mb-1 font-medium">{t('khata.balance')}</p>
+                        {/* Balance Section */}
+                        <div className={`flex items-center gap-3 shrink-0 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                            <div className={isRtl ? 'text-left' : 'text-right'}>
+                                <p className="text-xs text-text-secondary mb-1 font-medium">{t('khata.balance')}</p>
 
-                                    {customer.balance === 0 ? (
-                                        <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200">
-                                            {t('khata.settled')} ✓
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <p className={`text-xl font-bold mb-1 ${customer.balance > 0 ? 'text-danger' : 'text-success'
-                                                }`}>
-                                                Rs {Math.abs(customer.balance).toLocaleString()}
-                                            </p>
-                                            {customer.balance > 0 && (
-                                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-danger">
-                                                    <ArrowUpRight size={12} />
-                                                    {t('khata.udhar')}
-                                                </div>
-                                            )}
-                                            {customer.balance < 0 && (
-                                                <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-success">
-                                                    <ArrowDownLeft size={12} />
-                                                    {t('khata.advance')}
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
+                                {customer.balance === 0 ? (
+                                    <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200">
+                                        {t('khata.settled')} ✓
+                                    </div>
+                                ) : (
+                                    <>
+                                        <p className={`text-xl font-bold mb-1 ${customer.balance > 0 ? 'text-danger' : 'text-success'
+                                            }`}>
+                                            Rs {Math.abs(customer.balance).toLocaleString()}
+                                        </p>
+                                        {customer.balance > 0 && (
+                                            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-danger">
+                                                <ArrowUpRight size={12} />
+                                                {t('khata.udhar')}
+                                            </div>
+                                        )}
+                                        {customer.balance < 0 && (
+                                            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-success">
+                                                <ArrowDownLeft size={12} />
+                                                {t('khata.advance')}
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
 
-                                {/* Action Buttons */}
-                                <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleEdit(customer);
-                                        }}
-                                        className="p-2 rounded-lg border border-border text-text-secondary hover:bg-background hover:text-primary transition-colors"
-                                        title={t('common.edit') || 'Edit'}
-                                    >
-                                        <Edit size={16} />
-                                    </button>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            handleDelete(customer.id, customer.name);
-                                        }}
-                                        className="p-2 rounded-lg border border-red-500/30 text-red-500 hover:bg-red-500/10 transition-colors"
-                                        title={t('common.delete') || 'Delete'}
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                    <Link href={`/khata/${customer.id}`}>
-                                        <ChevronRight size={20} className={`text-text-secondary ${isRtl ? 'rotate-180' : ''}`} />
-                                    </Link>
-                                </div>
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleEdit(customer);
+                                    }}
+                                    className="p-2 rounded-lg border border-border text-text-secondary hover:bg-background hover:text-primary transition-colors"
+                                    title={t('common.edit') || 'Edit'}
+                                >
+                                    <Edit size={16} />
+                                </button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDelete(customer.id, customer.name);
+                                    }}
+                                    className="p-2 rounded-lg border border-red-500/30 text-red-500 hover:bg-red-500/10 transition-colors"
+                                    title={t('common.delete') || 'Delete'}
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+                                <Link href={`/khata/${customer.id}`}>
+                                    <ChevronRight size={20} className={`text-text-secondary ${isRtl ? 'rotate-180' : ''}`} />
+                                </Link>
                             </div>
                         </div>
                     </div>
-                ))}
-            </div>
+                </div>
+            ))}
+        </div>
 
-            {/* Empty State (if no customers) */}
-            {!isLoading && customers.length === 0 && (
+        {/* Empty State (if no customers) */}
+        {
+            !isLoading && customers.length === 0 && (
                 <div className="bg-surface rounded-xl p-12 text-center shadow-md border border-border">
                     <div className="w-20 h-20 rounded-full bg-primary/10 mx-auto mb-4 flex items-center justify-center text-primary">
                         <User size={40} />
@@ -326,16 +330,19 @@ export default function KhataPage() {
                         <Plus size={20} /> {t('khata.addFirstCustomer')}
                     </button>
                 </div>
-            )}
+            )
+        }
 
-            {/* No search results */}
-            {customers.length > 0 && filteredCustomers.length === 0 && (
+        {/* No search results */}
+        {
+            customers.length > 0 && filteredCustomers.length === 0 && (
                 <div className="bg-surface rounded-xl p-12 text-center shadow-md border border-border">
                     <Search size={40} className="mx-auto text-text-secondary mb-4" />
                     <h3 className="text-xl font-bold mb-2">{t('common.noResults') || 'No Results Found'}</h3>
                     <p className="text-text-secondary">{t('khata.noSearchResults') || 'No customers match your search'}</p>
                 </div>
-            )}
-        </DashboardLayout>
-    );
+            )
+        }
+
+    </>);
 }

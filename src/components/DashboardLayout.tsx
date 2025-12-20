@@ -13,7 +13,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const { t, dir } = useLanguage();
 
     const navItems = [
-        { name: t('common.home'), icon: Home, href: '/' },
+        { name: t('common.home'), icon: Home, href: '/dashboard' },
         { name: t('common.khata'), icon: FileText, href: '/khata' },
         { name: t('common.inventory'), icon: Package, href: '/inventory' },
         { name: t('common.employees'), icon: Users, href: '/employees' },
@@ -61,8 +61,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 key={item.href}
                                 href={item.href}
                                 className={`flex flex-col items-center gap-1 p-2 rounded-xl text-xs transition-all duration-200 ${isActive
-                                        ? 'text-primary bg-primary/10'
-                                        : 'text-text-secondary hover:text-text-primary'
+                                    ? 'text-primary bg-primary/10'
+                                    : 'text-text-secondary hover:text-text-primary'
                                     }`}
                             >
                                 <Icon size={24} />

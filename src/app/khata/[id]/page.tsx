@@ -1,5 +1,5 @@
 'use client';
-import DashboardLayout from '@/components/DashboardLayout';
+
 import { ArrowLeft, Plus, Phone, MapPin, ArrowUpRight, ArrowDownLeft, ShoppingBag, User } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, use } from 'react';
@@ -71,7 +71,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
 
     if (loading) {
         return (
-            <DashboardLayout>
+            <>
                 {/* Back link skeleton */}
                 <div className="flex items-center gap-2 mb-4">
                     <div className="w-5 h-5 bg-gray-200 rounded animate-pulse" />
@@ -124,13 +124,13 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                         ))}
                     </div>
                 </div>
-            </DashboardLayout>
+            </>
         );
     }
 
     if (!customer) {
         return (
-            <DashboardLayout>
+            <>
                 <div className="text-center py-12">
                     <User size={48} className="mx-auto text-text-secondary mb-4" />
                     <h2 className="text-2xl font-bold mb-2">{t('khata.customerNotFound') || 'Customer Not Found'}</h2>
@@ -139,12 +139,12 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                         <ArrowLeft size={20} /> {t('khata.backToKhata') || 'Back to Khata'}
                     </Link>
                 </div>
-            </DashboardLayout>
+            </>
         );
     }
 
     return (
-        <DashboardLayout>
+        <>
             <Link href="/khata" className={`flex items-center gap-2 text-primary mb-4 hover:underline ${isRtl ? 'flex-row-reverse' : ''}`}>
                 <ArrowLeft size={20} className={isRtl ? 'rotate-180' : ''} /> {t('khata.backToKhata') || 'Back to Khata'}
             </Link>
@@ -328,6 +328,6 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                     </div>
                 )}
             </div>
-        </DashboardLayout>
+        </>
     );
 }

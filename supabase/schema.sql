@@ -102,6 +102,9 @@ begin
     if not exists (select 1 from information_schema.columns where table_name = 'transactions' and column_name = 'paid_amount') then
         alter table transactions add column paid_amount numeric; -- Amount paid at time of transaction
     end if;
+    if not exists (select 1 from information_schema.columns where table_name = 'transactions' and column_name = 'created_at') then
+        alter table transactions add column created_at timestamp with time zone default timezone('utc'::text, now()) null;
+    end if;
 
     -- Employees columns (Status and Join Date)
     -- Rename joined_at to join_date if it exists
