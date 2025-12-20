@@ -1,5 +1,10 @@
 
 import '@testing-library/jest-dom'
+import { TextEncoder, TextDecoder } from 'util';
+
+// Polyfill TextEncoder/TextDecoder for Node.js environment (needed for jose/JWT)
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
 
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

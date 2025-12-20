@@ -15,10 +15,13 @@ const mockQueryBuilder = {
     then: jest.fn((resolve) => resolve({ data: [], error: null })),
 };
 
+// Track the from calls
+const mockFrom = jest.fn(() => mockQueryBuilder);
+
 // Mock dependencies
 jest.mock('@/lib/db', () => ({
     getDb: jest.fn(() => ({
-        from: jest.fn(() => mockQueryBuilder),
+        from: mockFrom,
     })),
 }));
 
@@ -60,7 +63,7 @@ describe('Inventory Actions', () => {
             const result = await getInventoryItems();
             expect(result).toEqual(mockItems);
             expect(mockGetDb).toHaveBeenCalled();
-            expect(mockGetDb().from).toHaveBeenCalledWith('inventory');
+            expect(mockFrom).toHaveBeenCalledWith('inventory');
             expect(mockQueryBuilder.select).toHaveBeenCalledWith('*');
             expect(mockQueryBuilder.eq).toHaveBeenCalledWith('user_id', mockSession.userId);
         });
@@ -84,7 +87,7 @@ describe('Inventory Actions', () => {
             await addInventoryItem(formData);
 
             expect(mockGetDb).toHaveBeenCalled();
-            expect(mockGetDb().from).toHaveBeenCalledWith('inventory');
+            expect(mockFrom).toHaveBeenCalledWith('inventory');
             expect(mockQueryBuilder.insert).toHaveBeenCalled();
         });
     });
@@ -96,7 +99,7 @@ describe('Inventory Actions', () => {
             await deleteInventoryItem('1');
 
             expect(mockGetDb).toHaveBeenCalled();
-            expect(mockGetDb().from).toHaveBeenCalledWith('inventory');
+            expect(mockFrom).toHaveBeenCalledWith('inventory');
             expect(mockQueryBuilder.delete).toHaveBeenCalled();
             expect(mockQueryBuilder.eq).toHaveBeenCalledWith('id', '1');
             expect(mockQueryBuilder.eq).toHaveBeenCalledWith('user_id', mockSession.userId);
