@@ -1,4 +1,6 @@
 
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import {
@@ -17,10 +19,14 @@ import {
   Download
 } from 'lucide-react';
 import styles from './page.module.css';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function LandingPage() {
+  const { t, language } = useLanguage();
+  const isRtl = language === 'ur';
+
   return (
-    <div className="min-h-screen bg-background text-text-primary" dir="ltr">
+    <div className="min-h-screen bg-background text-text-primary" dir={isRtl ? 'rtl' : 'ltr'}>
       {/* Header */}
       <header className={styles.header}>
         <div className={styles.headerContainer}>
@@ -31,15 +37,15 @@ export default function LandingPage() {
             <span className={styles.logoText}>Khata</span>
           </div>
           <nav className={styles.headerNav}>
-            <Link href="#features" className={styles.navLink}>Features</Link>
-            <Link href="#how-it-works" className={styles.navLink}>How it Works</Link>
+            <Link href="#features" className={styles.navLink}>{t('landing.features')}</Link>
+            <Link href="#how-it-works" className={styles.navLink}>{t('landing.howItWorks')}</Link>
           </nav>
           <div className={styles.headerActions}>
             <Link href="/login" className={styles.loginLink}>
-              Login
+              {t('landing.login')}
             </Link>
             <Link href="/dashboard" className={styles.headerButton}>
-              Try Free <ArrowRight size={16} />
+              {t('landing.tryFree')} <ArrowRight size={16} />
             </Link>
           </div>
         </div>
@@ -54,24 +60,24 @@ export default function LandingPage() {
                 <span className={styles.ping}></span>
                 <span className={styles.pingDot}></span>
               </span>
-              The #1 App for Pakistani Shopkeepers
+              {t('landing.badge')}
             </div>
 
             <h1 className={styles.heroTitle}>
-              EZ Khata – The <br />
-              <span>Smart Online Khata App</span>
+              {t('landing.heroTitle')} <br />
+              <span>{t('landing.heroTitleHighlight')}</span>
             </h1>
 
             <p className="text-lg text-text-secondary mb-4 leading-relaxed">
-              Manage udhar, stock, employees, and payments — all in one easy app.
+              {t('landing.heroDescription')}
             </p>
             <p className="font-[family-name:var(--font-urdu)] text-xl text-text-primary mb-8 font-semibold" dir="rtl">
-              آن لائن کھاتہ اور اسٹاک مینجمنٹ، آپ کی دکان کے لیے
+              {t('landing.heroUrdu')}
             </p>
 
             <div className={styles.heroButtons}>
               <Link href="/dashboard" className={styles.heroButton}>
-                Try Free on Web
+                {t('landing.tryFreeWeb')}
               </Link>
             </div>
           </div>
@@ -175,42 +181,42 @@ export default function LandingPage() {
       <section id="features" className={`${styles.section} ${styles.featuresSection}`}>
         <div className={styles.container}>
           <div className={styles.sectionTitle}>
-            <h2>Everything You Need to Run Your Shop</h2>
+            <h2>{t('landing.featuresTitle')}</h2>
             <p>
-              EZ Khata replaces your paper registers with a secure, easy-to-use mobile app.
+              {t('landing.featuresSubtitle')}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <FeatureCard
               icon={<BarChart3 size={32} />}
-              title="Khata (Ledger)"
-              description="Manage customer credits (Udhar) and payments. Send reminders, track dues, and keep clean digital records."
+              title={t('landing.featureKhata')}
+              description={t('landing.featureKhataDesc')}
             />
             <FeatureCard
               icon={<Layers size={32} />}
-              title="Inventory Management"
-              description="Track stock levels, prices, and get low-stock alerts. Inventory updates automatically with every sale."
+              title={t('landing.featureInventory')}
+              description={t('landing.featureInventoryDesc')}
             />
             <FeatureCard
               icon={<Users size={32} />}
-              title="Employee Management"
-              description="Manage staff details, track attendance, and salaries easily within the app."
+              title={t('landing.featureEmployees')}
+              description={t('landing.featureEmployeesDesc')}
             />
             <FeatureCard
               icon={<Globe size={32} />}
-              title="Bilingual Support"
-              description="Full Urdu support and clean UX designed specifically for Pakistani shopkeepers. Switch languages instantly."
+              title={t('landing.featureBilingual')}
+              description={t('landing.featureBilingualDesc')}
             />
             <FeatureCard
               icon={<ShieldCheck size={32} />}
-              title="Secure Custom Authentication"
-              description="Custom Postgres users table with bcrypt hashing and JWT sessions. You own your data completely."
+              title={t('landing.featureAuth')}
+              description={t('landing.featureAuthDesc')}
             />
             <FeatureCard
               icon={<Lock size={32} />}
-              title="Air-Tight Security"
-              description="Vendor-independent database access. Policies ensure your data is only accessible by the secure server."
+              title={t('landing.featureSecurity')}
+              description={t('landing.featureSecurityDesc')}
             />
           </div>
         </div>
@@ -220,14 +226,14 @@ export default function LandingPage() {
       <section className={`${styles.section} ${styles.whySection}`}>
         <div className={styles.container}>
           <div className={styles.sectionTitle}>
-            <h2>Why Pakistani Shopkeepers Love EZ Khata</h2>
+            <h2>{t('landing.whyTitle')}</h2>
           </div>
           <div className={styles.whyGrid}>
             {[
-              { title: "Simple to Use", desc: "Designed for anyone, no tech skills needed." },
-              { title: "For Retail", desc: "Perfect for Kiryana, Medical, and General Stores." },
-              { title: "Mobile & Desktop", desc: "Works on your phone and laptop seamlessly." },
-              { title: "100% Reliable", desc: "Accurate calculations, zero errors." }
+              { title: t('landing.whySimple'), desc: t('landing.whySimpleDesc') },
+              { title: t('landing.whyRetail'), desc: t('landing.whyRetailDesc') },
+              { title: t('landing.whyMobile'), desc: t('landing.whyMobileDesc') },
+              { title: t('landing.whyReliable'), desc: t('landing.whyReliableDesc') }
             ].map((item, i) => (
               <div key={i} className={styles.whyCard}>
                 <div className={styles.whyBadge}>
@@ -245,8 +251,8 @@ export default function LandingPage() {
       <section id="how-it-works" className={styles.section}>
         <div className={styles.container}>
           <div className={styles.sectionTitle}>
-            <h2>How It Works</h2>
-            <p>Get started in minutes.</p>
+            <h2>{t('landing.howItWorksTitle')}</h2>
+            <p>{t('landing.howItWorksSubtitle')}</p>
           </div>
 
           <div className={styles.howItWorksGrid}>
@@ -254,10 +260,10 @@ export default function LandingPage() {
             <div className={styles.connectingLine}></div>
 
             {[
-              { icon: Smartphone, title: "Sign Up", desc: "Create your secure account in seconds." },
-              { icon: Users, title: "Add Customers", desc: "Add your customers or inventory items." },
-              { icon: BarChart3, title: "Track Khata", desc: "Record udhar and payments daily." },
-              { icon: Zap, title: "Grow Business", desc: "View insights and grow your profits." }
+              { icon: Smartphone, title: t('landing.stepSignUp'), desc: t('landing.stepSignUpDesc') },
+              { icon: Users, title: t('landing.stepAddCustomers'), desc: t('landing.stepAddCustomersDesc') },
+              { icon: BarChart3, title: t('landing.stepTrackKhata'), desc: t('landing.stepTrackKhataDesc') },
+              { icon: Zap, title: t('landing.stepGrow'), desc: t('landing.stepGrowDesc') }
             ].map((step, i) => (
               <div key={i} className={styles.stepCard}>
                 <div className={styles.stepIcon}>
@@ -275,12 +281,12 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className={styles.ctaSection}>
         <div className={styles.ctaContainer}>
-          <h2 className={styles.ctaTitle}>Start Your Digital Journey Today</h2>
+          <h2 className={styles.ctaTitle}>{t('landing.ctaTitle')}</h2>
           <p className={styles.ctaDescription}>
-            Join the community of smart shopkeepers.
+            {t('landing.ctaSubtitle')}
           </p>
           <Link href="/dashboard" className={styles.ctaButton}>
-            Get Started for Free <ArrowRight size={20} />
+            {t('landing.ctaButton')} <ArrowRight size={20} />
           </Link>
         </div>
       </section>
@@ -297,34 +303,34 @@ export default function LandingPage() {
                 <span className={styles.logoText}>EZ Khata</span>
               </div>
               <p className={styles.footerDescription}>
-                The best companion for your business. Secure, fast, and reliable.
+                {t('landing.footerDescription')}
               </p>
               <p className={styles.footerUrdu} dir="rtl">
-                کاروبار میں برکت، ڈیجیٹل دکان کی حرکت
+                {t('landing.footerUrdu')}
               </p>
             </div>
 
             <div className={styles.footerLinks}>
-              <h4>Product</h4>
+              <h4>{t('landing.product')}</h4>
               <ul>
-                <li><Link href="#features">Features</Link></li>
-                <li><Link href="#how-it-works">How it Works</Link></li>
-                <li><Link href="/pricing">Pricing</Link></li>
+                <li><Link href="#features">{t('landing.features')}</Link></li>
+                <li><Link href="#how-it-works">{t('landing.howItWorks')}</Link></li>
+                <li><Link href="/pricing">{t('landing.pricing')}</Link></li>
               </ul>
             </div>
             <div className={styles.footerLinks}>
-              <h4>Company</h4>
+              <h4>{t('landing.company')}</h4>
               <ul>
-                <li><Link href="/about">About Us</Link></li>
-                <li><Link href="/careers">Careers</Link></li>
-                <li><Link href="/contact">Contact</Link></li>
+                <li><Link href="/about">{t('landing.aboutUs')}</Link></li>
+                <li><Link href="/careers">{t('landing.careers')}</Link></li>
+                <li><Link href="/contact">{t('landing.contact')}</Link></li>
               </ul>
             </div>
             <div className={styles.footerLinks}>
-              <h4>Legal</h4>
+              <h4>{t('landing.legal')}</h4>
               <ul>
-                <li><Link href="/privacy">Privacy Policy</Link></li>
-                <li><Link href="/terms">Terms of Service</Link></li>
+                <li><Link href="/privacy">{t('landing.privacy')}</Link></li>
+                <li><Link href="/terms">{t('landing.terms')}</Link></li>
               </ul>
             </div>
           </div>

@@ -182,9 +182,13 @@ export default function LoginPage() {
                         <p className="text-emerald-50 text-sm leading-relaxed mb-8">
                             To keep connected with us please login with your personal info
                         </p>
-                        <div className="inline-block px-8 py-2.5 border-2 border-white rounded-full text-sm font-semibold hover:bg-white hover:text-emerald-600 transition-all cursor-pointer">
+                        <button
+                            type="button"
+                            onClick={() => setIsLogin(false)}
+                            className="inline-block px-8 py-2.5 border-2 border-white rounded-full text-sm font-semibold hover:bg-white hover:text-emerald-600 transition-all cursor-pointer"
+                        >
                             No account yet?
-                        </div>
+                        </button>
                     </div>
                 </div>
             </div>
