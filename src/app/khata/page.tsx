@@ -6,9 +6,12 @@ import { useState } from 'react';
 import { addCustomer } from './actions';
 import Link from 'next/link';
 import AddCustomerModal from '@/components/AddCustomerModal';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function KhataPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const { t, language } = useLanguage();
+    const isRtl = language === 'ur';
 
     // Mock data - in production, fetch from DB
     const customers = [
@@ -22,18 +25,18 @@ export default function KhataPage() {
     return (
         <DashboardLayout>
             {/* Header Section */}
-            <div className="flex items-center justify-between mb-8">
+            <div className={`flex items-center justify-between mb-8 ${isRtl ? 'flex-row-reverse' : ''}`} dir={isRtl ? 'rtl' : 'ltr'}>
                 <div>
                     <h1 className="text-3xl font-extrabold mb-2 tracking-tight">
-                        Khata (Ledger)
+                        {t('khata.title')}
                     </h1>
-                    <p className="text-text-secondary">Manage customer credit accounts</p>
+                    <p className="text-text-secondary">{t('khata.subtitle')}</p>
                 </div>
                 <button
                     className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px"
                     onClick={() => setIsModalOpen(true)}
                 >
-                    <Plus size={20} /> Add Customer
+                    <Plus size={20} /> {t('khata.addCustomer')}
                 </button>
             </div>
 
@@ -44,14 +47,14 @@ export default function KhataPage() {
             />
 
             {/* Search Section */}
-            <div className="mb-6 relative">
+            <div className="mb-6 relative" dir={isRtl ? 'rtl' : 'ltr'}>
                 <div className="relative">
                     <input
                         type="text"
-                        className="w-full p-3 pl-12 h-14 text-lg rounded-[0.75rem] border border-border bg-surface text-text-primary shadow-sm focus:shadow-md transition-shadow focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                        placeholder="Search customer by name or phone..."
+                        className={`w-full p-3 ${isRtl ? 'pr-12 pl-3' : 'pl-12 pr-3'} h-14 text-lg rounded-[0.75rem] border border-border bg-surface text-text-primary shadow-sm focus:shadow-md transition-shadow focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary`}
+                        placeholder={t('khata.searchPlaceholder')}
                     />
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" size={24} />
+                    <Search className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-text-secondary`} size={24} />
                 </div>
             </div>
 
@@ -63,10 +66,10 @@ export default function KhataPage() {
                         href={`/khata/${customer.id}`}
                         className="block"
                     >
-                        <div className="bg-surface rounded-[0.75rem] p-5 shadow-md border border-border hover:bg-gray-50 transition-colors">
-                            <div className="flex items-center justify-between gap-4">
+                        <div className="bg-surface rounded-[0.75rem] p-5 shadow-md border border-border hover:bg-gray-50 transition-colors" dir={isRtl ? 'rtl' : 'ltr'}>
+                            <div className={`flex items-center justify-between gap-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
                                 {/* Customer Info */}
-                                <div className="flex items-center gap-4 flex-1 min-w-0">
+                                <div className={`flex items-center gap-4 flex-1 min-w-0 ${isRtl ? 'flex-row-reverse' : ''}`}>
                                     {/* Avatar */}
                                     <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary/10 text-primary font-bold flex-shrink-0">
                                         <User size={24} />
@@ -81,13 +84,13 @@ export default function KhataPage() {
                                 </div>
 
                                 {/* Balance Section */}
-                                <div className="flex items-center gap-3 flex-shrink-0">
-                                    <div className="text-right">
-                                        <p className="text-xs text-text-secondary mb-1 font-medium">Balance</p>
+                                <div className={`flex items-center gap-3 flex-shrink-0 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                                    <div className={isRtl ? 'text-left' : 'text-right'}>
+                                        <p className="text-xs text-text-secondary mb-1 font-medium">{t('khata.balance')}</p>
 
                                         {customer.balance === 0 ? (
                                             <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200">
-                                                Settled ✓
+                                                {t('khata.settled')} ✓
                                             </div>
                                         ) : (
                                             <>
@@ -98,19 +101,19 @@ export default function KhataPage() {
                                                 {customer.balance > 0 && (
                                                     <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-danger">
                                                         <ArrowUpRight size={12} />
-                                                        Udhar
+                                                        {t('khata.udhar')}
                                                     </div>
                                                 )}
                                                 {customer.balance < 0 && (
                                                     <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-success">
                                                         <ArrowDownLeft size={12} />
-                                                        Advance
+                                                        {t('khata.advance')}
                                                     </div>
                                                 )}
                                             </>
                                         )}
                                     </div>
-                                    <ChevronRight size={20} className="text-text-secondary" />
+                                    <ChevronRight size={20} className={`text-text-secondary ${isRtl ? 'rotate-180' : ''}`} />
                                 </div>
                             </div>
                         </div>
@@ -124,13 +127,13 @@ export default function KhataPage() {
                     <div className="w-20 h-20 rounded-full bg-primary/10 mx-auto mb-4 flex items-center justify-center text-primary">
                         <User size={40} />
                     </div>
-                    <h3 className="text-xl font-bold mb-2">No Customers Yet</h3>
-                    <p className="text-text-secondary mb-6">Start by adding your first customer</p>
+                    <h3 className="text-xl font-bold mb-2">{t('khata.noCustomersTitle')}</h3>
+                    <p className="text-text-secondary mb-6">{t('khata.noCustomersSubtitle')}</p>
                     <button
                         className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-[0.75rem] font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px"
                         onClick={() => setIsModalOpen(true)}
                     >
-                        <Plus size={20} /> Add First Customer
+                        <Plus size={20} /> {t('khata.addFirstCustomer')}
                     </button>
                 </div>
             )}

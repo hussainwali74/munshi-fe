@@ -58,6 +58,19 @@ export const translations = {
         color: "e.g. White",
       }
     },
+    khata: {
+      title: "Khata (Ledger)",
+      subtitle: "Manage customer credit accounts",
+      addCustomer: "Add Customer",
+      addFirstCustomer: "Add First Customer",
+      searchPlaceholder: "Search customer by name or phone...",
+      balance: "Balance",
+      settled: "Settled",
+      udhar: "Udhar",
+      advance: "Advance",
+      noCustomersTitle: "No Customers Yet",
+      noCustomersSubtitle: "Start by adding your first customer",
+    },
     login: {
       signIn: "Sign in to manage your shop",
       createAccount: "Create your digital dukan",
@@ -137,6 +150,19 @@ export const translations = {
         size: "مثلاً 4 انچ",
         color: "مثلاً سفید",
       }
+    },
+    khata: {
+      title: "کھاتہ (لیجر)",
+      subtitle: "گاہکوں کے کریڈٹ اکاؤنٹس کا انتظام کریں",
+      addCustomer: "گاہک شامل کریں",
+      addFirstCustomer: "پہلا گاہک شامل کریں",
+      searchPlaceholder: "نام یا فون سے گاہک تلاش کریں...",
+      balance: "بیلنس",
+      settled: "بے باق",
+      udhar: "ادھار",
+      advance: "پیشگی",
+      noCustomersTitle: "ابھی کوئی گاہک نہیں",
+      noCustomersSubtitle: "اپنا پہلا گاہک شامل کر کے شروع کریں",
     },
     login: {
       signIn: "اپنی دکان کا انتظام کرنے کے لیے سائن ان کریں",
