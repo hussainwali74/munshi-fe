@@ -4,14 +4,16 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { ArrowUpRight, ArrowDownLeft, AlertTriangle, Users, Search, X, Calendar, Clock } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useState, useEffect, useRef } from 'react';
-import { searchCustomers } from './search-actions';
+import { searchCustomers, getRecentTransactions } from './search-actions';
 import Link from 'next/link';
 import AddCustomerModal from '@/components/AddCustomerModal';
+import { SkeletonCustomerRow } from '@/components/Skeleton';
 
 
 interface Transaction {
   id: string;
   customerName: string;
+  customerId?: string;
   date: string;
   time: string;
   type: 'credit' | 'debit';
@@ -22,74 +24,6 @@ interface Transaction {
   paidAmount?: number;
 }
 
-const recentTransactions: Transaction[] = [
-  {
-    id: '1',
-    customerName: 'Ahmed Ali',
-    date: 'Today',
-    time: '10:30 AM',
-    type: 'credit',
-    amount: 1500,
-    description: 'Plumbing Pipe x 2',
-    items: [
-      { name: 'Plumbing Pipe', qty: 2, price: 500 },
-      { name: 'Labor', qty: 1, price: 500 }
-    ],
-    billAmount: 1500,
-    paidAmount: 0
-  },
-  {
-    id: '2',
-    customerName: 'Sara Khan',
-    date: 'Today',
-    time: '09:15 AM',
-    type: 'debit',
-    amount: 5000,
-    description: 'Payment Received',
-    paidAmount: 5000
-  },
-  {
-    id: '3',
-    customerName: 'Bilal Ahmed',
-    date: 'Yesterday',
-    time: '05:45 PM',
-    type: 'credit',
-    amount: 3200,
-    description: 'Paint & Brushes',
-    items: [
-      { name: 'Dulux Paint 4L', qty: 1, price: 2800 },
-      { name: 'Paint Brush 4"', qty: 2, price: 200 }
-    ],
-    billAmount: 3200,
-    paidAmount: 0
-  },
-  {
-    id: '4',
-    customerName: 'Usman Ghani',
-    date: 'Yesterday',
-    time: '02:30 PM',
-    type: 'debit',
-    amount: 1500,
-    description: 'Partial Payment',
-    paidAmount: 1500
-  },
-  {
-    id: '5',
-    customerName: 'Tariq Mehmood',
-    date: 'Jan 22, 2024',
-    time: '11:00 AM',
-    type: 'credit',
-    amount: 850,
-    description: 'Electrical Socket',
-    items: [
-      { name: 'Power Socket', qty: 5, price: 150 },
-      { name: 'Switch Box', qty: 1, price: 100 }
-    ],
-    billAmount: 850,
-    paidAmount: 0
-  }
-];
-
 export default function Home() {
   const { t, language } = useLanguage();
   const isRtl = language === 'ur';
@@ -99,6 +33,24 @@ export default function Home() {
   const searchRef = useRef<HTMLDivElement>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
+
+  // Fetch recent transactions on mount
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      setIsLoadingTransactions(true);
+      try {
+        const data = await getRecentTransactions();
+        setTransactions(data);
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+      } finally {
+        setIsLoadingTransactions(false);
+      }
+    };
+    fetchTransactions();
+  }, []);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
@@ -139,7 +91,7 @@ export default function Home() {
       <div dir={isRtl ? 'rtl' : 'ltr'}>
         <div className="mb-8">
           <h1 className="text-3xl font-extrabold mb-4 tracking-tight">{t('common.dashboard')}</h1>
-          <p className="text-text-secondary">{t('common.welcomeBack')} Ezekata</p>
+          <p className="text-text-secondary">{t('common.welcomeBack')} EZ Khata</p>
         </div>
 
         {/* Main Search Bar */}
@@ -220,29 +172,40 @@ export default function Home() {
             <div className="bg-surface rounded-xl p-6 shadow-md border border-border">
               <h2 className="text-2xl font-bold mb-3">{t('dashboard.recentActivity')}</h2>
               <div className="space-y-4">
-                {recentTransactions.map((txn) => (
-                  <div
-                    key={txn.id}
-                    className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg border-b border-gray-100 last:border-0 cursor-pointer transition-colors"
-                    onClick={() => setSelectedTransaction(txn)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${txn.type === 'credit' ? 'bg-red-100 text-danger' : 'bg-green-100 text-success'}`}>
-                        {txn.type === 'credit' ? <ArrowUpRight size={20} /> : <ArrowDownLeft size={20} />}
-                      </div>
-                      <div>
-                        <p className="font-semibold">{txn.customerName}</p>
-                        <p className="text-sm text-text-secondary">{txn.description}</p>
-                      </div>
-                    </div>
-                    <div className={isRtl ? 'text-left' : 'text-right'}>
-                      <p className={`font-bold ${txn.type === 'credit' ? 'text-danger' : 'text-success'}`}>
-                        {txn.type === 'credit' ? '-' : '+'} Rs {txn.amount}
-                      </p>
-                      <p className="text-sm text-text-secondary">{txn.date}, {txn.time}</p>
-                    </div>
+                {isLoadingTransactions ? (
+                  // Skeleton loading state
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <SkeletonCustomerRow key={i} />
+                  ))
+                ) : transactions.length === 0 ? (
+                  <div className="text-center py-8 text-text-secondary">
+                    <p>{t('khata.noTransactions') || 'No recent transactions'}</p>
                   </div>
-                ))}
+                ) : (
+                  transactions.map((txn) => (
+                    <div
+                      key={txn.id}
+                      className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg border-b border-gray-100 dark:border-gray-800 last:border-0 cursor-pointer transition-colors"
+                      onClick={() => setSelectedTransaction(txn)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${txn.type === 'credit' ? 'bg-red-100 dark:bg-red-900/30 text-danger' : 'bg-green-100 dark:bg-green-900/30 text-success'}`}>
+                          {txn.type === 'credit' ? <ArrowUpRight size={20} /> : <ArrowDownLeft size={20} />}
+                        </div>
+                        <div>
+                          <p className="font-semibold">{txn.customerName}</p>
+                          <p className="text-sm text-text-secondary">{txn.description}</p>
+                        </div>
+                      </div>
+                      <div className={isRtl ? 'text-left' : 'text-right'}>
+                        <p className={`font-bold ${txn.type === 'credit' ? 'text-danger' : 'text-success'}`}>
+                          {txn.type === 'credit' ? '-' : '+'} Rs {txn.amount?.toLocaleString()}
+                        </p>
+                        <p className="text-sm text-text-secondary">{txn.date}, {txn.time}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -272,7 +235,7 @@ export default function Home() {
         {selectedTransaction && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setSelectedTransaction(null)}>
             <div className="bg-surface rounded-xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()} dir={isRtl ? 'rtl' : 'ltr'}>
-              <div className="p-4 border-b border-border flex items-center justify-between bg-gray-50">
+              <div className="p-4 border-b border-border flex items-center justify-between bg-gray-50 dark:bg-gray-800/50">
                 <h3 className="text-lg font-bold flex items-center gap-2">
                   {t('dashboard.transactionDetails')}
                 </h3>
@@ -284,7 +247,7 @@ export default function Home() {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedTransaction.type === 'credit' ? 'bg-red-100 text-danger' : 'bg-green-100 text-success'}`}>
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedTransaction.type === 'credit' ? 'bg-red-100 dark:bg-red-900/30 text-danger' : 'bg-green-100 dark:bg-green-900/30 text-success'}`}>
                       {selectedTransaction.type === 'credit' ? <ArrowUpRight size={24} /> : <ArrowDownLeft size={24} />}
                     </div>
                     <div>
@@ -296,7 +259,7 @@ export default function Home() {
                   </div>
                   <div className={isRtl ? 'text-left' : 'text-right'}>
                     <p className={`text-2xl font-bold ${selectedTransaction.type === 'credit' ? 'text-danger' : 'text-success'}`}>
-                      Rs {selectedTransaction.amount}
+                      Rs {selectedTransaction.amount?.toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -315,7 +278,7 @@ export default function Home() {
                 <div className="space-y-4">
                   <div>
                     <h4 className="font-semibold text-sm text-text-secondary mb-2 uppercase tracking-wider">{t('dashboard.description')}</h4>
-                    <p className="text-text-primary p-3 bg-gray-50 rounded-lg">{selectedTransaction.description}</p>
+                    <p className="text-text-primary p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">{selectedTransaction.description}</p>
                   </div>
 
                   {selectedTransaction.items && selectedTransaction.items.length > 0 && (
@@ -323,7 +286,7 @@ export default function Home() {
                       <h4 className="font-semibold text-sm text-text-secondary mb-2 uppercase tracking-wider">{t('dashboard.items')}</h4>
                       <div className="border border-border rounded-lg overflow-hidden">
                         <table className="w-full text-sm text-left">
-                          <thead className="bg-gray-50 text-text-secondary font-medium border-b border-border">
+                          <thead className="bg-gray-50 dark:bg-gray-800/50 text-text-secondary font-medium border-b border-border">
                             <tr>
                               <th className="p-3">{t('dashboard.item')}</th>
                               <th className={`p-3 ${isRtl ? 'text-left' : 'text-right'}`}>{t('dashboard.qty')}</th>
@@ -350,19 +313,19 @@ export default function Home() {
                     {selectedTransaction.billAmount && (
                       <div className="flex justify-between text-sm">
                         <span className="text-text-secondary">{t('dashboard.totalBill')}</span>
-                        <span className="font-bold">Rs {selectedTransaction.billAmount}</span>
+                        <span className="font-bold">Rs {selectedTransaction.billAmount?.toLocaleString()}</span>
                       </div>
                     )}
                     {selectedTransaction.paidAmount !== undefined && selectedTransaction.paidAmount > 0 && (
                       <div className="flex justify-between text-sm">
                         <span className="text-text-secondary">{t('dashboard.paidAmount')}</span>
-                        <span className="font-bold text-success">Rs {selectedTransaction.paidAmount}</span>
+                        <span className="font-bold text-success">Rs {selectedTransaction.paidAmount?.toLocaleString()}</span>
                       </div>
                     )}
                     {selectedTransaction.type === 'credit' && selectedTransaction.billAmount && selectedTransaction.paidAmount !== undefined && (
                       <div className="flex justify-between text-base font-bold pt-2 border-t border-dashed border-border">
                         <span>{t('dashboard.addedToUdhar')}</span>
-                        <span className="text-danger">Rs {selectedTransaction.billAmount - selectedTransaction.paidAmount}</span>
+                        <span className="text-danger">Rs {(selectedTransaction.billAmount - selectedTransaction.paidAmount).toLocaleString()}</span>
                       </div>
                     )}
                   </div>
@@ -392,7 +355,7 @@ function StatCard({ title, value, icon, trend }: any) {
     <div className="bg-surface rounded-xl p-6 shadow-md border border-border">
       <div className="flex items-start justify-between mb-2">
         <p className="text-text-secondary font-medium">{title}</p>
-        <div className="p-2 bg-gray-50 rounded-lg">{icon}</div>
+        <div className="p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">{icon}</div>
       </div>
       <h3 className="text-2xl font-bold mb-1">{value}</h3>
       <p className="text-sm text-text-secondary">{trend}</p>

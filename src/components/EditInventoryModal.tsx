@@ -64,21 +64,21 @@ export default function EditInventoryModal({ item, onClose, onUpdate }: EditInve
 
                         {previewUrl ? (
                             <div className="flex flex-col gap-3">
-                                <div className="relative w-full h-48 rounded-[0.75rem] overflow-hidden border border-border bg-gray-50">
+                                <div className="relative w-full h-48 rounded-[0.75rem] overflow-hidden border border-border bg-background">
                                     <img
                                         src={getImageUrl(previewUrl)}
                                         alt="Preview"
                                         className="w-full h-full object-contain"
                                         onError={(e) => {
                                             e.currentTarget.style.display = 'none';
-                                            e.currentTarget.parentElement?.classList.add('bg-gray-100', 'flex', 'items-center', 'justify-center');
+                                            e.currentTarget.parentElement?.classList.add('bg-background', 'flex', 'items-center', 'justify-center');
                                             e.currentTarget.parentElement!.innerHTML = '<div class="text-text-secondary flex flex-col items-center"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-off mb-2"><line x1="2" x2="22" y1="2" y2="22"/><path d="M10.41 6.69C11.24 5.77 12.6 5.77 13.41 6.69L15 8.28 18 5.27L20 7.27"/><path d="M18.22 18.22L12.13 12.13"/><path d="M2 12L5 15L6.3 13.7"/><path d="M22 15.89V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 1.18-.39"/></svg><span>Image not found</span></div>';
                                         }}
                                     />
                                     <button
                                         type="button"
                                         onClick={handleDeleteImage}
-                                        className="absolute top-2 right-2 p-2 bg-white/80 hover:bg-white text-red-500 rounded-full shadow-sm transition-colors backdrop-blur-sm"
+                                        className="absolute top-2 right-2 p-2 bg-surface/80 hover:bg-surface text-danger rounded-full shadow-sm transition-colors backdrop-blur-sm"
                                         title={t('inventory.deleteImage')}
                                     >
                                         <Trash2 size={18} />
@@ -157,7 +157,7 @@ export default function EditInventoryModal({ item, onClose, onUpdate }: EditInve
                     </div>
 
                     <div className="pt-2 flex gap-3">
-                        <button type="button" onClick={onClose} className="flex-1 py-3 px-4 rounded-[0.75rem] border border-border text-text-primary hover:bg-gray-50 transition-colors shadow-sm font-medium">
+                        <button type="button" onClick={onClose} className="flex-1 py-3 px-4 rounded-[0.75rem] border border-border text-text-primary hover:bg-background/80 transition-colors shadow-sm font-medium">
                             {t('common.cancel')}
                         </button>
                         <button type="submit" className="flex-1 py-3 px-4 bg-primary text-white font-bold rounded-[0.75rem] hover:bg-primary-dark transition-colors shadow-md">

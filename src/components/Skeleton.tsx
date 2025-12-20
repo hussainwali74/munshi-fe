@@ -112,7 +112,7 @@ export function SkeletonCustomerRow({ className }: { className?: string }) {
 
 export function SkeletonTableRow({ columns = 6, className }: { columns?: number; className?: string }) {
     return (
-        <tr className={cn('hover:bg-gray-50/50', className)}>
+        <tr className={cn('hover:bg-background/50', className)}>
             {Array.from({ length: columns }).map((_, i) => (
                 <td key={i} className="p-3">
                     {i === 0 ? (
@@ -149,7 +149,7 @@ export function SkeletonStatCard({ className }: { className?: string }) {
 
 export function SkeletonTransactionRow({ className }: { className?: string }) {
     return (
-        <div className={cn('flex items-center justify-between p-3 rounded-lg border-b border-gray-100', className)}>
+        <div className={cn('flex items-center justify-between p-3 rounded-lg border-b border-border', className)}>
             <div className="flex items-center gap-3">
                 <Skeleton variant="circular" width={40} height={40} />
                 <div className="space-y-2">
@@ -167,8 +167,8 @@ export function SkeletonTransactionRow({ className }: { className?: string }) {
 
 export function SkeletonTranslationCard({ className }: { className?: string }) {
     return (
-        <div className={cn('bg-white border border-border rounded-lg p-4', className)}>
-            <div className="mb-3 border-b border-gray-100 pb-2">
+        <div className={cn('bg-surface border border-border rounded-lg p-4', className)}>
+            <div className="mb-3 border-b border-border pb-2">
                 <Skeleton variant="text" width="80%" height={18} />
             </div>
             <Skeleton variant="text" width="70%" height={24} />
