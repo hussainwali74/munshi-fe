@@ -168,3 +168,18 @@ begin
 end;
 $$;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS phone_number TEXT UNIQUE;
+
+-- CUSTOM TRANSLATIONS
+create table if not exists custom_translations (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references users(id) on delete cascade not null,
+  key text not null,
+  lang text not null,
+  value text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  unique(user_id, key, lang)
+);
+
+alter table custom_translations enable row level security;
+create policy "No public access" on custom_translations for all using (false);

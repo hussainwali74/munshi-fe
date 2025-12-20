@@ -11,6 +11,8 @@ const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'jest-environment-jsdom',
   moduleNameMapper: {
+    '^jose$': '<rootDir>/src/__mocks__/jose.ts',
+    '^bcrypt-ts$': '<rootDir>/src/__mocks__/bcrypt-ts.ts',
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   transformIgnorePatterns: [

@@ -1,50 +1,28 @@
+
 import { addCustomer, addTransaction } from './actions';
 import { getDb } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 
-// Create a mock query builder that returns itself for chaining
-const mockQueryBuilder = {
-    select: jest.fn().mockReturnThis(),
-    insert: jest.fn().mockReturnThis(),
-    update: jest.fn().mockReturnThis(),
-    delete: jest.fn().mockReturnThis(),
-    eq: jest.fn().mockReturnThis(),
-    order: jest.fn().mockReturnThis(),
-    single: jest.fn().mockReturnThis(),
-    then: jest.fn((resolve) => resolve({ data: [], error: null })),
-};
-
-const mockRpc = jest.fn().mockResolvedValue({ error: null });
-
-// Mock dependencies
-jest.mock('@/lib/db', () => ({
-    getDb: jest.fn(() => ({
-        from: jest.fn(() => mockQueryBuilder),
-        rpc: mockRpc,
-    })),
-}));
-
-jest.mock('@/lib/auth', () => ({
-    getSession: jest.fn(),
-    verifyPassword: jest.fn(),
-    hashPassword: jest.fn(),
-    createSession: jest.fn(),
-    deleteSession: jest.fn(),
-}));
-
-jest.mock('next/cache', () => ({
-    revalidatePath: jest.fn(),
-}));
+jest.mock('@/lib/db');
+jest.mock('@/lib/auth');
+jest.mock('next/cache');
 
 describe('Khata Actions', () => {
     const mockSession = { userId: 'user-123' };
-    const mockGetDb = getDb as jest.Mock;
+
+    // Helper to get the mock chain object from the manual mock
+    // We cast to any because we know the structure of our manual mock
+    const getMockChain = () => (getDb() as any).from();
+    const getRpcSpy = () => (getDb() as any).rpc;
 
     beforeEach(() => {
         jest.clearAllMocks();
         (getSession as jest.Mock).mockResolvedValue(mockSession);
-        mockQueryBuilder.then.mockImplementation((resolve) => resolve({ data: [], error: null }));
+
+        // Reset default response for db calls
+        const chain = getMockChain();
+        chain.then.mockImplementation((resolve: any) => resolve({ data: [], error: null }));
     });
 
     describe('addCustomer', () => {
@@ -60,8 +38,6 @@ describe('Khata Actions', () => {
         });
 
         it('should insert correct customer data', async () => {
-            mockQueryBuilder.then.mockImplementation((resolve) => resolve({ error: null }));
-
             const formData = new FormData();
             formData.append('name', 'Test Customer');
             formData.append('phone', '1234567890');
@@ -69,8 +45,8 @@ describe('Khata Actions', () => {
 
             await addCustomer(formData);
 
-            expect(mockGetDb).toHaveBeenCalled();
-            expect(mockQueryBuilder.insert).toHaveBeenCalledWith({
+            expect(getDb).toHaveBeenCalled();
+            expect(getMockChain().insert).toHaveBeenCalledWith({
                 user_id: 'user-123',
                 name: 'Test Customer',
                 phone: '1234567890',
@@ -80,7 +56,7 @@ describe('Khata Actions', () => {
         });
 
         it('should throw error on DB error', async () => {
-            mockQueryBuilder.then.mockImplementation((resolve) =>
+            getMockChain().then.mockImplementation((resolve: any) =>
                 resolve({ error: { message: 'DB Error' } })
             );
 
@@ -93,8 +69,6 @@ describe('Khata Actions', () => {
         });
 
         it('should call revalidatePath on success', async () => {
-            mockQueryBuilder.then.mockImplementation((resolve) => resolve({ error: null }));
-
             const formData = new FormData();
             formData.append('name', 'Test Customer');
             formData.append('phone', '1234567890');
@@ -120,7 +94,6 @@ describe('Khata Actions', () => {
         });
 
         it('should parse items JSON correctly', async () => {
-            mockQueryBuilder.then.mockImplementation((resolve) => resolve({ error: null }));
             const items = [{ name: 'Item 1', price: 50 }];
 
             const formData = new FormData();
@@ -132,7 +105,7 @@ describe('Khata Actions', () => {
 
             await addTransaction(formData);
 
-            expect(mockQueryBuilder.insert).toHaveBeenCalledWith(
+            expect(getMockChain().insert).toHaveBeenCalledWith(
                 expect.objectContaining({
                     items: items
                 })
@@ -140,8 +113,6 @@ describe('Khata Actions', () => {
         });
 
         it('should update customer balance via RPC', async () => {
-            mockQueryBuilder.then.mockImplementation((resolve) => resolve({ error: null }));
-
             const formData = new FormData();
             formData.append('customerId', 'cust-123');
             formData.append('type', 'credit');
@@ -150,15 +121,13 @@ describe('Khata Actions', () => {
 
             await addTransaction(formData);
 
-            expect(mockRpc).toHaveBeenCalledWith('update_customer_balance', {
+            expect(getRpcSpy()).toHaveBeenCalledWith('update_customer_balance', {
                 p_customer_id: 'cust-123',
                 p_amount: 100 // credit = positive
             });
         });
 
         it('should use negative amount for debit transactions', async () => {
-            mockQueryBuilder.then.mockImplementation((resolve) => resolve({ error: null }));
-
             const formData = new FormData();
             formData.append('customerId', 'cust-123');
             formData.append('type', 'debit');
@@ -167,7 +136,7 @@ describe('Khata Actions', () => {
 
             await addTransaction(formData);
 
-            expect(mockRpc).toHaveBeenCalledWith('update_customer_balance', {
+            expect(getRpcSpy()).toHaveBeenCalledWith('update_customer_balance', {
                 p_customer_id: 'cust-123',
                 p_amount: -50 // debit = negative
             });

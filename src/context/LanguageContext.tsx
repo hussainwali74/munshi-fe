@@ -16,6 +16,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   // Always start with the same default for both SSR and client to avoid hydration mismatch
   const [language, setLanguageState] = useState<Language>('en');
   const [mounted, setMounted] = useState(false);
+  const [customTranslations, setCustomTranslations] = useState<Record<string, string>>({});
 
   // Load from localStorage after component mounts
   useEffect(() => {
@@ -26,6 +27,25 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         setLanguageState(savedLang);
       }
     }
+
+    // Load merged translations (System + Custom)
+    import('@/app/settings/translation-actions').then(({ getMergedTranslations }) => {
+      getMergedTranslations().then(({ system, custom }) => {
+        const map: Record<string, string> = {};
+
+        // System defaults first
+        system.forEach(item => {
+          map[`${item.lang}:${item.key}`] = item.value;
+        });
+
+        // Custom overrides second
+        custom.forEach(item => {
+          map[`${item.lang}:${item.key}`] = item.value;
+        });
+
+        setCustomTranslations(map);
+      }).catch(console.error);
+    });
   }, []);
 
   const handleSetLanguage = (lang: Language) => {
@@ -52,12 +72,18 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }, [language, mounted]);
 
   const t = (path: string) => {
+    // Check custom translation first
+    const customKey = `${language}:${path}`;
+    if (customTranslations[customKey]) {
+      return customTranslations[customKey];
+    }
+
     const keys = path.split('.');
     let current: any = translations[language];
 
     for (const key of keys) {
       if (current[key] === undefined) {
-        console.warn(`Translation missing for key: ${path} in language: ${language}`);
+        // console.warn(`Translation missing for key: ${path} in language: ${language}`);
         return path;
       }
       current = current[key];

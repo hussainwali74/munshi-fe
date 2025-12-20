@@ -23,8 +23,18 @@ jest.mock('@/components/DashboardLayout', () => ({
 }));
 
 // Mock Lucide icons
+// Mock Lucide icons
 jest.mock('lucide-react', () => ({
     Settings: () => <span data-testid="settings-icon" />,
+    Languages: () => <span data-testid="languages-icon" />,
+    Store: () => <span data-testid="store-icon" />,
+    Search: () => <span data-testid="search-icon" />,
+    Edit2: () => <span data-testid="edit-icon" />,
+    X: () => <span data-testid="x-icon" />,
+    Check: () => <span data-testid="check-icon" />,
+    ChevronDown: () => <span data-testid="chevron-down-icon" />,
+    ChevronRight: () => <span data-testid="chevron-right-icon" />,
+    RotateCcw: () => <span data-testid="rotate-ccw-icon" />,
 }));
 
 describe('Settings Page - Urdu Support', () => {
@@ -56,7 +66,8 @@ describe('Settings Page - Urdu Support', () => {
         expect(container).toBeInTheDocument();
 
         // Check main container
-        const mainContainer = screen.getByText('settings.detailsTitle').closest('div[dir="rtl"]');
+        const heading = screen.getByRole('heading', { name: 'settings.detailsTitle' });
+        const mainContainer = heading.closest('div[dir="rtl"]');
         expect(mainContainer).toBeInTheDocument();
     });
 

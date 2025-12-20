@@ -3,6 +3,10 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import LanguageToggle from './LanguageToggle';
 import { LanguageProvider } from '@/context/LanguageContext';
 
+jest.mock('@/app/settings/translation-actions', () => ({
+  getMergedTranslations: jest.fn().mockResolvedValue({ system: [], custom: [] }),
+}));
+
 describe('LanguageToggle', () => {
   beforeEach(() => {
     localStorage.clear();

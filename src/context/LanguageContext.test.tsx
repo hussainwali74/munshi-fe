@@ -3,6 +3,10 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { LanguageProvider, useLanguage } from '@/context/LanguageContext';
 
+jest.mock('@/app/settings/translation-actions', () => ({
+  getMergedTranslations: jest.fn().mockResolvedValue({ system: [], custom: [] }),
+}));
+
 // Test component to consume context
 const TestComponent = () => {
   const { language, setLanguage, t, dir } = useLanguage();
