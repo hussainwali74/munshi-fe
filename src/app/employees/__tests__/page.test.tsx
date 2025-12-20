@@ -24,6 +24,10 @@ jest.mock('lucide-react', () => ({
     Phone: () => <span data-testid="phone-icon" />,
     X: () => <span data-testid="x-icon" />,
     Trash2: () => <span data-testid="trash-icon" />,
+    Calendar: () => <span data-testid="calendar-icon" />,
+    Briefcase: () => <span data-testid="briefcase-icon" />,
+    DollarSign: () => <span data-testid="dollar-icon" />,
+    Edit: () => <span data-testid="edit-icon" />,
 }));
 
 // Mock server actions to avoid cookies() error
@@ -31,6 +35,7 @@ jest.mock('../actions', () => ({
     getEmployees: jest.fn().mockResolvedValue([]),
     addEmployee: jest.fn().mockResolvedValue(undefined),
     deleteEmployee: jest.fn().mockResolvedValue(undefined),
+    updateEmployee: jest.fn().mockResolvedValue(undefined),
 }));
 
 // Mock react-hot-toast

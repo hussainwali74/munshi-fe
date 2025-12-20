@@ -17,6 +17,7 @@ export const translations = {
       actions: "Actions",
       search: "Search...",
       or: "Or",
+      close: "Close",
     },
     dashboard: {
       totalSales: "Total Sales",
@@ -84,8 +85,11 @@ export const translations = {
     employees: {
       title: "Employees",
       addEmployee: "Add Employee",
+      editEmployee: "Edit Employee",
       employeeName: "Employee Name",
       active: "Active",
+      inactive: "Inactive",
+      status: "Status",
       role: "Salesman",
       roleLabel: "Role",
       phone: "Phone",
@@ -235,6 +239,7 @@ export const translations = {
       actions: "عمل",
       search: "تلاش کریں...",
       or: "یا",
+      close: "بند کریں",
     },
     dashboard: {
       totalSales: "کل فروخت",
@@ -302,8 +307,11 @@ export const translations = {
     employees: {
       title: "ملازمین",
       addEmployee: "ملازم شامل کریں",
+      editEmployee: "ملازم میں ترمیم کریں",
       employeeName: "ملازم کا نام",
       active: "فعال",
+      inactive: "غیر فعال",
+      status: "حیثیت",
       role: "سیلز مین",
       roleLabel: "کردار",
       phone: "فون",
