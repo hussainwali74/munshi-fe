@@ -59,7 +59,8 @@ create table if not exists employees (
   role text,
   phone text,
   salary numeric,
-  joined_at date default current_date,
+  join_date date default current_date,
+  status text default 'active',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -94,6 +95,16 @@ begin
     end if;
     if not exists (select 1 from information_schema.columns where table_name = 'transactions' and column_name = 'paid_amount') then
         alter table transactions add column paid_amount numeric; -- Amount paid at time of transaction
+    end if;
+
+    -- Employees columns (Status and Join Date)
+    -- Rename joined_at to join_date if it exists
+    if exists (select 1 from information_schema.columns where table_name = 'employees' and column_name = 'joined_at') then
+        alter table employees rename column joined_at to join_date;
+    end if;
+    -- Add status column if it doesn't exist
+    if not exists (select 1 from information_schema.columns where table_name = 'employees' and column_name = 'status') then
+        alter table employees add column status text default 'active';
     end if;
 end $$;
 

@@ -22,6 +22,23 @@ jest.mock('lucide-react', () => ({
     Plus: () => <span data-testid="plus-icon" />,
     UserCheck: () => <span data-testid="user-check-icon" />,
     Phone: () => <span data-testid="phone-icon" />,
+    X: () => <span data-testid="x-icon" />,
+    Trash2: () => <span data-testid="trash-icon" />,
+}));
+
+// Mock server actions to avoid cookies() error
+jest.mock('../actions', () => ({
+    getEmployees: jest.fn().mockResolvedValue([]),
+    addEmployee: jest.fn().mockResolvedValue(undefined),
+    deleteEmployee: jest.fn().mockResolvedValue(undefined),
+}));
+
+// Mock react-hot-toast
+jest.mock('react-hot-toast', () => ({
+    toast: {
+        success: jest.fn(),
+        error: jest.fn(),
+    },
 }));
 
 describe('Employees Page - Urdu Support', () => {
