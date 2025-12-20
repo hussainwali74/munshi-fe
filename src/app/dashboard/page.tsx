@@ -90,7 +90,8 @@ const recentTransactions: Transaction[] = [
 ];
 
 export default function Home() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isRtl = language === 'ur';
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -134,251 +135,253 @@ export default function Home() {
 
   return (
     <DashboardLayout>
-      <div className="mb-8">
-        <h1 className="text-3xl font-extrabold mb-4 tracking-tight">{t('common.dashboard')}</h1>
-        <p className="text-text-secondary">{t('common.welcomeBack')} Ezekata</p>
-      </div>
+      <div dir={isRtl ? 'rtl' : 'ltr'}>
+        <div className="mb-8">
+          <h1 className="text-3xl font-extrabold mb-4 tracking-tight">{t('common.dashboard')}</h1>
+          <p className="text-text-secondary">{t('common.welcomeBack')} Ezekata</p>
+        </div>
 
-      {/* Main Search Bar */}
-      <div className="mb-8 relative z-20" ref={searchRef}>
-        <div className="relative">
-          <input
-            type="text"
-            className="w-full p-3 pl-12 h-14 text-lg rounded-xl border border-border bg-surface text-text-primary shadow-sm focus:shadow-md transition-shadow focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            placeholder={t('common.search') || "Search customers by name or phone..."}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary" size={24} />
-          {loading && (
-            <div className="absolute right-4 top-1/2 -translate-y-1/2">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+        {/* Main Search Bar */}
+        <div className="mb-8 relative z-20" ref={searchRef}>
+          <div className="relative">
+            <input
+              type="text"
+              className={`w-full p-3 ${isRtl ? 'pr-12 pl-3' : 'pl-12 pr-3'} h-14 text-lg rounded-xl border border-border bg-surface text-text-primary shadow-sm focus:shadow-md transition-shadow focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary`}
+              placeholder={t('khata.searchPlaceholder')}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            <Search className={`absolute ${isRtl ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 text-text-secondary`} size={24} />
+            {loading && (
+              <div className={`absolute ${isRtl ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2`}>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+              </div>
+            )}
+          </div>
+
+          {/* Search Results Dropdown */}
+          {results.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-surface rounded-xl shadow-xl border border-border overflow-hidden max-h-80 overflow-y-auto">
+              {results.map((customer) => (
+                <Link
+                  href={`/khata/${customer.id}`}
+                  key={customer.id}
+                  className="flex items-center gap-4 p-4 hover:bg-background transition-colors border-b border-border last:border-0"
+                  onClick={() => {
+                    setResults([]);
+                    setQuery('');
+                  }}
+                >
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                    {customer.name.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-text-primary">{customer.name}</p>
+                    <p className="text-sm text-text-secondary">{customer.phone} • {customer.address}</p>
+                  </div>
+                </Link>
+              ))}
             </div>
           )}
         </div>
 
-        {/* Search Results Dropdown */}
-        {results.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-surface rounded-xl shadow-xl border border-border overflow-hidden max-h-80 overflow-y-auto">
-            {results.map((customer) => (
-              <Link
-                href={`/khata/${customer.id}`}
-                key={customer.id}
-                className="flex items-center gap-4 p-4 hover:bg-background transition-colors border-b border-border last:border-0"
-                onClick={() => {
-                  setResults([]);
-                  setQuery('');
-                }}
-              >
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                  {customer.name.charAt(0)}
-                </div>
-                <div>
-                  <p className="font-semibold text-text-primary">{customer.name}</p>
-                  <p className="text-sm text-text-secondary">{customer.phone} • {customer.address}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard
-          title="Total Udhar (Receivable)"
-          value="Rs 45,200"
-          icon={<ArrowUpRight className="text-danger" />}
-          trend="+12% this month"
-        />
-        <StatCard
-          title="Total Payable"
-          value="Rs 12,500"
-          icon={<ArrowDownLeft className="text-success" />}
-          trend="-5% this month"
-        />
-        <StatCard
-          title="Low Stock Items"
-          value="3 Items"
-          icon={<AlertTriangle className="text-warning" />}
-          trend="Needs attention"
-        />
-        <StatCard
-          title="Active Customers"
-          value="128"
-          icon={<Users className="text-primary" />}
-          trend="+4 new today"
-        />
-      </div>
-
-      {/* Recent Transactions & Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <div className="bg-surface rounded-xl p-6 shadow-md border border-border">
-            <h2 className="text-2xl font-bold mb-3">Recent Transactions</h2>
-            <div className="space-y-4">
-              {recentTransactions.map((txn) => (
-                <div
-                  key={txn.id}
-                  className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg border-b border-gray-100 last:border-0 cursor-pointer transition-colors"
-                  onClick={() => setSelectedTransaction(txn)}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${txn.type === 'credit' ? 'bg-red-100 text-danger' : 'bg-green-100 text-success'}`}>
-                      {txn.type === 'credit' ? <ArrowUpRight size={20} /> : <ArrowDownLeft size={20} />}
-                    </div>
-                    <div>
-                      <p className="font-semibold">{txn.customerName}</p>
-                      <p className="text-sm text-text-secondary">{txn.description}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className={`font-bold ${txn.type === 'credit' ? 'text-danger' : 'text-success'}`}>
-                      {txn.type === 'credit' ? '-' : '+'} Rs {txn.amount}
-                    </p>
-                    <p className="text-sm text-text-secondary">{txn.date}, {txn.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <StatCard
+            title={t('dashboard.totalUdhar')}
+            value="Rs 45,200"
+            icon={<ArrowUpRight className="text-danger" />}
+            trend={`+12% ${t('dashboard.thisMonth')}`}
+          />
+          <StatCard
+            title={t('dashboard.totalPayable')}
+            value="Rs 12,500"
+            icon={<ArrowDownLeft className="text-success" />}
+            trend={`-5% ${t('dashboard.thisMonth')}`}
+          />
+          <StatCard
+            title={t('dashboard.lowStock')}
+            value={`3 ${t('dashboard.items')}`}
+            icon={<AlertTriangle className="text-warning" />}
+            trend={t('dashboard.needsAttention')}
+          />
+          <StatCard
+            title={t('dashboard.activeCustomers')}
+            value="128"
+            icon={<Users className="text-primary" />}
+            trend={`+4 ${t('dashboard.newToday')}`}
+          />
         </div>
 
-        <div>
-          <div className="bg-surface rounded-xl p-6 shadow-md border border-border mb-6">
-            <h2 className="text-2xl font-bold mb-3">Quick Actions</h2>
-            <div className="flex flex-col gap-3 text-white">
-              <Link href="/billing" className="inline-flex  items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px w-full">
-                <ArrowUpRight size={20} /> Add Transaction (Bill)
-              </Link>
-              <button className="inline-flex items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-surface text-text-primary border border-border hover:bg-background w-full">
-                <ArrowDownLeft size={20} /> Add Payment
-              </button>
-              <button
-                onClick={() => setIsAddCustomerOpen(true)}
-                className="inline-flex items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-surface text-text-primary border border-border hover:bg-background w-full"
-              >
-                <Users size={20} /> Add New Customer
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Transaction Detail Modal */}
-      {selectedTransaction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setSelectedTransaction(null)}>
-          <div className="bg-surface rounded-xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
-            <div className="p-4 border-b border-border flex items-center justify-between bg-gray-50">
-              <h3 className="text-lg font-bold flex items-center gap-2">
-                Transaction Details
-              </h3>
-              <button onClick={() => setSelectedTransaction(null)} className="text-text-secondary hover:text-text-primary">
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedTransaction.type === 'credit' ? 'bg-red-100 text-danger' : 'bg-green-100 text-success'}`}>
-                    {selectedTransaction.type === 'credit' ? <ArrowUpRight size={24} /> : <ArrowDownLeft size={24} />}
-                  </div>
-                  <div>
-                    <p className="font-bold text-lg">{selectedTransaction.customerName}</p>
-                    <p className={`text-sm font-medium ${selectedTransaction.type === 'credit' ? 'text-danger' : 'text-success'}`}>
-                      {selectedTransaction.type === 'credit' ? 'Purchase (Udhar)' : 'Payment Received'}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className={`text-2xl font-bold ${selectedTransaction.type === 'credit' ? 'text-danger' : 'text-success'}`}>
-                    Rs {selectedTransaction.amount}
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="flex items-center gap-2 text-text-secondary">
-                  <Calendar size={18} />
-                  <span>{selectedTransaction.date}</span>
-                </div>
-                <div className="flex items-center gap-2 text-text-secondary">
-                  <Clock size={18} />
-                  <span>{selectedTransaction.time}</span>
-                </div>
-              </div>
-
+        {/* Recent Transactions & Quick Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <div className="bg-surface rounded-xl p-6 shadow-md border border-border">
+              <h2 className="text-2xl font-bold mb-3">{t('dashboard.recentActivity')}</h2>
               <div className="space-y-4">
-                <div>
-                  <h4 className="font-semibold text-sm text-text-secondary mb-2 uppercase tracking-wider">Description</h4>
-                  <p className="text-text-primary p-3 bg-gray-50 rounded-lg">{selectedTransaction.description}</p>
-                </div>
-
-                {selectedTransaction.items && selectedTransaction.items.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold text-sm text-text-secondary mb-2 uppercase tracking-wider">Items</h4>
-                    <div className="border border-border rounded-lg overflow-hidden">
-                      <table className="w-full text-sm text-left">
-                        <thead className="bg-gray-50 text-text-secondary font-medium border-b border-border">
-                          <tr>
-                            <th className="p-3">Item</th>
-                            <th className="p-3 text-right">Qty</th>
-                            <th className="p-3 text-right">Price</th>
-                            <th className="p-3 text-right">Total</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {selectedTransaction.items.map((item, idx) => (
-                            <tr key={idx} className="border-b border-border last:border-0">
-                              <td className="p-3">{item.name}</td>
-                              <td className="p-3 text-right">{item.qty}</td>
-                              <td className="p-3 text-right">Rs {item.price}</td>
-                              <td className="p-3 text-right font-medium">Rs {item.qty * item.price}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                {recentTransactions.map((txn) => (
+                  <div
+                    key={txn.id}
+                    className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg border-b border-gray-100 last:border-0 cursor-pointer transition-colors"
+                    onClick={() => setSelectedTransaction(txn)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${txn.type === 'credit' ? 'bg-red-100 text-danger' : 'bg-green-100 text-success'}`}>
+                        {txn.type === 'credit' ? <ArrowUpRight size={20} /> : <ArrowDownLeft size={20} />}
+                      </div>
+                      <div>
+                        <p className="font-semibold">{txn.customerName}</p>
+                        <p className="text-sm text-text-secondary">{txn.description}</p>
+                      </div>
+                    </div>
+                    <div className={isRtl ? 'text-left' : 'text-right'}>
+                      <p className={`font-bold ${txn.type === 'credit' ? 'text-danger' : 'text-success'}`}>
+                        {txn.type === 'credit' ? '-' : '+'} Rs {txn.amount}
+                      </p>
+                      <p className="text-sm text-text-secondary">{txn.date}, {txn.time}</p>
                     </div>
                   </div>
-                )}
-
-                <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                  {selectedTransaction.billAmount && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-text-secondary">Total Bill</span>
-                      <span className="font-bold">Rs {selectedTransaction.billAmount}</span>
-                    </div>
-                  )}
-                  {selectedTransaction.paidAmount !== undefined && selectedTransaction.paidAmount > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-text-secondary">Paid Amount</span>
-                      <span className="font-bold text-success">Rs {selectedTransaction.paidAmount}</span>
-                    </div>
-                  )}
-                  {selectedTransaction.type === 'credit' && selectedTransaction.billAmount && selectedTransaction.paidAmount !== undefined && (
-                    <div className="flex justify-between text-base font-bold pt-2 border-t border-dashed border-border">
-                      <span>Added to Udhar</span>
-                      <span className="text-danger">Rs {selectedTransaction.billAmount - selectedTransaction.paidAmount}</span>
-                    </div>
-                  )}
-                </div>
+                ))}
               </div>
+            </div>
+          </div>
 
-              <div className="mt-8">
-                <button onClick={() => setSelectedTransaction(null)} className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-surface text-text-primary border border-border hover:bg-background w-full">
-                  Close Details
+          <div>
+            <div className="bg-surface rounded-xl p-6 shadow-md border border-border mb-6">
+              <h2 className="text-2xl font-bold mb-3">{t('dashboard.quickActions')}</h2>
+              <div className="flex flex-col gap-3 text-white">
+                <Link href="/billing" className="inline-flex  items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px w-full">
+                  <ArrowUpRight size={20} /> {t('dashboard.addTransaction')}
+                </Link>
+                <button className="inline-flex items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-surface text-text-primary border border-border hover:bg-background w-full">
+                  <ArrowDownLeft size={20} /> {t('dashboard.addPayment')}
+                </button>
+                <button
+                  onClick={() => setIsAddCustomerOpen(true)}
+                  className="inline-flex items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-surface text-text-primary border border-border hover:bg-background w-full"
+                >
+                  <Users size={20} /> {t('khata.addCustomer')}
                 </button>
               </div>
             </div>
           </div>
         </div>
-      )}
 
-      <AddCustomerModal
-        isOpen={isAddCustomerOpen}
-        onClose={() => setIsAddCustomerOpen(false)}
-      />
+        {/* Transaction Detail Modal */}
+        {selectedTransaction && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setSelectedTransaction(null)}>
+            <div className="bg-surface rounded-xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()} dir={isRtl ? 'rtl' : 'ltr'}>
+              <div className="p-4 border-b border-border flex items-center justify-between bg-gray-50">
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                  {t('dashboard.transactionDetails')}
+                </h3>
+                <button onClick={() => setSelectedTransaction(null)} className="text-text-secondary hover:text-text-primary">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedTransaction.type === 'credit' ? 'bg-red-100 text-danger' : 'bg-green-100 text-success'}`}>
+                      {selectedTransaction.type === 'credit' ? <ArrowUpRight size={24} /> : <ArrowDownLeft size={24} />}
+                    </div>
+                    <div>
+                      <p className="font-bold text-lg">{selectedTransaction.customerName}</p>
+                      <p className={`text-sm font-medium ${selectedTransaction.type === 'credit' ? 'text-danger' : 'text-success'}`}>
+                        {selectedTransaction.type === 'credit' ? t('dashboard.purchaseUdhar') : t('dashboard.paymentReceived')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className={isRtl ? 'text-left' : 'text-right'}>
+                    <p className={`text-2xl font-bold ${selectedTransaction.type === 'credit' ? 'text-danger' : 'text-success'}`}>
+                      Rs {selectedTransaction.amount}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="flex items-center gap-2 text-text-secondary">
+                    <Calendar size={18} />
+                    <span>{selectedTransaction.date}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-text-secondary">
+                    <Clock size={18} />
+                    <span>{selectedTransaction.time}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-semibold text-sm text-text-secondary mb-2 uppercase tracking-wider">{t('dashboard.description')}</h4>
+                    <p className="text-text-primary p-3 bg-gray-50 rounded-lg">{selectedTransaction.description}</p>
+                  </div>
+
+                  {selectedTransaction.items && selectedTransaction.items.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold text-sm text-text-secondary mb-2 uppercase tracking-wider">{t('dashboard.items')}</h4>
+                      <div className="border border-border rounded-lg overflow-hidden">
+                        <table className="w-full text-sm text-left">
+                          <thead className="bg-gray-50 text-text-secondary font-medium border-b border-border">
+                            <tr>
+                              <th className="p-3">{t('dashboard.item')}</th>
+                              <th className={`p-3 ${isRtl ? 'text-left' : 'text-right'}`}>{t('dashboard.qty')}</th>
+                              <th className={`p-3 ${isRtl ? 'text-left' : 'text-right'}`}>{t('inventory.price')}</th>
+                              <th className={`p-3 ${isRtl ? 'text-left' : 'text-right'}`}>{t('dashboard.total')}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {selectedTransaction.items.map((item, idx) => (
+                              <tr key={idx} className="border-b border-border last:border-0">
+                                <td className="p-3">{item.name}</td>
+                                <td className={`p-3 ${isRtl ? 'text-left' : 'text-right'}`}>{item.qty}</td>
+                                <td className={`p-3 ${isRtl ? 'text-left' : 'text-right'}`}>Rs {item.price}</td>
+                                <td className={`p-3 ${isRtl ? 'text-left' : 'text-right'} font-medium`}>Rs {item.qty * item.price}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-2 pt-4 border-t border-border">
+                    {selectedTransaction.billAmount && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-text-secondary">{t('dashboard.totalBill')}</span>
+                        <span className="font-bold">Rs {selectedTransaction.billAmount}</span>
+                      </div>
+                    )}
+                    {selectedTransaction.paidAmount !== undefined && selectedTransaction.paidAmount > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-text-secondary">{t('dashboard.paidAmount')}</span>
+                        <span className="font-bold text-success">Rs {selectedTransaction.paidAmount}</span>
+                      </div>
+                    )}
+                    {selectedTransaction.type === 'credit' && selectedTransaction.billAmount && selectedTransaction.paidAmount !== undefined && (
+                      <div className="flex justify-between text-base font-bold pt-2 border-t border-dashed border-border">
+                        <span>{t('dashboard.addedToUdhar')}</span>
+                        <span className="text-danger">Rs {selectedTransaction.billAmount - selectedTransaction.paidAmount}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-8">
+                  <button onClick={() => setSelectedTransaction(null)} className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-surface text-text-primary border border-border hover:bg-background w-full">
+                    {t('dashboard.closeDetails')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <AddCustomerModal
+          isOpen={isAddCustomerOpen}
+          onClose={() => setIsAddCustomerOpen(false)}
+        />
+      </div>
     </DashboardLayout>
   );
 }

@@ -19,7 +19,7 @@ export default function EmployeesPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" dir={isRtl ? 'rtl' : 'ltr'}>
                 {[1, 2, 3].map((i) => (
-                    <div key={i} className="bg-surface rounded-[0.75rem] p-6 shadow-md border border-border hover:bg-gray-50 transition-colors">
+                    <div key={i} className="bg-surface rounded-xl p-6 shadow-md border border-border hover:bg-gray-50 transition-colors">
                         <div className="flex items-start justify-between mb-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 rounded-full flex items-center justify-center text-text-secondary bg-gray-100">
