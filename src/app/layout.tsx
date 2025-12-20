@@ -26,9 +26,7 @@ export default function RootLayout({
         <ThemeProvider>
           <LanguageProvider>
             <ClientLayoutWrapper>
-              <main className="min-h-screen bg-background text-text-primary">
-                {children}
-              </main>
+              {children}
             </ClientLayoutWrapper>
             <Toaster position="top-right" />
           </LanguageProvider>

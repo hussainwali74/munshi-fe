@@ -9,7 +9,11 @@ export default function ClientLayoutWrapper({ children }: { children: React.Reac
     const isPublic = pathname === '/' || pathname.startsWith('/login') || pathname.startsWith('/auth');
 
     if (isPublic) {
-        return <>{children}</>;
+        return (
+            <main className="min-h-screen bg-background text-text-primary">
+                {children}
+            </main>
+        );
     }
 
     // Wrap authenticated pages in DashboardLayout

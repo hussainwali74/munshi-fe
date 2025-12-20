@@ -20,7 +20,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     ];
 
     return (
-        <div className="flex min-h-screen relative" style={{ direction: dir === 'rtl' ? 'ltr' : undefined }}>
+        <div className="flex h-screen overflow-hidden relative" style={{ direction: dir === 'rtl' ? 'ltr' : undefined }}>
             {/* Mobile Overlay */}
             {isSidebarOpen && (
                 <div

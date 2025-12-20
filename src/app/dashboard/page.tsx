@@ -24,6 +24,8 @@ interface Transaction {
   paidAmount?: number;
 }
 
+type Variant = 'primary' | 'secondary' | 'danger' | 'success' | 'warning';
+
 export default function Home() {
   const { t, language } = useLanguage();
   const isRtl = language === 'ur';
@@ -172,12 +174,14 @@ export default function Home() {
           trend={stats?.udharTrend !== undefined && stats.udharTrend !== 0 ? `${stats.udharTrend > 0 ? '+' : ''}${stats.udharTrend}% ${t('dashboard.thisMonth')}` : undefined}
           trendType={stats?.udharTrend && stats.udharTrend > 0 ? 'up' : stats?.udharTrend && stats.udharTrend < 0 ? 'down' : undefined}
           isLoading={isLoadingStats}
+          variant="danger"
         />
         <StatCard
           title={t('dashboard.totalPayable')}
           value={isLoadingStats ? '...' : `Rs ${stats?.totalPayable?.toLocaleString() || 0}`}
           icon={<ArrowDownLeft className="text-success" />}
           isLoading={isLoadingStats}
+          variant="success"
         />
         <StatCard
           title={t('dashboard.lowStock')}
@@ -185,6 +189,7 @@ export default function Home() {
           icon={<AlertTriangle className="text-warning" />}
           trend={stats?.lowStockCount && stats.lowStockCount > 0 ? t('dashboard.needsAttention') : undefined}
           isLoading={isLoadingStats}
+          variant="warning"
         />
         <StatCard
           title={t('dashboard.activeCustomers')}
@@ -193,6 +198,7 @@ export default function Home() {
           trend={stats?.newCustomersThisMonth && stats.newCustomersThisMonth > 0 ? `+${stats.newCustomersThisMonth} ${t('dashboard.newThisMonth')}` : undefined}
           trendType="up"
           isLoading={isLoadingStats}
+          variant="primary"
         />
       </div>
 
@@ -215,11 +221,11 @@ export default function Home() {
                 transactions.map((txn) => (
                   <div
                     key={txn.id}
-                    className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-lg border-b border-gray-100 dark:border-gray-800 last:border-0 cursor-pointer transition-colors"
+                    className="flex items-center justify-between p-3 hover:bg-primary/5 dark:hover:bg-primary/10 rounded-lg border-b border-gray-100 dark:border-gray-800 last:border-0 cursor-pointer transition-colors"
                     onClick={() => setSelectedTransaction(txn)}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${txn.type === 'credit' ? 'bg-red-100 dark:bg-red-900/30 text-danger' : 'bg-green-100 dark:bg-green-900/30 text-success'}`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${txn.type === 'credit' ? 'bg-danger/10 text-danger' : 'bg-success/10 text-success'}`}>
                         {txn.type === 'credit' ? <ArrowUpRight size={20} /> : <ArrowDownLeft size={20} />}
                       </div>
                       <div>
@@ -243,16 +249,16 @@ export default function Home() {
         <div>
           <div className="bg-surface rounded-xl p-6 shadow-md border border-border mb-6">
             <h2 className="text-2xl font-bold mb-3">{t('dashboard.quickActions')}</h2>
-            <div className="flex flex-col gap-3 text-white">
+            <div className="flex flex-col gap-3">
               <Link href="/billing" className="inline-flex  items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px w-full">
                 <ArrowUpRight size={20} /> {t('dashboard.addTransaction')}
               </Link>
-              <Link href="/khata" className="inline-flex items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-surface text-text-primary border border-border hover:bg-background w-full">
+              <Link href="/khata" className="inline-flex items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 bg-primary/10 text-primary hover:bg-primary/20 hover:-translate-y-px border border-transparent w-full">
                 <ArrowDownLeft size={20} /> {t('dashboard.addPayment')}
               </Link>
               <button
                 onClick={() => setIsAddCustomerOpen(true)}
-                className="inline-flex items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-surface text-text-primary border border-border hover:bg-background w-full"
+                className="inline-flex items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 bg-primary/10 text-primary hover:bg-primary/20 hover:-translate-y-px border border-transparent w-full"
               >
                 <Users size={20} /> {t('khata.addCustomer')}
               </button>
@@ -265,7 +271,7 @@ export default function Home() {
       {selectedTransaction && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setSelectedTransaction(null)}>
           <div className="bg-surface rounded-xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()} dir={isRtl ? 'rtl' : 'ltr'}>
-            <div className="p-4 border-b border-border flex items-center justify-between bg-gray-50 dark:bg-gray-800/50">
+            <div className="p-4 border-b border-border flex items-center justify-between bg-primary/5 dark:bg-primary/10">
               <h3 className="text-lg font-bold flex items-center gap-2">
                 {t('dashboard.transactionDetails')}
               </h3>
@@ -277,7 +283,7 @@ export default function Home() {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedTransaction.type === 'credit' ? 'bg-red-100 dark:bg-red-900/30 text-danger' : 'bg-green-100 dark:bg-green-900/30 text-success'}`}>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${selectedTransaction.type === 'credit' ? 'bg-danger/10 text-danger' : 'bg-success/10 text-success'}`}>
                     {selectedTransaction.type === 'credit' ? <ArrowUpRight size={24} /> : <ArrowDownLeft size={24} />}
                   </div>
                   <div>
@@ -308,7 +314,7 @@ export default function Home() {
               <div className="space-y-4">
                 <div>
                   <h4 className="font-semibold text-sm text-text-secondary mb-2 uppercase tracking-wider">{t('dashboard.description')}</h4>
-                  <p className="text-text-primary p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">{selectedTransaction.description}</p>
+                  <p className="text-text-primary p-3 bg-primary/5 dark:bg-primary/10 rounded-lg">{selectedTransaction.description}</p>
                 </div>
 
                 {selectedTransaction.items && selectedTransaction.items.length > 0 && (
@@ -316,7 +322,7 @@ export default function Home() {
                     <h4 className="font-semibold text-sm text-text-secondary mb-2 uppercase tracking-wider">{t('dashboard.items')}</h4>
                     <div className="border border-border rounded-lg overflow-hidden">
                       <table className="w-full text-sm text-left">
-                        <thead className="bg-gray-50 dark:bg-gray-800/50 text-text-secondary font-medium border-b border-border">
+                        <thead className="bg-primary/5 dark:bg-primary/10 text-text-secondary font-medium border-b border-border">
                           <tr>
                             <th className="p-3">{t('dashboard.item')}</th>
                             <th className={`p-3 ${isRtl ? 'text-left' : 'text-right'}`}>{t('dashboard.qty')}</th>
@@ -380,18 +386,40 @@ export default function Home() {
   );
 }
 
-function StatCard({ title, value, icon, trend, trendType, isLoading }: any) {
+function StatCard({ title, value, icon, trend, trendType, isLoading, variant = 'primary' }: {
+  title: string;
+  value: string | number;
+  icon: React.ReactNode;
+  trend?: string;
+  trendType?: 'up' | 'down';
+  isLoading?: boolean;
+  variant?: Variant;
+}) {
   const getTrendColor = () => {
     if (trendType === 'up') return 'text-success';
     if (trendType === 'down') return 'text-danger';
     return 'text-text-secondary';
   };
 
+  const getVariantStyles = () => {
+    switch (variant) {
+      case 'danger':
+        return 'bg-danger/10 text-danger';
+      case 'success':
+        return 'bg-success/10 text-success';
+      case 'warning':
+        return 'bg-warning/10 text-warning';
+      case 'primary':
+      default:
+        return 'bg-primary/10 text-primary';
+    }
+  };
+
   return (
     <div className="bg-surface rounded-xl p-6 shadow-md border border-border">
       <div className="flex items-start justify-between mb-2">
         <p className="text-text-secondary font-medium">{title}</p>
-        <div className="p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">{icon}</div>
+        <div className={`p-2 rounded-lg ${getVariantStyles()}`}>{icon}</div>
       </div>
       {isLoading ? (
         <div className="animate-pulse">

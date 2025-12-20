@@ -280,7 +280,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                             <div key={txn.id} className="p-4 rounded-lg border border-border">
                                 <div className={`flex items-start justify-between mb-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
                                     <div className={`flex items-center gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${txn.type === 'credit' ? 'bg-red-100 text-danger' : 'bg-green-100 text-success'}`}>
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${txn.type === 'credit' ? 'bg-danger/10 text-danger' : 'bg-success/10 text-success'}`}>
                                             {txn.type === 'credit' ? <ArrowUpRight size={20} /> : <ArrowDownLeft size={20} />}
                                         </div>
                                         <div>

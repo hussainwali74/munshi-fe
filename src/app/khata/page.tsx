@@ -231,7 +231,7 @@ export default function KhataPage() {
                     <SkeletonCustomerRow key={i} />
                 ))
             ) : filteredCustomers.map((customer) => (
-                <div key={customer.id} className="bg-surface rounded-xl p-5 shadow-md border border-border hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" dir={isRtl ? 'rtl' : 'ltr'}>
+                <div key={customer.id} className="bg-surface rounded-xl p-5 shadow-sm border border-border hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors" dir={isRtl ? 'rtl' : 'ltr'}>
                     <div className={`flex items-center justify-between gap-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
                         {/* Customer Info */}
                         <Link href={`/khata/${customer.id}`} className={`flex items-center gap-4 flex-1 min-w-0 ${isRtl ? 'flex-row-reverse' : ''}`}>
@@ -257,7 +257,7 @@ export default function KhataPage() {
                                 <p className="text-xs text-text-secondary mb-1 font-medium">{t('khata.balance')}</p>
 
                                 {customer.balance === 0 ? (
-                                    <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200">
+                                    <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-secondary/10 text-secondary border border-secondary/20">
                                         {t('khata.settled')} ✓
                                     </div>
                                 ) : (
@@ -267,13 +267,13 @@ export default function KhataPage() {
                                             Rs {Math.abs(customer.balance).toLocaleString()}
                                         </p>
                                         {customer.balance > 0 && (
-                                            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-danger">
+                                            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-danger/10 text-danger">
                                                 <ArrowUpRight size={12} />
                                                 {t('khata.udhar')}
                                             </div>
                                         )}
                                         {customer.balance < 0 && (
-                                            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-success">
+                                            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-success/10 text-success">
                                                 <ArrowDownLeft size={12} />
                                                 {t('khata.advance')}
                                             </div>
