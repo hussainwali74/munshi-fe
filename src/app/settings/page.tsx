@@ -92,7 +92,7 @@ export default function SettingsPage() {
                     onClick={() => setActiveTab('shop')}
                     className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all whitespace-nowrap ${activeTab === 'shop'
                         ? 'bg-primary text-white shadow-md'
-                        : 'bg-surface text-text-secondary hover:bg-gray-50 dark:hover:bg-gray-800 border border-border'
+                        : 'bg-surface text-text-secondary hover:bg-primary/5 hover:text-primary border border-border'
                         }`}
                 >
                     <StoreIcon size={20} />
@@ -102,7 +102,7 @@ export default function SettingsPage() {
                     onClick={() => setActiveTab('categories')}
                     className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all whitespace-nowrap ${activeTab === 'categories'
                         ? 'bg-primary text-white shadow-md'
-                        : 'bg-surface text-text-secondary hover:bg-gray-50 dark:hover:bg-gray-800 border border-border'
+                        : 'bg-surface text-text-secondary hover:bg-primary/5 hover:text-primary border border-border'
                         }`}
                 >
                     <TagsIcon size={20} />
@@ -112,7 +112,7 @@ export default function SettingsPage() {
                     onClick={() => setActiveTab('translations')}
                     className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all whitespace-nowrap ${activeTab === 'translations'
                         ? 'bg-primary text-white shadow-md'
-                        : 'bg-surface text-text-secondary hover:bg-gray-50 dark:hover:bg-gray-800 border border-border'
+                        : 'bg-surface text-text-secondary hover:bg-primary/5 hover:text-primary border border-border'
                         }`}
                 >
                     <LanguagesIcon size={20} />
@@ -267,8 +267,8 @@ export default function SettingsPage() {
                             )}
                         </div>
 
-                        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                            <p className="text-sm text-blue-700 dark:text-blue-300">
+                        <div className="mt-6 p-4 bg-primary/5 dark:bg-primary/10 rounded-xl border border-primary/20 dark:border-primary/30">
+                            <p className="text-sm text-primary">
                                 <strong>{t('common.note') || 'Note'}:</strong> {t('settings.categoriesNote') || 'Categories are used when adding inventory items. Changes will be reflected in the inventory page.'}
                             </p>
                         </div>
