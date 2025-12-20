@@ -4,6 +4,7 @@ import { Search, Plus, Package, Filter, X, Upload, Edit, Trash2, Loader2 } from 
 import { toast } from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import { addInventoryItem, getInventoryItems, deleteInventoryItem } from './actions';
+import { getCategories } from '@/app/settings/actions';
 import EditInventoryModal from '@/components/EditInventoryModal';
 import { useLanguage } from '@/context/LanguageContext';
 import { SkeletonTableRow } from '@/components/Skeleton';
@@ -27,6 +28,27 @@ export default function InventoryPage() {
     const [minPrice, setMinPrice] = useState<number | ''>('');
     const [maxPrice, setMaxPrice] = useState<number | ''>('');
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [categories, setCategories] = useState<string[]>(['sanitary', 'electrical', 'plumbing', 'other']);
+
+    const getCategoryLabel = (category: string) => {
+        if (!category) return '';
+        const key = `inventory.categories.${category}`;
+        const translation = t(key);
+        return translation === key ? category.charAt(0).toUpperCase() + category.slice(1) : translation;
+    };
+
+    // Fetch categories
+    useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                const data = await getCategories();
+                setCategories(data);
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        };
+        loadCategories();
+    }, []);
 
     const fetchInventory = async () => {
         setIsLoading(true);
@@ -113,6 +135,7 @@ export default function InventoryPage() {
                 {editingItem && (
                     <EditInventoryModal
                         item={editingItem}
+                        categories={categories}
                         onClose={() => setEditingItem(null)}
                         onUpdate={fetchInventory}
                     />
@@ -240,11 +263,10 @@ export default function InventoryPage() {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.category')}</label>
-                                        <select name="category" disabled={isSubmitting} className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none">
-                                            <option value="sanitary">{t('inventory.categories.sanitary')}</option>
-                                            <option value="electrical">{t('inventory.categories.electrical')}</option>
-                                            <option value="plumbing">{t('inventory.categories.plumbing')}</option>
-                                            <option value="other">{t('inventory.categories.other')}</option>
+                                        <select name="category" disabled={isSubmitting} className="w-full p-2 rounded-lg border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none capitalize">
+                                            {categories.map((cat) => (
+                                                <option key={cat} value={cat}>{getCategoryLabel(cat)}</option>
+                                            ))}
                                         </select>
                                     </div>
                                 </div>
@@ -323,7 +345,7 @@ export default function InventoryPage() {
                                                 <div className="min-w-0">
                                                     <div className="font-medium text-text-primary truncate">{item.name}</div>
                                                     <div className="text-xs text-text-secondary capitalize">
-                                                        {t(`inventory.categories.${item.category}`)} • Rs {item.selling_price}
+                                                        {getCategoryLabel(item.category)} • Rs {item.selling_price}
                                                         {item.size ? ` • ${item.size}` : ''}
                                                     </div>
                                                 </div>
@@ -341,13 +363,12 @@ export default function InventoryPage() {
                                 <select
                                     value={selectedCategory}
                                     onChange={(e) => setSelectedCategory(e.target.value)}
-                                    className="w-full p-2.5 rounded-xl border border-border bg-background text-text-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                                    className="w-full p-2.5 rounded-xl border border-border bg-background text-text-primary focus:ring-1 focus:ring-primary outline-none transition-all capitalize"
                                 >
                                     <option value="">{t('common.all') || 'All Categories'}</option>
-                                    <option value="sanitary">{t('inventory.categories.sanitary')}</option>
-                                    <option value="electrical">{t('inventory.categories.electrical')}</option>
-                                    <option value="plumbing">{t('inventory.categories.plumbing')}</option>
-                                    <option value="other">{t('inventory.categories.other')}</option>
+                                    {categories.map((cat) => (
+                                        <option key={cat} value={cat}>{getCategoryLabel(cat)}</option>
+                                    ))}
                                 </select>
                             </div>
                             <div>
@@ -433,7 +454,7 @@ export default function InventoryPage() {
                                             <span className="font-medium text-text-primary">{item.name}</span>
                                         </div>
                                     </td>
-                                    <td className="p-3 text-text-secondary capitalize">{t(`inventory.categories.${item.category}`)}</td>
+                                    <td className="p-3 text-text-secondary capitalize">{getCategoryLabel(item.category)}</td>
                                     <td className="p-3 font-medium text-text-primary">{item.quantity}</td>
                                     <td className="p-3 text-text-primary">Rs {item.selling_price}</td>
                                     <td className="p-3">

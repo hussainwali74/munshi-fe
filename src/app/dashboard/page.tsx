@@ -4,7 +4,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { ArrowUpRight, ArrowDownLeft, AlertTriangle, Users, Search, X, Calendar, Clock } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useState, useEffect, useRef } from 'react';
-import { searchCustomers, getRecentTransactions } from './search-actions';
+import { searchCustomers, getRecentTransactions, getDashboardStats } from './search-actions';
 import Link from 'next/link';
 import AddCustomerModal from '@/components/AddCustomerModal';
 import { SkeletonCustomerRow } from '@/components/Skeleton';
@@ -35,6 +35,31 @@ export default function Home() {
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
+  const [stats, setStats] = useState<{
+    totalUdhar: number;
+    totalPayable: number;
+    lowStockCount: number;
+    activeCustomersCount: number;
+    udharTrend: number;
+    newCustomersThisMonth: number;
+  } | null>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+  // Fetch dashboard stats on mount
+  useEffect(() => {
+    const fetchStats = async () => {
+      setIsLoadingStats(true);
+      try {
+        const data = await getDashboardStats();
+        setStats(data);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
   // Fetch recent transactions on mount
   useEffect(() => {
@@ -142,27 +167,32 @@ export default function Home() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <StatCard
             title={t('dashboard.totalUdhar')}
-            value="Rs 45,200"
+            value={isLoadingStats ? '...' : `Rs ${stats?.totalUdhar?.toLocaleString() || 0}`}
             icon={<ArrowUpRight className="text-danger" />}
-            trend={`+12% ${t('dashboard.thisMonth')}`}
+            trend={stats?.udharTrend !== undefined && stats.udharTrend !== 0 ? `${stats.udharTrend > 0 ? '+' : ''}${stats.udharTrend}% ${t('dashboard.thisMonth')}` : undefined}
+            trendType={stats?.udharTrend && stats.udharTrend > 0 ? 'up' : stats?.udharTrend && stats.udharTrend < 0 ? 'down' : undefined}
+            isLoading={isLoadingStats}
           />
           <StatCard
             title={t('dashboard.totalPayable')}
-            value="Rs 12,500"
+            value={isLoadingStats ? '...' : `Rs ${stats?.totalPayable?.toLocaleString() || 0}`}
             icon={<ArrowDownLeft className="text-success" />}
-            trend={`-5% ${t('dashboard.thisMonth')}`}
+            isLoading={isLoadingStats}
           />
           <StatCard
             title={t('dashboard.lowStock')}
-            value={`3 ${t('dashboard.items')}`}
+            value={isLoadingStats ? '...' : `${stats?.lowStockCount || 0} ${t('dashboard.items')}`}
             icon={<AlertTriangle className="text-warning" />}
-            trend={t('dashboard.needsAttention')}
+            trend={stats?.lowStockCount && stats.lowStockCount > 0 ? t('dashboard.needsAttention') : undefined}
+            isLoading={isLoadingStats}
           />
           <StatCard
             title={t('dashboard.activeCustomers')}
-            value="128"
+            value={isLoadingStats ? '...' : `${stats?.activeCustomersCount || 0}`}
             icon={<Users className="text-primary" />}
-            trend={`+4 ${t('dashboard.newToday')}`}
+            trend={stats?.newCustomersThisMonth && stats.newCustomersThisMonth > 0 ? `+${stats.newCustomersThisMonth} ${t('dashboard.newThisMonth')}` : undefined}
+            trendType="up"
+            isLoading={isLoadingStats}
           />
         </div>
 
@@ -217,9 +247,9 @@ export default function Home() {
                 <Link href="/billing" className="inline-flex  items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px w-full">
                   <ArrowUpRight size={20} /> {t('dashboard.addTransaction')}
                 </Link>
-                <button className="inline-flex items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-surface text-text-primary border border-border hover:bg-background w-full">
+                <Link href="/khata" className="inline-flex items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-surface text-text-primary border border-border hover:bg-background w-full">
                   <ArrowDownLeft size={20} /> {t('dashboard.addPayment')}
-                </button>
+                </Link>
                 <button
                   onClick={() => setIsAddCustomerOpen(true)}
                   className="inline-flex items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-surface text-text-primary border border-border hover:bg-background w-full"
@@ -350,15 +380,30 @@ export default function Home() {
   );
 }
 
-function StatCard({ title, value, icon, trend }: any) {
+function StatCard({ title, value, icon, trend, trendType, isLoading }: any) {
+  const getTrendColor = () => {
+    if (trendType === 'up') return 'text-success';
+    if (trendType === 'down') return 'text-danger';
+    return 'text-text-secondary';
+  };
+
   return (
     <div className="bg-surface rounded-xl p-6 shadow-md border border-border">
       <div className="flex items-start justify-between mb-2">
         <p className="text-text-secondary font-medium">{title}</p>
         <div className="p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">{icon}</div>
       </div>
-      <h3 className="text-2xl font-bold mb-1">{value}</h3>
-      <p className="text-sm text-text-secondary">{trend}</p>
+      {isLoading ? (
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-1"></div>
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+        </div>
+      ) : (
+        <>
+          <h3 className="text-2xl font-bold mb-1">{value}</h3>
+          {trend && <p className={`text-sm ${getTrendColor()}`}>{trend}</p>}
+        </>
+      )}
     </div>
   );
 }

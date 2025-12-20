@@ -8,13 +8,21 @@ import { useRouter } from 'next/navigation';
 
 interface EditInventoryModalProps {
     item: any;
+    categories?: string[];
     onClose: () => void;
     onUpdate: () => void;
 }
 
-export default function EditInventoryModal({ item, onClose, onUpdate }: EditInventoryModalProps) {
+export default function EditInventoryModal({ item, categories = ['sanitary', 'electrical', 'plumbing', 'other'], onClose, onUpdate }: EditInventoryModalProps) {
     const { t } = useLanguage();
     const router = useRouter();
+
+    const getCategoryLabel = (category: string) => {
+        if (!category) return '';
+        const key = `inventory.categories.${category}`;
+        const translation = t(key);
+        return translation === key ? category.charAt(0).toUpperCase() + category.slice(1) : translation;
+    };
     const [previewUrl, setPreviewUrl] = useState<string | null>(item.image_url);
     const [deleteImage, setDeleteImage] = useState(false);
 
@@ -125,11 +133,10 @@ export default function EditInventoryModal({ item, onClose, onUpdate }: EditInve
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.category')}</label>
-                            <select name="category" defaultValue={item.category} className="w-full p-2 rounded-[0.75rem] border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none">
-                                <option value="sanitary">{t('inventory.categories.sanitary')}</option>
-                                <option value="electrical">{t('inventory.categories.electrical')}</option>
-                                <option value="plumbing">{t('inventory.categories.plumbing')}</option>
-                                <option value="other">{t('inventory.categories.other')}</option>
+                            <select name="category" defaultValue={item.category} className="w-full p-2 rounded-[0.75rem] border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none capitalize">
+                                {categories.map((cat) => (
+                                    <option key={cat} value={cat}>{getCategoryLabel(cat)}</option>
+                                ))}
                             </select>
                         </div>
                     </div>

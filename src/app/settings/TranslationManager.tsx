@@ -225,7 +225,7 @@ export default function TranslationManager() {
                         <div key={section} className="bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
                             <button
                                 onClick={() => toggleSection(section)}
-                                className="w-full flex items-center justify-between p-4 bg-gray-50/50 hover:bg-gray-50 transition-colors"
+                                className="w-full flex items-center justify-between p-4 bg-gray-50/50 dark:bg-white/5 hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
                             >
                                 <h3 className="text-lg font-bold capitalize text-text-primary flex items-center gap-2">
                                     {isExpanded ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
@@ -238,7 +238,7 @@ export default function TranslationManager() {
                                     {items.map(item => {
                                         const isEditing = editingKey === item.key;
                                         return (
-                                            <div key={item.key} className="bg-white border border-border rounded-lg p-4 relative group hover:shadow-md transition-shadow">
+                                            <div key={item.key} className="bg-background border border-border rounded-lg p-4 relative group hover:shadow-md transition-shadow">
                                                 {isEditing ? (
                                                     <div className="space-y-3">
                                                         <div>
@@ -247,7 +247,7 @@ export default function TranslationManager() {
                                                                 type="text"
                                                                 value={editValues.en}
                                                                 onChange={(e) => setEditValues({ ...editValues, en: e.target.value })}
-                                                                className="w-full p-2 mt-1 rounded border border-primary outline-none text-sm"
+                                                                className="w-full p-2 mt-1 rounded border border-primary outline-none text-sm bg-surface text-text-primary"
                                                                 disabled={loading}
                                                             />
                                                         </div>
@@ -257,7 +257,7 @@ export default function TranslationManager() {
                                                                 type="text"
                                                                 value={editValues.ur}
                                                                 onChange={(e) => setEditValues({ ...editValues, ur: e.target.value })}
-                                                                className="w-full p-2 mt-1 rounded border border-primary outline-none text-sm text-right font-noto"
+                                                                className="w-full p-2 mt-1 rounded border border-primary outline-none text-sm text-right font-noto bg-surface text-text-primary"
                                                                 dir="rtl"
                                                                 disabled={loading}
                                                             />
@@ -299,7 +299,7 @@ export default function TranslationManager() {
                                                         </div>
 
                                                         {/* Actions */}
-                                                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-white shadow-sm p-1 rounded-lg border border-border">
+                                                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 bg-surface shadow-sm p-1 rounded-lg border border-border">
                                                             <button
                                                                 onClick={() => {
                                                                     setEditingKey(item.key);

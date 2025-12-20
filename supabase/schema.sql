@@ -18,6 +18,7 @@ create table if not exists customers (
   user_id uuid references users(id) on delete cascade not null,
   name text not null,
   phone text,
+  cnic text,
   address text,
   balance numeric default 0,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
@@ -67,6 +68,11 @@ create table if not exists employees (
 -- MIGRATION: Add missing columns if table exists (Idempotent)
 do $$
 begin
+    -- Customers columns
+    if not exists (select 1 from information_schema.columns where table_name = 'customers' and column_name = 'cnic') then
+        alter table customers add column cnic text;
+    end if;
+
     -- Inventory columns
     if not exists (select 1 from information_schema.columns where table_name = 'inventory' and column_name = 'image_url') then
         alter table inventory add column image_url text;

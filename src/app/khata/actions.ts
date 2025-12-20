@@ -65,6 +65,7 @@ export async function updateCustomer(formData: FormData) {
     const id = formData.get('id') as string
     const name = formData.get('name') as string
     const phone = formData.get('phone') as string
+    const cnic = formData.get('cnic') as string
     const address = formData.get('address') as string
 
     const { error } = await getDb()
@@ -72,6 +73,7 @@ export async function updateCustomer(formData: FormData) {
         .update({
             name,
             phone,
+            cnic,
             address
         })
         .eq('id', id)
@@ -110,12 +112,14 @@ export async function addCustomer(formData: FormData) {
 
     const name = formData.get('name') as string
     const phone = formData.get('phone') as string
+    const cnic = formData.get('cnic') as string
     const address = formData.get('address') as string
 
     const { error } = await getDb().from('customers').insert({
         user_id: session.userId,
         name,
         phone,
+        cnic,
         address,
         balance: 0
     })

@@ -8,11 +8,13 @@ import AddCustomerModal from '@/components/AddCustomerModal';
 import { useLanguage } from '@/context/LanguageContext';
 import { toast } from 'react-hot-toast';
 import { SkeletonCustomerRow } from '@/components/Skeleton';
+import { formatCNIC } from '@/lib/utils';
 
 interface Customer {
     id: string;
     name: string;
     phone: string;
+    cnic?: string;
     address: string;
     balance: number;
 }
@@ -20,6 +22,7 @@ interface Customer {
 export default function KhataPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+    const [editingCnic, setEditingCnic] = useState('');
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,6 +59,7 @@ export default function KhataPage() {
 
     const handleEdit = (customer: Customer) => {
         setEditingCustomer(customer);
+        setEditingCnic(customer.cnic || '');
     };
 
     const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -80,6 +84,7 @@ export default function KhataPage() {
     const filteredCustomers = customers.filter((customer) =>
         customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         customer.phone?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        customer.cnic?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         customer.address?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
@@ -152,6 +157,22 @@ export default function KhataPage() {
 
                             <div>
                                 <label className="block text-sm font-medium mb-1 text-text-primary">
+                                    {t('khata.cnic') || 'CNIC'} <span className="text-text-secondary font-normal text-xs">({t('common.optional') || 'Optional'})</span>
+                                </label>
+                                <input
+                                    name="cnic"
+                                    type="text"
+                                    disabled={isSubmitting}
+                                    value={editingCnic}
+                                    onChange={(e) => setEditingCnic(formatCNIC(e.target.value))}
+                                    maxLength={15}
+                                    className="w-full p-3 rounded-xl border border-border bg-surface text-text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all duration-200"
+                                    placeholder="12345-1234567-1"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1 text-text-primary">
                                     {t('khata.address') || 'Address'}
                                 </label>
                                 <input
@@ -207,7 +228,7 @@ export default function KhataPage() {
                         <SkeletonCustomerRow key={i} />
                     ))
                 ) : filteredCustomers.map((customer) => (
-                    <div key={customer.id} className="bg-surface rounded-xl p-5 shadow-md border border-border hover:bg-gray-50 transition-colors" dir={isRtl ? 'rtl' : 'ltr'}>
+                    <div key={customer.id} className="bg-surface rounded-xl p-5 shadow-md border border-border hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" dir={isRtl ? 'rtl' : 'ltr'}>
                         <div className={`flex items-center justify-between gap-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
                             {/* Customer Info */}
                             <Link href={`/khata/${customer.id}`} className={`flex items-center gap-4 flex-1 min-w-0 ${isRtl ? 'flex-row-reverse' : ''}`}>
@@ -220,7 +241,10 @@ export default function KhataPage() {
                                     <h3 className="font-bold text-lg text-text-primary mb-1 truncate">
                                         {customer.name}
                                     </h3>
-                                    <p className="text-text-secondary text-sm">{customer.phone}</p>
+                                    <p className="text-text-secondary text-sm">
+                                        {customer.phone}
+                                        {customer.cnic && ` • ${formatCNIC(customer.cnic)}`}
+                                    </p>
                                 </div>
                             </Link>
 

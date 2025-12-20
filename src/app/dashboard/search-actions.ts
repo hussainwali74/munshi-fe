@@ -18,9 +18,9 @@ export async function searchCustomers(query: string) {
 
     const { data, error } = await getDb()
         .from('customers')
-        .select('id, name, phone, address')
+        .select('id, name, phone, address, cnic')
         .eq('user_id', session.userId)
-        .or(`name.ilike.%${sanitizedQuery}%,phone.ilike.%${sanitizedQuery}%`)
+        .or(`name.ilike.%${sanitizedQuery}%,phone.ilike.%${sanitizedQuery}%,cnic.ilike.%${sanitizedQuery}%`)
         .limit(5)
 
     if (error) {
@@ -95,4 +95,109 @@ export async function getRecentTransactions() {
             paidAmount: txn.paid_amount
         }
     })
+}
+
+export async function getDashboardStats() {
+    const session = await getSession()
+    if (!session) return null
+
+    // Date calculations
+    const now = new Date()
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0) // Last day of previous month
+
+    // Get total udhar (receivable) - sum of positive customer balances
+    const { data: udharData } = await getDb()
+        .from('customers')
+        .select('balance')
+        .eq('user_id', session.userId)
+        .gt('balance', 0)
+
+    const totalUdhar = (udharData || []).reduce((sum: number, c: any) => sum + (c.balance || 0), 0)
+
+    // Get total payable - sum of negative customer balances (we owe them)
+    const { data: payableData } = await getDb()
+        .from('customers')
+        .select('balance')
+        .eq('user_id', session.userId)
+        .lt('balance', 0)
+
+    const totalPayable = Math.abs((payableData || []).reduce((sum: number, c: any) => sum + (c.balance || 0), 0))
+
+    // Get low stock items count
+    const { data: lowStockData } = await getDb()
+        .from('inventory')
+        .select('id, quantity, low_stock_threshold')
+        .eq('user_id', session.userId)
+
+    const lowStockCount = (lowStockData || []).filter(
+        (item: any) => item.quantity <= (item.low_stock_threshold || 5)
+    ).length
+
+    // Get active customers count (customers with at least one transaction in last 30 days)
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+    const { data: activeCustomersData } = await getDb()
+        .from('transactions')
+        .select('customer_id')
+        .eq('user_id', session.userId)
+        .gte('created_at', thirtyDaysAgo.toISOString())
+
+    // Get unique customer IDs
+    const uniqueCustomerIds = new Set((activeCustomersData || []).map((t: any) => t.customer_id))
+    const activeCustomersCount = uniqueCustomerIds.size
+
+    // Get total customers count
+    const { count: totalCustomers } = await getDb()
+        .from('customers')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', session.userId)
+
+    // Calculate month-over-month trends
+    // Get credit transactions this month (udhar given)
+    const { data: thisMonthCredits } = await getDb()
+        .from('transactions')
+        .select('amount')
+        .eq('user_id', session.userId)
+        .eq('type', 'credit')
+        .gte('created_at', startOfThisMonth.toISOString())
+
+    const thisMonthUdhar = (thisMonthCredits || []).reduce((sum: number, t: any) => sum + (t.amount || 0), 0)
+
+    // Get credit transactions last month
+    const { data: lastMonthCredits } = await getDb()
+        .from('transactions')
+        .select('amount')
+        .eq('user_id', session.userId)
+        .eq('type', 'credit')
+        .gte('created_at', startOfLastMonth.toISOString())
+        .lte('created_at', endOfLastMonth.toISOString())
+
+    const lastMonthUdhar = (lastMonthCredits || []).reduce((sum: number, t: any) => sum + (t.amount || 0), 0)
+
+    // Calculate udhar trend percentage
+    let udharTrend = 0
+    if (lastMonthUdhar > 0) {
+        udharTrend = Math.round(((thisMonthUdhar - lastMonthUdhar) / lastMonthUdhar) * 100)
+    } else if (thisMonthUdhar > 0) {
+        udharTrend = 100 // New activity this month
+    }
+
+    // Get new customers this month
+    const { count: newCustomersThisMonth } = await getDb()
+        .from('customers')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', session.userId)
+        .gte('created_at', startOfThisMonth.toISOString())
+
+    return {
+        totalUdhar,
+        totalPayable,
+        lowStockCount,
+        activeCustomersCount: activeCustomersCount || totalCustomers || 0,
+        udharTrend,
+        newCustomersThisMonth: newCustomersThisMonth || 0
+    }
 }

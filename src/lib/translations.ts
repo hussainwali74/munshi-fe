@@ -19,6 +19,7 @@ export const translations = {
       or: "Or",
       close: "Close",
       all: "All",
+      note: "Note",
     },
     dashboard: {
       totalSales: "Total Sales",
@@ -46,6 +47,7 @@ export const translations = {
       needsAttention: "Needs attention",
       thisMonth: "this month",
       newToday: "new today",
+      newThisMonth: "new this month",
     },
     inventory: {
       title: "Inventory",
@@ -128,7 +130,20 @@ export const translations = {
         ownerName: "Your full name",
         phone: "0300-1234567",
         address: "Street, City",
-      }
+      },
+      categories: "Categories",
+      categoriesTitle: "Inventory Categories",
+      categoriesSubtitle: "Manage categories for your inventory items",
+      addNewCategory: "Add New Category",
+      categoryPlaceholder: "e.g. Electronics",
+      currentCategories: "Current Categories",
+      noCategories: "No categories found",
+      categoryAdded: "Category added successfully",
+      categoryRemoved: "Category removed successfully",
+      categoryNameRequired: "Category name is required",
+      cannotRemoveLastCategory: "Cannot remove the last category",
+      categoriesNote: "Categories are used when adding inventory items. Changes will be reflected in the inventory page.",
+      translations: "Translations",
     },
     khata: {
       title: "Khata (Ledger)",
@@ -149,6 +164,7 @@ export const translations = {
       noCustomersSubtitle: "Start by adding your first customer",
       noSearchResults: "No customers match your search",
       noTransactions: "No recent transactions",
+      cnic: "CNIC",
     },
     billing: {
       title: "New Bill",
@@ -281,6 +297,7 @@ export const translations = {
       or: "یا",
       close: "بند کریں",
       all: "تمام",
+      note: "نوٹ",
     },
     dashboard: {
       totalSales: "کل فروخت",
@@ -308,6 +325,7 @@ export const translations = {
       needsAttention: "توجہ کی ضرورت ہے",
       thisMonth: "اس مہینے",
       newToday: "آج نیا",
+      newThisMonth: "اس مہینے نئے",
     },
     inventory: {
       title: "انوینٹری",
@@ -390,7 +408,20 @@ export const translations = {
         ownerName: "آپ کا پورا نام",
         phone: "0300-1234567",
         address: "گلی، شہر",
-      }
+      },
+      categories: "زمرہ جات",
+      categoriesTitle: "انوینٹری کے زمرہ جات",
+      categoriesSubtitle: "اپنی انوینٹری آئٹمز کے لیے زمرہ جات کا انتظام کریں",
+      addNewCategory: "نیا زمرہ شامل کریں",
+      categoryPlaceholder: "مثلاً الیکٹرانکس",
+      currentCategories: "موجودہ زمرہ جات",
+      noCategories: "کوئی زمرہ جات نہیں ملے",
+      categoryAdded: "زمرہ کامیابی سے شامل کر دیا گیا",
+      categoryRemoved: "زمرہ کامیابی سے ہٹا دیا گیا",
+      categoryNameRequired: "زمرہ کا نام درکار ہے",
+      cannotRemoveLastCategory: "آخری زمرہ کو نہیں ہٹایا جا سکتا",
+      categoriesNote: "زمرہ جات انوینٹری آئٹمز شامل کرتے وقت استعمال ہوتے ہیں۔ تبدیلیاں انوینٹری صفحے پر نظر آئیں گی۔",
+      translations: "تراجم",
     },
     khata: {
       title: "کھاتہ (لیجر)",
@@ -411,6 +442,7 @@ export const translations = {
       noCustomersSubtitle: "اپنا پہلا گاہک شامل کر کے شروع کریں",
       noSearchResults: "آپ کی تلاش سے میل کھانے والا کوئی گاہک نہیں",
       noTransactions: "کوئی حالیہ لین دین نہیں",
+      cnic: "شناختی کارڈ",
     },
     billing: {
       title: "نیا بل",

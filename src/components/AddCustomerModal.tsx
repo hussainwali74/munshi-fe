@@ -3,6 +3,8 @@
 import { X } from 'lucide-react';
 import { addCustomer } from '@/app/khata/actions';
 import { useLanguage } from '@/context/LanguageContext';
+import { useState, useEffect } from 'react';
+import { formatCNIC } from '@/lib/utils';
 
 interface AddCustomerModalProps {
     isOpen: boolean;
@@ -12,6 +14,11 @@ interface AddCustomerModalProps {
 
 export default function AddCustomerModal({ isOpen, onClose, onSuccess }: AddCustomerModalProps) {
     const { t } = useLanguage();
+    const [cnic, setCnic] = useState('');
+
+    useEffect(() => {
+        if (isOpen) setCnic('');
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -56,6 +63,21 @@ export default function AddCustomerModal({ isOpen, onClose, onSuccess }: AddCust
                             type="tel"
                             className="w-full p-3 rounded-[0.75rem] border border-border bg-surface text-text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all duration-200"
                             placeholder="0300-1234567"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold mb-2 text-text-primary">
+                            {t('khata.cnic') || 'CNIC'} <span className="text-text-secondary font-normal text-xs">({t('common.optional') || 'Optional'})</span>
+                        </label>
+                        <input
+                            name="cnic"
+                            type="text"
+                            value={cnic}
+                            onChange={(e) => setCnic(formatCNIC(e.target.value))}
+                            maxLength={15}
+                            className="w-full p-3 rounded-[0.75rem] border border-border bg-surface text-text-primary focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all duration-200"
+                            placeholder="12345-1234567-1"
                         />
                     </div>
 

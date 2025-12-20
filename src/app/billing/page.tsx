@@ -9,6 +9,7 @@ import AddCustomerModal from '@/components/AddCustomerModal';
 import { useLanguage } from '@/context/LanguageContext';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import { formatCNIC } from '@/lib/utils';
 
 interface CartItem {
     id: string;
@@ -23,6 +24,7 @@ interface Customer {
     name: string;
     phone: string;
     address: string;
+    cnic?: string;
 }
 
 export default function BillingPage() {
@@ -285,7 +287,10 @@ export default function BillingPage() {
                                         </div>
                                         <div>
                                             <p className="font-bold text-text-primary">{selectedCustomer.name}</p>
-                                            <p className="text-sm text-text-secondary">{selectedCustomer.phone || selectedCustomer.address || '-'}</p>
+                                            <p className="text-sm text-text-secondary">
+                                                {selectedCustomer.phone || selectedCustomer.address || '-'}
+                                                {selectedCustomer.cnic && ` • ${formatCNIC(selectedCustomer.cnic)}`}
+                                            </p>
                                         </div>
                                     </div>
                                     <button
@@ -326,7 +331,10 @@ export default function BillingPage() {
                                                     </div>
                                                     <div>
                                                         <p className="font-semibold text-text-primary">{c.name}</p>
-                                                        <p className="text-xs text-text-secondary">{c.phone}</p>
+                                                        <p className="text-xs text-text-secondary">
+                                                            {c.phone}
+                                                            {c.cnic && ` • ${formatCNIC(c.cnic)}`}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             ))}
