@@ -3,7 +3,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import SettingsPage from '../page';
 import { useLanguage } from '@/context/LanguageContext';
-import { updateShopDetails } from '../actions';
+
 import '@testing-library/jest-dom';
 
 // Mock the useLanguage hook

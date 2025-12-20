@@ -41,6 +41,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'cdn.ezkhata.com',
       },
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
     ],
   },
   experimental: {

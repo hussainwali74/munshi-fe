@@ -1,7 +1,7 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import Page from '../page';
 import { useLanguage } from '@/context/LanguageContext';
 

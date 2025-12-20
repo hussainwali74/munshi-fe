@@ -62,7 +62,7 @@ describe('Middleware', () => {
         it('should allow access to /login without session', async () => {
             const request = createMockRequest('/login');
 
-            const response = await middleware(request);
+            await middleware(request);
 
             // Should call NextResponse.next() for public paths
             expect(NextResponse.next).toHaveBeenCalled();
@@ -71,7 +71,7 @@ describe('Middleware', () => {
         it('should allow access to / (landing page) without session', async () => {
             const request = createMockRequest('/');
 
-            const response = await middleware(request);
+            await middleware(request);
 
             expect(NextResponse.next).toHaveBeenCalled();
         });
@@ -79,7 +79,7 @@ describe('Middleware', () => {
         it('should allow access to /auth paths without session', async () => {
             const request = createMockRequest('/auth/callback');
 
-            const response = await middleware(request);
+            await middleware(request);
 
             expect(NextResponse.next).toHaveBeenCalled();
         });
@@ -89,7 +89,7 @@ describe('Middleware', () => {
         it('should redirect unauthenticated users to /login', async () => {
             const request = createMockRequest('/dashboard');
 
-            const response = await middleware(request);
+            await middleware(request);
 
             expect(NextResponse.redirect).toHaveBeenCalled();
             const redirectCall = (NextResponse.redirect as jest.Mock).mock.calls[0][0];
@@ -100,7 +100,7 @@ describe('Middleware', () => {
             (jwtVerify as jest.Mock).mockResolvedValue({ payload: { userId: 'user-123' } });
             const request = createMockRequest('/dashboard', 'valid-session-token');
 
-            const response = await middleware(request);
+            await middleware(request);
 
             expect(NextResponse.next).toHaveBeenCalled();
         });
@@ -111,7 +111,7 @@ describe('Middleware', () => {
             (jwtVerify as jest.Mock).mockResolvedValue({ payload: { userId: 'user-123' } });
             const request = createMockRequest('/login', 'valid-session-token');
 
-            const response = await middleware(request);
+            await middleware(request);
 
             expect(NextResponse.redirect).toHaveBeenCalled();
             const redirectCall = (NextResponse.redirect as jest.Mock).mock.calls[0][0];
@@ -122,7 +122,7 @@ describe('Middleware', () => {
             (jwtVerify as jest.Mock).mockResolvedValue({ payload: { userId: 'user-123' } });
             const request = createMockRequest('/', 'valid-session-token');
 
-            const response = await middleware(request);
+            await middleware(request);
 
             expect(NextResponse.redirect).toHaveBeenCalled();
             const redirectCall = (NextResponse.redirect as jest.Mock).mock.calls[0][0];
@@ -134,7 +134,7 @@ describe('Middleware', () => {
         it('should allow static files without session', async () => {
             const request = createMockRequest('/icon.svg');
 
-            const response = await middleware(request);
+            await middleware(request);
 
             // Static files should pass through
             expect(NextResponse.next).toHaveBeenCalled();
@@ -146,7 +146,7 @@ describe('Middleware', () => {
             (jwtVerify as jest.Mock).mockRejectedValue(new Error('Invalid token'));
             const request = createMockRequest('/dashboard', 'invalid-token');
 
-            const response = await middleware(request);
+            await middleware(request);
 
             expect(NextResponse.redirect).toHaveBeenCalled();
             const redirectCall = (NextResponse.redirect as jest.Mock).mock.calls[0][0];

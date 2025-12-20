@@ -1,9 +1,8 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Home, Users, Package, FileText, Settings, LogOut } from 'lucide-react';
+import { X, Home, Users, Package, FileText, Settings, LogOut } from 'lucide-react';
 import { signOut } from '@/app/login/actions';
 import ThemeToggle from './ThemeToggle';
 import LanguageToggle from './LanguageToggle';

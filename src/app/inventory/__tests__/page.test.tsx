@@ -87,7 +87,7 @@ describe('Inventory Page - Urdu Support', () => {
 
         // Check for RTL direction
         const titleElement = screen.getByText('inventory.title');
-        const container = titleElement.closest('div[dir="rtl"]');
+        expect(titleElement.closest('div[dir="rtl"]')).toBeInTheDocument();
         // Note: Inventory page might not have a single wrapper with dir="rtl" for everything,
         // but specific sections might. Let's check my implementation.
         // In step 150 (replace_file_content), I didn't explicitly wrap everything in a dir="rtl" div 

@@ -1,6 +1,7 @@
 'use client';
 
-import { Search, Plus, Package, Filter, X, Upload, Edit, Trash2, Loader2 } from 'lucide-react';
+import { Search, Plus, Package, X, Upload, Edit, Trash2, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 import { toast } from 'react-hot-toast';
 import { useState, useEffect } from 'react';
 import { addInventoryItem, getInventoryItems, deleteInventoryItem } from './actions';
@@ -112,7 +113,7 @@ export default function InventoryPage() {
 
     // Close suggestions on click outside
     useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
+        const handleClickOutside = () => {
             if (showSuggestions) {
                 setShowSuggestions(false);
             }
@@ -167,7 +168,7 @@ export default function InventoryPage() {
 
                             // Debug: Log all FormData entries
                             console.log('📋 FormData contents:');
-                            for (let [key, value] of formData.entries()) {
+                            for (const [key, value] of formData.entries()) {
                                 if (value instanceof File) {
                                     console.log(`  ${key}:`, value.name, value.size, 'bytes', value.type);
                                 } else {
@@ -207,7 +208,7 @@ export default function InventoryPage() {
                                 {addImagePreview ? (
                                     <div className="flex flex-col gap-3">
                                         <div className="relative w-full h-48 rounded-xl overflow-hidden border border-border bg-background">
-                                            <img src={addImagePreview} alt="Preview" className="w-full h-full object-contain" />
+                                            <Image src={addImagePreview} alt="Preview" fill className="object-contain" unoptimized />
                                             <button
                                                 type="button"
                                                 onClick={() => {
@@ -335,9 +336,9 @@ export default function InventoryPage() {
                                             }}
                                             className="w-full p-3 flex items-center gap-3 hover:bg-background/80 transition-colors text-left"
                                         >
-                                            <div className="w-10 h-10 rounded-lg bg-background border border-border flex items-center justify-center overflow-hidden shrink-0">
+                                            <div className="relative w-10 h-10 rounded-lg bg-background border border-border flex items-center justify-center overflow-hidden shrink-0">
                                                 {item.image_url ? (
-                                                    <img src={getImageUrl(item.image_url)} alt="" className="w-full h-full object-cover" />
+                                                    <Image src={getImageUrl(item.image_url)} alt="" fill className="object-cover" />
                                                 ) : (
                                                     <Package size={16} className="text-text-secondary" />
                                                 )}
@@ -435,15 +436,17 @@ export default function InventoryPage() {
                             <tr key={item.id} className="hover:bg-background/50 transition-colors">
                                 <td className="p-3">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-12 h-12 rounded-lg flex items-center justify-center text-text-secondary overflow-hidden bg-background border border-border shrink-0">
+                                        <div className="relative w-12 h-12 rounded-lg flex items-center justify-center text-text-secondary overflow-hidden bg-background border border-border shrink-0">
                                             {item.image_url ? (
-                                                <img
+                                                <Image
                                                     src={getImageUrl(item.image_url)}
                                                     alt={item.name}
-                                                    className="w-full h-full object-cover"
+                                                    fill
+                                                    className="object-cover"
                                                     onError={(e) => {
-                                                        e.currentTarget.style.display = 'none';
-                                                        e.currentTarget.parentElement?.classList.add('fallback-icon');
+                                                        const target = e.currentTarget as HTMLImageElement;
+                                                        target.style.display = 'none';
+                                                        target.parentElement?.classList.add('fallback-icon');
                                                     }}
                                                 />
                                             ) : null}

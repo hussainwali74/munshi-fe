@@ -12,11 +12,8 @@ import {
   Smartphone,
   Globe,
   Lock,
-  Database,
-  Server,
   Zap,
-  Layers,
-  Download
+  Layers
 } from 'lucide-react';
 import styles from './page.module.css';
 import { useLanguage } from '@/context/LanguageContext';

@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X, Upload, Trash2 } from 'lucide-react';
+import Image from 'next/image';
 import { updateInventoryItem } from '@/app/inventory/actions';
 import { useLanguage } from '@/context/LanguageContext';
-import { useRouter } from 'next/navigation';
 
 interface EditInventoryModalProps {
     item: any;
@@ -15,7 +15,6 @@ interface EditInventoryModalProps {
 
 export default function EditInventoryModal({ item, categories = ['sanitary', 'electrical', 'plumbing', 'other'], onClose, onUpdate }: EditInventoryModalProps) {
     const { t } = useLanguage();
-    const router = useRouter();
 
     const getCategoryLabel = (category: string) => {
         if (!category) return '';
@@ -73,14 +72,17 @@ export default function EditInventoryModal({ item, categories = ['sanitary', 'el
                         {previewUrl ? (
                             <div className="flex flex-col gap-3">
                                 <div className="relative w-full h-48 rounded-[0.75rem] overflow-hidden border border-border bg-background">
-                                    <img
+                                    <Image
                                         src={getImageUrl(previewUrl)}
                                         alt="Preview"
-                                        className="w-full h-full object-contain"
+                                        fill
+                                        className="object-contain"
+                                        unoptimized
                                         onError={(e) => {
-                                            e.currentTarget.style.display = 'none';
-                                            e.currentTarget.parentElement?.classList.add('bg-background', 'flex', 'items-center', 'justify-center');
-                                            e.currentTarget.parentElement!.innerHTML = '<div class="text-text-secondary flex flex-col items-center"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-off mb-2"><line x1="2" x2="22" y1="2" y2="22"/><path d="M10.41 6.69C11.24 5.77 12.6 5.77 13.41 6.69L15 8.28 18 5.27L20 7.27"/><path d="M18.22 18.22L12.13 12.13"/><path d="M2 12L5 15L6.3 13.7"/><path d="M22 15.89V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 1.18-.39"/></svg><span>Image not found</span></div>';
+                                            const target = e.currentTarget as HTMLImageElement;
+                                            target.style.display = 'none';
+                                            target.parentElement?.classList.add('bg-background', 'flex', 'items-center', 'justify-center');
+                                            target.parentElement!.innerHTML = '<div class="text-text-secondary flex flex-col items-center"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-off mb-2"><line x1="2" x2="22" y1="2" y2="22"/><path d="M10.41 6.69C11.24 5.77 12.6 5.77 13.41 6.69L15 8.28 18 5.27L20 7.27"/><path d="M18.22 18.22L12.13 12.13"/><path d="M2 12L5 15L6.3 13.7"/><path d="M22 15.89V5a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 1.18-.39"/></svg><span>Image not found</span></div>';
                                         }}
                                     />
                                     <button

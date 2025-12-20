@@ -35,8 +35,6 @@ export async function createBill(formData: FormData) {
 
     const customerId = formData.get('customerId') as string
     const itemsJson = formData.get('items') as string
-    const totalAmount = parseFloat(formData.get('totalAmount') as string)
-    const discount = parseFloat(formData.get('discount') as string) || 0
     const finalAmount = parseFloat(formData.get('finalAmount') as string)
     const paidAmount = parseFloat(formData.get('paidAmount') as string) || 0
     const paymentMode = formData.get('paymentMode') as string || 'cash' // cash, credit (udhar)
@@ -44,12 +42,11 @@ export async function createBill(formData: FormData) {
     let items = []
     try {
         items = JSON.parse(itemsJson)
-    } catch (e) {
+    } catch {
         throw new Error('Invalid items data')
     }
 
     // 1. Create Transaction Record
-    const type = paymentMode === 'credit' ? 'credit' : 'debit' // credit means udhar given (receivable), debit means cash sale (if fully paid, it's balanced, but usually we track sales)
     // Actually, for a bill:
     // If fully paid: It's a cash sale. We might just record it as a 'sale' type or 'debit' (money coming in).
     // If udhar: It's 'credit' (money receivable).

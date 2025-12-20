@@ -1,8 +1,8 @@
 'use client';
 
-import { ArrowLeft, Plus, Phone, MapPin, ArrowUpRight, ArrowDownLeft, ShoppingBag, User } from 'lucide-react';
+import { ArrowLeft, Phone, MapPin, ArrowUpRight, ArrowDownLeft, ShoppingBag, User } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useCallback } from 'react';
 import { addTransaction, getCustomerById } from '../actions';
 import { useLanguage } from '@/context/LanguageContext';
 import { toast } from 'react-hot-toast';
@@ -38,16 +38,16 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
     // Unwrap params Promise
     const { id } = use(params);
 
-    const fetchCustomer = async () => {
+    const fetchCustomer = useCallback(async () => {
         setLoading(true);
         const data = await getCustomerById(id);
         setCustomer(data);
         setLoading(false);
-    };
+    }, [id]);
 
     useEffect(() => {
         fetchCustomer();
-    }, [id]);
+    }, [fetchCustomer]);
 
     const handleSubmitTransaction = async (formData: FormData) => {
         try {

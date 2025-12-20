@@ -25,7 +25,7 @@ jest.mock('@/context/LanguageContext', () => ({
 
 describe('AddCustomerModal', () => {
     const mockOnClose = jest.fn();
-    const mockOnSuccess = jest.fn();
+
 
     beforeEach(() => {
         jest.clearAllMocks();

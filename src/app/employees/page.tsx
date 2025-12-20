@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Search, Plus, UserCheck, Phone, X, Trash2, Calendar, Briefcase, DollarSign, Edit } from 'lucide-react';
+import { Plus, UserCheck, Phone, X, Trash2, Calendar, Briefcase, DollarSign } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useState, useEffect } from 'react';
 import { addEmployee, getEmployees, deleteEmployee, updateEmployee } from './actions';

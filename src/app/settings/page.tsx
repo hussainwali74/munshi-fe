@@ -51,7 +51,7 @@ export default function SettingsPage() {
             } else {
                 toast.error(result.error || 'Failed to add category');
             }
-        } catch (error) {
+        } catch {
             toast.error('Failed to add category');
         } finally {
             setIsAddingCategory(false);
@@ -73,7 +73,7 @@ export default function SettingsPage() {
             } else {
                 toast.error(result.error || 'Failed to remove category');
             }
-        } catch (error) {
+        } catch {
             toast.error('Failed to remove category');
         } finally {
             setRemovingCategory(null);

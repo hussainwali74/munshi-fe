@@ -1,4 +1,4 @@
-import { deleteInventoryItem, getInventoryItems, addInventoryItem, updateInventoryItem } from './actions';
+import { deleteInventoryItem, getInventoryItems, addInventoryItem } from './actions';
 import { getDb } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 

@@ -2,12 +2,11 @@
 
 import { login, signup } from './actions'
 import { useState, useActionState } from 'react'
-import { useLanguage } from '@/context/LanguageContext'
+
 import { Loader2, Facebook, Twitter, Linkedin } from 'lucide-react'
 
 export default function LoginPage() {
     const [isLogin, setIsLogin] = useState(true)
-    const { t } = useLanguage()
 
     // Use separate states for login and signup
     const [loginState, loginAction, isLoginPending] = useActionState(login, {})

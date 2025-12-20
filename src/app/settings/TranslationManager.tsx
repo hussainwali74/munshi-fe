@@ -12,7 +12,6 @@ import { SkeletonTranslationCard } from '@/components/Skeleton';
 function getFlattenedKeys(obj: any, prefix = ''): string[] {
     return Object.keys(obj).reduce((acc: string[], k: string) => {
         const pre = prefix.length ? prefix + '.' : '';
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (typeof obj[k] === 'object' && obj[k] !== null && !Array.isArray(obj[k])) {
             acc.push(...getFlattenedKeys(obj[k], pre + k));
         } else {
@@ -140,7 +139,7 @@ export default function TranslationManager() {
             setEditingKey(null);
             toast.success('Translations updated');
             window.location.reload();
-        } catch (error) {
+        } catch {
             toast.error('Failed to save');
         } finally {
             setLoading(false);
@@ -156,7 +155,7 @@ export default function TranslationManager() {
             setEditingKey(null); // Close edit mode if open
             toast.success(`Reverted ${lang === 'en' ? 'English' : 'Urdu'} to default`);
             window.location.reload();
-        } catch (error) {
+        } catch {
             toast.error('Failed to revert');
         } finally {
             setLoading(false);
