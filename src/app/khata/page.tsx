@@ -7,6 +7,7 @@ import Link from 'next/link';
 import AddCustomerModal from '@/components/AddCustomerModal';
 import { useLanguage } from '@/context/LanguageContext';
 import { toast } from 'react-hot-toast';
+import { SkeletonCustomerRow } from '@/components/Skeleton';
 
 interface Customer {
     id: string;
@@ -22,12 +23,18 @@ export default function KhataPage() {
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const { t, language } = useLanguage();
     const isRtl = language === 'ur';
 
     const fetchCustomers = async () => {
-        const data = await getCustomers();
-        setCustomers(data || []);
+        setIsLoading(true);
+        try {
+            const data = await getCustomers();
+            setCustomers(data || []);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     useEffect(() => {
@@ -194,7 +201,12 @@ export default function KhataPage() {
 
             {/* Customer List */}
             <div className="space-y-4">
-                {filteredCustomers.map((customer) => (
+                {isLoading ? (
+                    // Skeleton loading state
+                    Array.from({ length: 5 }).map((_, i) => (
+                        <SkeletonCustomerRow key={i} />
+                    ))
+                ) : filteredCustomers.map((customer) => (
                     <div key={customer.id} className="bg-surface rounded-xl p-5 shadow-md border border-border hover:bg-gray-50 transition-colors" dir={isRtl ? 'rtl' : 'ltr'}>
                         <div className={`flex items-center justify-between gap-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
                             {/* Customer Info */}
@@ -276,7 +288,7 @@ export default function KhataPage() {
             </div>
 
             {/* Empty State (if no customers) */}
-            {customers.length === 0 && (
+            {!isLoading && customers.length === 0 && (
                 <div className="bg-surface rounded-xl p-12 text-center shadow-md border border-border">
                     <div className="w-20 h-20 rounded-full bg-primary/10 mx-auto mb-4 flex items-center justify-center text-primary">
                         <User size={40} />

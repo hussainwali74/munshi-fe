@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { addInventoryItem, getInventoryItems, deleteInventoryItem } from './actions';
 import EditInventoryModal from '@/components/EditInventoryModal';
 import { useLanguage } from '@/context/LanguageContext';
+import { SkeletonTableRow } from '@/components/Skeleton';
 
 // Force dynamic rendering (no static generation)
 export const dynamic = 'force-dynamic';
@@ -19,12 +20,18 @@ export default function InventoryPage() {
     const { t, language } = useLanguage();
     const isRtl = language === 'ur';
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const fetchInventory = async () => {
-        // Use Server Action to fetch data securely with cookies
-        const data = await getInventoryItems();
-        console.log('Inventory items:', data);
-        setItems(data || []);
+        setIsLoading(true);
+        try {
+            // Use Server Action to fetch data securely with cookies
+            const data = await getInventoryItems();
+            console.log('Inventory items:', data);
+            setItems(data || []);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const getImageUrl = (url: string) => {
@@ -264,7 +271,12 @@ export default function InventoryPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border">
-                                {items.length === 0 ? (
+                                {isLoading ? (
+                                    // Skeleton loading state
+                                    Array.from({ length: 5 }).map((_, i) => (
+                                        <SkeletonTableRow key={i} columns={6} />
+                                    ))
+                                ) : items.length === 0 ? (
                                     <tr>
                                         <td colSpan={6} className="p-8 text-center text-text-secondary">
                                             {t('inventory.noItems')}

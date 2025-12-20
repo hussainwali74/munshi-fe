@@ -8,6 +8,7 @@ import { searchCustomers } from './search-actions';
 import Link from 'next/link';
 import AddCustomerModal from '@/components/AddCustomerModal';
 
+
 interface Transaction {
   id: string;
   customerName: string;

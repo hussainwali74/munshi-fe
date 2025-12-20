@@ -6,6 +6,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useState, useEffect } from 'react';
 import { addEmployee, getEmployees, deleteEmployee, updateEmployee } from './actions';
 import { toast } from 'react-hot-toast';
+import { SkeletonCard } from '@/components/Skeleton';
 
 export default function EmployeesPage() {
     const { t, language } = useLanguage();
@@ -15,10 +16,16 @@ export default function EmployeesPage() {
     const [editingEmployee, setEditingEmployee] = useState<any | null>(null);
     const [employees, setEmployees] = useState<any[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     const fetchEmployees = async () => {
-        const data = await getEmployees();
-        setEmployees(data || []);
+        setIsLoading(true);
+        try {
+            const data = await getEmployees();
+            setEmployees(data || []);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     useEffect(() => {
@@ -195,7 +202,12 @@ export default function EmployeesPage() {
 
             {/* Employees Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" dir={isRtl ? 'rtl' : 'ltr'}>
-                {employees.length === 0 ? (
+                {isLoading ? (
+                    // Skeleton loading state
+                    Array.from({ length: 6 }).map((_, i) => (
+                        <SkeletonCard key={i} />
+                    ))
+                ) : employees.length === 0 ? (
                     <div className="col-span-full text-center py-12">
                         <UserCheck size={48} className="mx-auto text-text-secondary mb-4" />
                         <h3 className="text-xl font-semibold text-text-primary mb-2">

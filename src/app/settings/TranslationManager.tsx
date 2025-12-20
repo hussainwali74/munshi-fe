@@ -5,6 +5,7 @@ import { translations, Language } from '@/lib/translations';
 import { Search, Edit2, X, Check, ChevronDown, ChevronRight, RotateCcw } from 'lucide-react';
 import { updateCustomTranslation, deleteCustomTranslation, getMergedTranslations, CustomTranslation } from './translation-actions';
 import { toast } from 'react-hot-toast';
+import { SkeletonTranslationCard } from '@/components/Skeleton';
 
 // Helper to flatten keys but keep structure for grouping
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,6 +37,7 @@ export default function TranslationManager() {
     const [editingKey, setEditingKey] = useState<string | null>(null);
     const [editValues, setEditValues] = useState<{ en: string, ur: string }>({ en: '', ur: '' });
     const [loading, setLoading] = useState(false);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ 'dashboard': true, 'common': true });
 
     // Load translations
@@ -57,6 +59,8 @@ export default function TranslationManager() {
         } catch (error) {
             console.error(error);
             toast.error('Failed to load translations');
+        } finally {
+            setIsInitialLoading(false);
         }
     };
 
@@ -192,7 +196,20 @@ export default function TranslationManager() {
             </div>
 
             <div className="space-y-4">
-                {filteredSections.map(section => {
+                {isInitialLoading ? (
+                    // Skeleton loading state
+                    <div className="bg-surface rounded-xl border border-border shadow-sm overflow-hidden">
+                        <div className="p-4 bg-gray-50/50 flex items-center gap-2">
+                            <div className="w-5 h-5 bg-gray-200 rounded animate-pulse" />
+                            <div className="w-32 h-6 bg-gray-200 rounded animate-pulse" />
+                        </div>
+                        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {Array.from({ length: 6 }).map((_, i) => (
+                                <SkeletonTranslationCard key={i} />
+                            ))}
+                        </div>
+                    </div>
+                ) : filteredSections.map(section => {
                     const items = allData[section].filter(item =>
                         !searchTerm ||
                         section.toLowerCase().includes(searchTerm.toLowerCase()) ||

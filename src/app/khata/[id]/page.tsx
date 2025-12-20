@@ -72,8 +72,57 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
     if (loading) {
         return (
             <DashboardLayout>
-                <div className="flex items-center justify-center min-h-[400px]">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                {/* Back link skeleton */}
+                <div className="flex items-center gap-2 mb-4">
+                    <div className="w-5 h-5 bg-gray-200 rounded animate-pulse" />
+                    <div className="w-24 h-4 bg-gray-200 rounded animate-pulse" />
+                </div>
+
+                {/* Customer Header Skeleton */}
+                <div className="bg-surface rounded-xl p-6 shadow-md border border-border mb-6">
+                    <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-16 h-16 rounded-full bg-gray-200 animate-pulse" />
+                            <div className="space-y-2">
+                                <div className="w-32 h-6 bg-gray-200 rounded animate-pulse" />
+                                <div className="w-24 h-4 bg-gray-200 rounded animate-pulse" />
+                                <div className="w-40 h-4 bg-gray-200 rounded animate-pulse" />
+                            </div>
+                        </div>
+                        <div className="text-right space-y-2">
+                            <div className="w-20 h-4 bg-gray-200 rounded animate-pulse ml-auto" />
+                            <div className="w-32 h-8 bg-gray-200 rounded animate-pulse ml-auto" />
+                            <div className="w-24 h-4 bg-gray-200 rounded animate-pulse ml-auto" />
+                        </div>
+                    </div>
+                    <div className="flex gap-3 border-t border-border pt-4">
+                        <div className="flex-1 h-12 bg-gray-200 rounded-xl animate-pulse" />
+                        <div className="flex-1 h-12 bg-gray-200 rounded-xl animate-pulse" />
+                    </div>
+                </div>
+
+                {/* Transaction History Skeleton */}
+                <div className="bg-surface rounded-xl p-6 shadow-md border border-border">
+                    <div className="w-40 h-6 bg-gray-200 rounded animate-pulse mb-4" />
+                    <div className="space-y-3">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className="p-4 rounded-lg border border-border">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
+                                        <div className="space-y-2">
+                                            <div className="w-28 h-4 bg-gray-200 rounded animate-pulse" />
+                                            <div className="w-40 h-3 bg-gray-200 rounded animate-pulse" />
+                                        </div>
+                                    </div>
+                                    <div className="text-right space-y-2">
+                                        <div className="w-20 h-5 bg-gray-200 rounded animate-pulse ml-auto" />
+                                        <div className="w-16 h-3 bg-gray-200 rounded animate-pulse ml-auto" />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </DashboardLayout>
         );
