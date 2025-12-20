@@ -19,8 +19,8 @@ export default function AddCustomerModal({ isOpen, onClose, onSuccess }: AddCust
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
             <div className="bg-surface rounded-[0.75rem] w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200" onClick={(e) => e.stopPropagation()}>
                 {/* Modal Header */}
-                <div className="p-4 border-b border-border flex items-center justify-between bg-gray-50">
-                    <h2 className="text-lg font-bold">{t('khata.addNewCustomer') || 'Add New Customer'}</h2>
+                <div className="p-4 border-b border-border flex items-center justify-between bg-surface">
+                    <h2 className="text-lg font-bold text-text-primary">{t('khata.addNewCustomer') || 'Add New Customer'}</h2>
                     <button
                         onClick={onClose}
                         className="text-text-secondary hover:text-text-primary transition-colors"
