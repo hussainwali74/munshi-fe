@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import SettingsPage from '../page';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -17,6 +17,12 @@ jest.mock('../actions', () => ({
     getCategories: jest.fn().mockResolvedValue([]),
     addCategory: jest.fn(),
     removeCategory: jest.fn(),
+    getShopDetails: jest.fn().mockResolvedValue({
+        businessName: 'Test Shop',
+        fullName: 'Test Owner',
+        shopPhone: '1234567890',
+        shopAddress: 'Test Address'
+    }),
 }));
 
 // Mock DashboardLayout
@@ -77,7 +83,7 @@ describe('Settings Page - Urdu Support', () => {
         expect(mainContainer).toBeInTheDocument();
     });
 
-    it('renders phone input as LTR even in Urdu mode', () => {
+    it('renders phone input as LTR even in Urdu mode', async () => {
         (useLanguage as jest.Mock).mockReturnValue({
             language: 'ur',
             t: mockT,
@@ -85,7 +91,18 @@ describe('Settings Page - Urdu Support', () => {
 
         render(<SettingsPage />);
 
-        const phoneInput = screen.getByPlaceholderText('settings.placeholders.phone');
+        const phoneInput = await screen.findByPlaceholderText('0332-828280-8');
         expect(phoneInput).toHaveAttribute('dir', 'ltr');
+    });
+
+    it('formats phone number as user types', async () => {
+        const { getByPlaceholderText } = render(<SettingsPage />);
+        const input = await screen.findByPlaceholderText('0332-828280-8') as HTMLInputElement;
+
+        // Simulate typing 03328282808
+        fireEvent.change(input, { target: { value: '03328282808' } });
+
+        // Expect formatted value
+        expect(input.value).toBe('0332-828280-8');
     });
 });

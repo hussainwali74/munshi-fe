@@ -49,6 +49,30 @@ export async function getCategories(): Promise<string[]> {
     return data.categories as string[]
 }
 
+export async function getShopDetails() {
+    const session = await getSession()
+    if (!session) return null
+
+    const { data, error } = await getDb()
+        .from('users')
+        .select('business_name, full_name, shop_phone, shop_address')
+        .eq('id', session.userId)
+        .single()
+
+    if (error) {
+        console.error('Fetch shop details error:', error)
+        return null
+    }
+
+    return {
+        businessName: data.business_name,
+        fullName: data.full_name,
+        shopPhone: data.shop_phone,
+        shopAddress: data.shop_address
+    }
+}
+
+
 export async function addCategory(category: string): Promise<{ success: boolean; error?: string }> {
     const session = await getSession()
     if (!session) return { success: false, error: 'Not authenticated' }

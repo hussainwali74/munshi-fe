@@ -143,6 +143,7 @@ export const translations = {
       categoryNameRequired: "Category name is required",
       cannotRemoveLastCategory: "Cannot remove the last category",
       categoriesNote: "Categories are used when adding inventory items. Changes will be reflected in the inventory page.",
+      shopDetailsSaved: "Shop details saved successfully",
       translations: "Translations",
     },
     khata: {
@@ -421,6 +422,7 @@ export const translations = {
       categoryNameRequired: "زمرہ کا نام درکار ہے",
       cannotRemoveLastCategory: "آخری زمرہ کو نہیں ہٹایا جا سکتا",
       categoriesNote: "زمرہ جات انوینٹری آئٹمز شامل کرتے وقت استعمال ہوتے ہیں۔ تبدیلیاں انوینٹری صفحے پر نظر آئیں گی۔",
+      shopDetailsSaved: "دکان کی تفصیلات کامیابی سے محفوظ ہو گئیں",
       translations: "تراجم",
     },
     khata: {

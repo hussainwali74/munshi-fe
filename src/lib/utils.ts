@@ -34,3 +34,29 @@ export function validateCNIC(value: string) {
     const numbers = value.replace(/\D/g, '');
     return numbers.length === 13;
 }
+
+/**
+ * Formats a string into shop phone format: XXXX-XXXXXX-X
+ */
+export function formatShopPhone(value: string) {
+    if (!value) return '';
+    const numbers = value.replace(/\D/g, '');
+    let formatted = numbers;
+
+    if (numbers.length > 4) {
+        formatted = `${numbers.slice(0, 4)}-${numbers.slice(4)}`;
+    }
+    if (numbers.length > 10) {
+        formatted = `${numbers.slice(0, 4)}-${numbers.slice(4, 10)}-${numbers.slice(10, 11)}`;
+    }
+    return formatted;
+}
+
+/**
+ * Validates if a string contains exactly 11 digits for shop phone
+ */
+export function validateShopPhone(value: string) {
+    if (!value) return false;
+    const numbers = value.replace(/\D/g, '');
+    return numbers.length === 11;
+}
