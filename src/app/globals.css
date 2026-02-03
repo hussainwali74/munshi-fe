@@ -108,3 +108,23 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+@media print {
+  .invoice-sheet {
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .invoice-sheet-a4 {
+    width: 210mm;
+    max-width: 210mm;
+    padding: 12mm;
+  }
+
+  .invoice-sheet-thermal {
+    width: 80mm;
+    max-width: 80mm;
+    padding: 6mm;
+    font-size: 11px;
+  }
+}

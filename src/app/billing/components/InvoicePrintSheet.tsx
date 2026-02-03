@@ -6,10 +6,11 @@ import { formatCNIC } from '@/lib/utils';
 interface InvoicePrintSheetProps {
     bill: BillReceipt;
     className?: string;
+    printFormat?: 'a4' | 'thermal';
     t: (key: string, options?: Record<string, string | number>) => string;
 }
 
-export default function InvoicePrintSheet({ bill, className, t }: InvoicePrintSheetProps) {
+export default function InvoicePrintSheet({ bill, className, printFormat = 'a4', t }: InvoicePrintSheetProps) {
     const shopName = bill.shopDetails?.businessName || t('billing.invoice.shopNameFallback');
     const shopOwner = bill.shopDetails?.fullName;
     const shopPhone = bill.shopDetails?.shopPhone;
@@ -17,8 +18,13 @@ export default function InvoicePrintSheet({ bill, className, t }: InvoicePrintSh
 
     const createdDate = new Date(bill.createdAt);
 
+    const isThermal = printFormat === 'thermal';
+    const formatClass = isThermal
+        ? 'invoice-sheet invoice-sheet-thermal max-w-[360px] text-[12px]'
+        : 'invoice-sheet invoice-sheet-a4 max-w-[900px]';
+
     return (
-        <div className={`bg-white text-black border border-slate-200 rounded-xl p-8 shadow-lg print:shadow-none print:border-none ${className || ''}`}>
+        <div className={`bg-white text-black border border-slate-200 rounded-xl ${isThermal ? 'p-5' : 'p-8'} shadow-lg mx-auto ${formatClass} ${className || ''}`}>
             <div className="flex flex-col gap-6">
                 <div className="flex flex-wrap items-start justify-between gap-6">
                     <div>

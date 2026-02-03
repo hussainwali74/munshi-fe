@@ -14,6 +14,7 @@ import ItemsCard from './components/ItemsCard';
 import SummaryCard from './components/SummaryCard';
 import InvoicePrintSheet from './components/InvoicePrintSheet';
 import InvoiceSuccessModal from './components/InvoiceSuccessModal';
+import PrintSettingsCard from './components/PrintSettingsCard';
 import { calculateBalanceDue, calculateBillTotals, generateBillNumber } from './utils';
 import type { BillReceipt, CartItem, Customer, DiscountType, PaymentMode, ShopDetails } from './types';
 
@@ -43,6 +44,10 @@ export default function BillingPage() {
     const [shopDetails, setShopDetails] = useState<ShopDetails | null>(null);
     const [billNumber, setBillNumber] = useState(generateBillNumber());
     const [completedBill, setCompletedBill] = useState<BillReceipt | null>(null);
+    const [printFormat, setPrintFormat] = useState<'a4' | 'thermal'>('a4');
+    const [autoPrint, setAutoPrint] = useState(false);
+
+    const lastPrintedRef = useRef<string | null>(null);
 
     const customerSearchRef = useRef<HTMLDivElement>(null);
     const itemSearchRef = useRef<HTMLDivElement>(null);
@@ -54,6 +59,28 @@ export default function BillingPage() {
         };
         loadShopDetails();
     }, []);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const storedFormat = window.localStorage.getItem('billing.printFormat');
+        if (storedFormat === 'a4' || storedFormat === 'thermal') {
+            setPrintFormat(storedFormat);
+        }
+        const storedAutoPrint = window.localStorage.getItem('billing.autoPrint');
+        if (storedAutoPrint === 'true') {
+            setAutoPrint(true);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        window.localStorage.setItem('billing.printFormat', printFormat);
+    }, [printFormat]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        window.localStorage.setItem('billing.autoPrint', autoPrint ? 'true' : 'false');
+    }, [autoPrint]);
 
     useEffect(() => {
         if (customerQuery.trim().length > 0 && !selectedCustomer) {
@@ -114,6 +141,14 @@ export default function BillingPage() {
             setPaidAmount(totalAmount);
         }
     }, [paidAmount, totalAmount, paymentMode]);
+
+    useEffect(() => {
+        if (!completedBill || !autoPrint) return;
+        if (lastPrintedRef.current === completedBill.billNumber) return;
+        lastPrintedRef.current = completedBill.billNumber;
+        const timer = window.setTimeout(() => window.print(), 300);
+        return () => window.clearTimeout(timer);
+    }, [completedBill, autoPrint]);
 
     const handlePaymentModeChange = (mode: PaymentMode) => {
         setPaymentMode(mode);
@@ -360,6 +395,13 @@ export default function BillingPage() {
                             onSubmit={handleSubmit}
                             t={t}
                         />
+                        <PrintSettingsCard
+                            printFormat={printFormat}
+                            autoPrint={autoPrint}
+                            onPrintFormatChange={setPrintFormat}
+                            onAutoPrintChange={setAutoPrint}
+                            t={t}
+                        />
                     </div>
                 </div>
 
@@ -380,9 +422,9 @@ export default function BillingPage() {
                         onPrint={() => window.print()}
                         t={t}
                     >
-                        <InvoicePrintSheet bill={completedBill} t={t} />
+                        <InvoicePrintSheet bill={completedBill} t={t} printFormat={printFormat} />
                     </InvoiceSuccessModal>
-                    <InvoicePrintSheet bill={completedBill} t={t} className="hidden print:block" />
+                    <InvoicePrintSheet bill={completedBill} t={t} printFormat={printFormat} className="hidden print:block" />
                 </>
             )}
         </div>
