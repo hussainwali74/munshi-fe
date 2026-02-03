@@ -302,7 +302,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                                     <div className="mt-3 pt-3 border-t border-border">
                                         <p className="text-xs font-medium text-muted mb-2">{t('khata.items') || 'Items'}:</p>
                                         <div className="space-y-1">
-                                            {txn.items.map((item: any, idx: number) => (
+                                            {txn.items.map((item, idx) => (
                                                 <div key={idx} className={`flex justify-between text-sm ${isRtl ? 'flex-row-reverse' : ''}`}>
                                                     <span>{item.name} × {item.qty}</span>
                                                     <span className="font-medium">Rs {(item.price * item.qty).toLocaleString()}</span>

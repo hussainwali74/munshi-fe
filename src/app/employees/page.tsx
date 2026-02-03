@@ -8,13 +8,26 @@ import { addEmployee, getEmployees, deleteEmployee, updateEmployee } from './act
 import { toast } from 'react-hot-toast';
 import { SkeletonCard } from '@/components/Skeleton';
 
+type EmployeeStatus = 'active' | 'inactive';
+type EmployeeRole = 'salesman' | 'cashier' | 'manager' | 'helper';
+
+interface Employee {
+    id: string;
+    name: string;
+    phone?: string | null;
+    role: EmployeeRole;
+    salary?: number | null;
+    join_date?: string | null;
+    status: EmployeeStatus;
+}
+
 export default function EmployeesPage() {
     const { t, language } = useLanguage();
     const isRtl = language === 'ur';
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedEmployee, setSelectedEmployee] = useState<any | null>(null);
-    const [editingEmployee, setEditingEmployee] = useState<any | null>(null);
-    const [employees, setEmployees] = useState<any[]>([]);
+    const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+    const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+    const [employees, setEmployees] = useState<Employee[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -68,7 +81,7 @@ export default function EmployeesPage() {
         }
     };
 
-    const handleEdit = (employee: any) => {
+    const handleEdit = (employee: Employee) => {
         setEditingEmployee(employee);
         setSelectedEmployee(null); // Close profile modal if open
     };

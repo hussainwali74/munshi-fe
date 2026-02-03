@@ -60,8 +60,7 @@ describe('InvoicePrintSheet', () => {
     it('renders invoice details', () => {
         render(<InvoicePrintSheet bill={sampleBill} t={t} />);
 
-        expect(screen.getByText('Invoice')).toBeInTheDocument();
-        expect(screen.getByText('#123456')).toBeInTheDocument();
+        expect(screen.getByText((content) => content.includes('Invoice No.') && content.includes('123456'))).toBeInTheDocument();
         expect(screen.getByText('Ahmad Ali')).toBeInTheDocument();
         expect(screen.getByText('Soap')).toBeInTheDocument();
         expect(screen.getAllByText('Rs 220').length).toBeGreaterThan(0);

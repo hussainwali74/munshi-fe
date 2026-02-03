@@ -4,6 +4,36 @@
 import { getDb } from '@/lib/db'
 import { getSession } from '@/lib/auth'
 
+interface TransactionRow {
+    id: string;
+    amount: number;
+    type: 'credit' | 'debit';
+    description: string | null;
+    items: Array<{ name: string; qty: number; price: number }> | null;
+    bill_amount: number | null;
+    paid_amount: number | null;
+    created_at: string;
+    customer_id: string | null;
+    customers: { id: string; name: string } | null;
+}
+
+interface BalanceRow {
+    balance: number | null;
+}
+
+interface LowStockRow {
+    quantity: number | null;
+    low_stock_threshold: number | null;
+}
+
+interface TransactionAmountRow {
+    amount: number | null;
+}
+
+interface TransactionCustomerRow {
+    customer_id: string | null;
+}
+
 export async function searchCustomers(query: string) {
     const session = await getSession()
     if (!session) return []
@@ -62,7 +92,7 @@ export async function getRecentTransactions() {
     }
 
     // Format transactions for display
-    return (data || []).map((txn: any) => {
+    return ((data as TransactionRow[] | null) || []).map((txn) => {
         const createdAt = new Date(txn.created_at)
         const now = new Date()
         const isToday = createdAt.toDateString() === now.toDateString()
@@ -114,7 +144,7 @@ export async function getDashboardStats() {
         .eq('user_id', session.userId)
         .gt('balance', 0)
 
-    const totalUdhar = (udharData || []).reduce((sum: number, c: any) => sum + (c.balance || 0), 0)
+    const totalUdhar = ((udharData as BalanceRow[] | null) || []).reduce((sum, c) => sum + (c.balance || 0), 0)
 
     // Get total payable - sum of negative customer balances (we owe them)
     const { data: payableData } = await getDb()
@@ -123,7 +153,7 @@ export async function getDashboardStats() {
         .eq('user_id', session.userId)
         .lt('balance', 0)
 
-    const totalPayable = Math.abs((payableData || []).reduce((sum: number, c: any) => sum + (c.balance || 0), 0))
+    const totalPayable = Math.abs(((payableData as BalanceRow[] | null) || []).reduce((sum, c) => sum + (c.balance || 0), 0))
 
     // Get low stock items count
     const { data: lowStockData } = await getDb()
@@ -131,8 +161,8 @@ export async function getDashboardStats() {
         .select('id, quantity, low_stock_threshold')
         .eq('user_id', session.userId)
 
-    const lowStockCount = (lowStockData || []).filter(
-        (item: any) => item.quantity <= (item.low_stock_threshold || 5)
+    const lowStockCount = ((lowStockData as LowStockRow[] | null) || []).filter(
+        (item) => (item.quantity || 0) <= (item.low_stock_threshold || 5)
     ).length
 
     // Get active customers count (customers with at least one transaction in last 30 days)
@@ -146,7 +176,7 @@ export async function getDashboardStats() {
         .gte('created_at', thirtyDaysAgo.toISOString())
 
     // Get unique customer IDs
-    const uniqueCustomerIds = new Set((activeCustomersData || []).map((t: any) => t.customer_id))
+    const uniqueCustomerIds = new Set(((activeCustomersData as TransactionCustomerRow[] | null) || []).map((t) => t.customer_id))
     const activeCustomersCount = uniqueCustomerIds.size
 
     // Get total customers count
@@ -164,7 +194,7 @@ export async function getDashboardStats() {
         .eq('type', 'credit')
         .gte('created_at', startOfThisMonth.toISOString())
 
-    const thisMonthUdhar = (thisMonthCredits || []).reduce((sum: number, t: any) => sum + (t.amount || 0), 0)
+    const thisMonthUdhar = ((thisMonthCredits as TransactionAmountRow[] | null) || []).reduce((sum, t) => sum + (t.amount || 0), 0)
 
     // Get credit transactions last month
     const { data: lastMonthCredits } = await getDb()
@@ -175,7 +205,7 @@ export async function getDashboardStats() {
         .gte('created_at', startOfLastMonth.toISOString())
         .lte('created_at', endOfLastMonth.toISOString())
 
-    const lastMonthUdhar = (lastMonthCredits || []).reduce((sum: number, t: any) => sum + (t.amount || 0), 0)
+    const lastMonthUdhar = ((lastMonthCredits as TransactionAmountRow[] | null) || []).reduce((sum, t) => sum + (t.amount || 0), 0)
 
     // Calculate udhar trend percentage
     let udharTrend = 0

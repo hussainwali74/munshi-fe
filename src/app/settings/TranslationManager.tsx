@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { translations, Language } from '@/lib/translations';
 import { Search, Edit2, X, Check, ChevronDown, ChevronRight, RotateCcw } from 'lucide-react';
 import { updateCustomTranslation, deleteCustomTranslation, getMergedTranslations, CustomTranslation } from './translation-actions';
@@ -8,13 +8,16 @@ import { toast } from 'react-hot-toast';
 import { SkeletonTranslationCard } from '@/components/Skeleton';
 import { useLanguage } from '@/context/LanguageContext';
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === 'object' && value !== null;
+
 // Helper to flatten keys but keep structure for grouping
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getFlattenedKeys(obj: any, prefix = ''): string[] {
+function getFlattenedKeys(obj: Record<string, unknown>, prefix = ''): string[] {
     return Object.keys(obj).reduce((acc: string[], k: string) => {
         const pre = prefix.length ? prefix + '.' : '';
-        if (typeof obj[k] === 'object' && obj[k] !== null && !Array.isArray(obj[k])) {
-            acc.push(...getFlattenedKeys(obj[k], pre + k));
+        const value = obj[k];
+        if (isRecord(value) && !Array.isArray(value)) {
+            acc.push(...getFlattenedKeys(value, pre + k));
         } else {
             acc.push(pre + k);
         }
@@ -42,7 +45,7 @@ export default function TranslationManager() {
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ 'dashboard': true, 'common': true });
 
     // Load translations
-    const loadTranslations = async () => {
+    const loadTranslations = useCallback(async () => {
         try {
             const { system, custom } = await getMergedTranslations();
 
@@ -63,16 +66,16 @@ export default function TranslationManager() {
         } finally {
             setIsInitialLoading(false);
         }
-    };
+    }, [t]);
 
     useEffect(() => {
         loadTranslations();
-    }, []);
+    }, [loadTranslations]);
 
     // Prepare data
     const allData = useMemo(() => {
         // Get all known keys from file AND database (system)
-        const fileKeys = getFlattenedKeys(translations.en);
+        const fileKeys = getFlattenedKeys(translations.en as Record<string, unknown>);
         const dbKeys = Object.keys(systemMap)
             .filter(k => k.startsWith('en:'))
             .map(k => k.substring(3));
@@ -94,12 +97,12 @@ export default function TranslationManager() {
 
                 // Fallback to file
                 const p = k.split('.');
-                let curr: any = translations[lang];
+                let curr: unknown = translations[lang] as Record<string, unknown>;
                 for (const part of p) {
-                    if (curr?.[part] === undefined) return '';
+                    if (!isRecord(curr) || !(part in curr)) return '';
                     curr = curr[part];
                 }
-                return curr as string;
+                return typeof curr === 'string' ? curr : '';
             };
 
             const originalEn = getOriginal('en', key);

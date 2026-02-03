@@ -3,6 +3,9 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { translations, Language } from '@/lib/translations';
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
@@ -87,17 +90,17 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
 
     const keys = path.split('.');
-    let current: any = translations[language];
+    let current: unknown = translations[language] as Record<string, unknown>;
 
     for (const key of keys) {
-      if (current[key] === undefined) {
+      if (!isRecord(current) || current[key] === undefined) {
         // console.warn(`Translation missing for key: ${path} in language: ${language}`);
         return applyVars(path);
       }
       current = current[key];
     }
 
-    return applyVars(current);
+    return applyVars(typeof current === 'string' ? current : path);
   };
 
   return (

@@ -5,9 +5,10 @@ import { X, Upload, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { updateInventoryItem } from '@/app/inventory/actions';
 import { useLanguage } from '@/context/LanguageContext';
+import type { InventoryItem } from '@/types/inventory';
 
 interface EditInventoryModalProps {
-    item: any;
+    item: InventoryItem;
     categories?: string[];
     onClose: () => void;
     onUpdate: () => void;
@@ -22,7 +23,7 @@ export default function EditInventoryModal({ item, categories = ['sanitary', 'el
         const translation = t(key);
         return translation === key ? category.charAt(0).toUpperCase() + category.slice(1) : translation;
     };
-    const [previewUrl, setPreviewUrl] = useState<string | null>(item.image_url);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(item.image_url ?? null);
     const [deleteImage, setDeleteImage] = useState(false);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {

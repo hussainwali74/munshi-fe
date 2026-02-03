@@ -3,8 +3,9 @@
 import { getDb } from '@/lib/db'
 import { getSession } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
+import type { InventorySearchItem } from '@/types/inventory'
 
-export async function searchInventoryItems(query: string) {
+export async function searchInventoryItems(query: string): Promise<InventorySearchItem[]> {
     const session = await getSession()
     if (!session) return []
 
@@ -26,7 +27,7 @@ export async function searchInventoryItems(query: string) {
         return []
     }
 
-    return data
+    return (data as InventorySearchItem[] | null) || []
 }
 
 export async function createBill(formData: FormData) {

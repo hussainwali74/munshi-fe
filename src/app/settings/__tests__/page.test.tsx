@@ -96,7 +96,7 @@ describe('Settings Page - Urdu Support', () => {
     });
 
     it('formats phone number as user types', async () => {
-        const { getByPlaceholderText } = render(<SettingsPage />);
+        render(<SettingsPage />);
         const input = await screen.findByPlaceholderText('0332-828280-8') as HTMLInputElement;
 
         // Simulate typing 03328282808
