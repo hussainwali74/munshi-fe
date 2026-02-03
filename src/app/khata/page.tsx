@@ -45,14 +45,15 @@ export default function KhataPage() {
     }, []);
 
     const handleDelete = async (id: string, name: string) => {
-        if (confirm(`Are you sure you want to delete ${name}? This will also delete all their transactions.`)) {
+        const confirmMessage = t('khata.confirmDeleteCustomer', { name });
+        if (confirm(confirmMessage)) {
             try {
                 await deleteCustomer(id);
-                toast.success(t('common.deleted') || 'Customer deleted successfully');
+                toast.success(t('khata.customerDeleted'));
                 await fetchCustomers();
             } catch (error) {
                 console.error('Error deleting customer:', error);
-                toast.error('❌ Failed to delete customer');
+                toast.error(t('khata.deleteCustomerFailed'));
             }
         }
     };
@@ -69,12 +70,12 @@ export default function KhataPage() {
         try {
             const formData = new FormData(e.currentTarget);
             await updateCustomer(formData);
-            toast.success(t('common.saved') || 'Customer updated successfully');
+            toast.success(t('khata.customerUpdated'));
             setEditingCustomer(null);
             await fetchCustomers();
         } catch (error) {
             console.error('Error updating customer:', error);
-            toast.error('❌ Failed to update customer');
+            toast.error(t('khata.updateCustomerFailed'));
         } finally {
             setIsSubmitting(false);
         }

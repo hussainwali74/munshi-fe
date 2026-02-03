@@ -38,6 +38,7 @@ export async function createBill(formData: FormData) {
     const finalAmount = parseFloat(formData.get('finalAmount') as string)
     const paidAmount = parseFloat(formData.get('paidAmount') as string) || 0
     const paymentMode = formData.get('paymentMode') as string || 'cash' // cash, credit (udhar)
+    const billNumber = (formData.get('billNumber') as string) || Date.now().toString().slice(-6)
 
     let items = []
     try {
@@ -82,7 +83,7 @@ export async function createBill(formData: FormData) {
         customer_id: customerId,
         amount: finalAmount,
         type: transactionType,
-        description: `Bill #${Date.now().toString().slice(-6)}`, // Simple bill number
+        description: `Bill #${billNumber}`, // Simple bill number
         items: items,
         bill_amount: finalAmount,
         paid_amount: paidAmount

@@ -49,7 +49,7 @@ export default function EditInventoryModal({ item, categories = ['sanitary', 'el
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <div className="bg-surface rounded-[0.75rem] w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl border border-border animate-in fade-in zoom-in-95 duration-200">
                 <div className="flex items-center justify-between p-4 border-b border-border">
-                    <h2 className="text-xl font-bold text-text-primary">{t('common.edit')} Item</h2>
+                    <h2 className="text-xl font-bold text-text-primary">{t('inventory.editItem')}</h2>
                     <button onClick={onClose} className="text-text-secondary hover:text-text-primary transition-colors">
                         <X size={24} />
                     </button>

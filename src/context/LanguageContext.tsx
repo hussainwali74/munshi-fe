@@ -6,7 +6,7 @@ import { translations, Language } from '@/lib/translations';
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, vars?: Record<string, string | number>) => string;
   dir: 'ltr' | 'rtl';
 }
 
@@ -71,11 +71,19 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   }, [language, mounted]);
 
-  const t = (path: string) => {
+  const t = (path: string, vars?: Record<string, string | number>) => {
+    const applyVars = (value: string) => {
+      if (!vars) return value;
+      return value.replace(/\{(\w+)\}/g, (_, key: string) => {
+        const replacement = vars[key];
+        return replacement === undefined ? `{${key}}` : String(replacement);
+      });
+    };
+
     // Check custom translation first
     const customKey = `${language}:${path}`;
     if (customTranslations[customKey]) {
-      return customTranslations[customKey];
+      return applyVars(customTranslations[customKey]);
     }
 
     const keys = path.split('.');
@@ -84,12 +92,12 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     for (const key of keys) {
       if (current[key] === undefined) {
         // console.warn(`Translation missing for key: ${path} in language: ${language}`);
-        return path;
+        return applyVars(path);
       }
       current = current[key];
     }
 
-    return current;
+    return applyVars(current);
   };
 
   return (
