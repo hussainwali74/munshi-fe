@@ -14,7 +14,7 @@ interface TransactionRow {
     paid_amount: number | null;
     created_at: string;
     customer_id: string | null;
-    customers: { id: string; name: string } | null;
+    customers: Array<{ id: string; name: string }> | null;
 }
 
 interface BalanceRow {
@@ -113,7 +113,7 @@ export async function getRecentTransactions() {
 
         return {
             id: txn.id,
-            customerName: txn.customers?.name || 'Unknown Customer',
+            customerName: txn.customers?.[0]?.name || 'Unknown Customer',
             customerId: txn.customer_id,
             date: dateStr,
             time: timeStr,

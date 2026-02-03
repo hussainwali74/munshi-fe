@@ -13,15 +13,15 @@ import { SkeletonCustomerRow } from '@/components/Skeleton';
 interface Transaction {
   id: string;
   customerName: string;
-  customerId?: string;
+  customerId: string | null;
   date: string;
   time: string;
   type: 'credit' | 'debit';
   amount: number;
   description: string;
-  items?: { name: string; qty: number; price: number }[];
-  billAmount?: number;
-  paidAmount?: number;
+  items: { name: string; qty: number; price: number }[] | null;
+  billAmount: number | null;
+  paidAmount: number | null;
 }
 
 interface CustomerSearchResult {
@@ -360,13 +360,13 @@ export default function Home() {
                       <span className="font-bold">Rs {selectedTransaction.billAmount?.toLocaleString()}</span>
                     </div>
                   )}
-                  {selectedTransaction.paidAmount !== undefined && selectedTransaction.paidAmount > 0 && (
+                  {selectedTransaction.paidAmount != null && selectedTransaction.paidAmount > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-text-secondary">{t('dashboard.paidAmount')}</span>
                       <span className="font-bold text-success">Rs {selectedTransaction.paidAmount?.toLocaleString()}</span>
                     </div>
                   )}
-                  {selectedTransaction.type === 'credit' && selectedTransaction.billAmount && selectedTransaction.paidAmount !== undefined && (
+                  {selectedTransaction.type === 'credit' && selectedTransaction.billAmount && selectedTransaction.paidAmount != null && (
                     <div className="flex justify-between text-base font-bold pt-2 border-t border-dashed border-border">
                       <span>{t('dashboard.addedToUdhar')}</span>
                       <span className="text-danger">Rs {(selectedTransaction.billAmount - selectedTransaction.paidAmount).toLocaleString()}</span>
