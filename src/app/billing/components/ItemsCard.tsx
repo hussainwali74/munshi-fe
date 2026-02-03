@@ -1,15 +1,16 @@
 import React from 'react';
 import { Search, Package, Plus, Minus, Trash2, Loader2 } from 'lucide-react';
 import type { CartItem } from '../types';
+import type { InventorySearchItem } from '@/types/inventory';
 
 interface ItemsCardProps {
     itemQuery: string;
-    itemResults: any[];
+    itemResults: InventorySearchItem[];
     cart: CartItem[];
     isSearching: boolean;
     isRtl: boolean;
     onQueryChange: (value: string) => void;
-    onAddItem: (item: any) => void;
+    onAddItem: (item: InventorySearchItem) => void;
     onUpdateQty: (id: string, qty: number) => void;
     onRemoveItem: (id: string) => void;
     searchRef: React.RefObject<HTMLDivElement>;

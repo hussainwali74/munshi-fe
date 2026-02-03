@@ -24,13 +24,21 @@ interface Transaction {
   paidAmount?: number;
 }
 
+interface CustomerSearchResult {
+  id: string;
+  name: string;
+  phone: string;
+  address: string;
+  cnic?: string | null;
+}
+
 type Variant = 'primary' | 'secondary' | 'danger' | 'success' | 'warning';
 
 export default function Home() {
   const { t, language } = useLanguage();
   const isRtl = language === 'ur';
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<CustomerSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);

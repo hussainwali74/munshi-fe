@@ -18,16 +18,49 @@ jest.mock('next/navigation', () => ({
 
 describe('Login Actions', () => {
     // Helper to get the mock chain object from the manual mock
-    const getMockChain = () => (getDb() as any).from();
+    type MockChain = {
+        select: jest.Mock;
+        insert: jest.Mock;
+        update: jest.Mock;
+        delete: jest.Mock;
+        upsert: jest.Mock;
+        eq: jest.Mock;
+        neq: jest.Mock;
+        gt: jest.Mock;
+        lt: jest.Mock;
+        gte: jest.Mock;
+        lte: jest.Mock;
+        like: jest.Mock;
+        ilike: jest.Mock;
+        is: jest.Mock;
+        in: jest.Mock;
+        order: jest.Mock;
+        limit: jest.Mock;
+        offset: jest.Mock;
+        single: jest.Mock;
+        maybeSingle: jest.Mock;
+        or: jest.Mock;
+        then: jest.Mock;
+    };
+
+    type MockDb = {
+        from: jest.Mock<MockChain, []>;
+    };
+
+    type DbError = { message: string };
+    type DbResponse<T> = { data: T; error: DbError | null };
+    type ThenResolve<T> = (value: DbResponse<T>) => void;
+
+    const getMockChain = () => (getDb() as unknown as MockDb).from();
 
     beforeEach(() => {
         jest.clearAllMocks();
-        getMockChain().then.mockImplementation((resolve: any) => resolve({ data: null, error: null }));
+        getMockChain().then.mockImplementation((resolve: ThenResolve<null>) => resolve({ data: null, error: null }));
     });
 
     describe('login', () => {
         it('should return error for user not found', async () => {
-            getMockChain().then.mockImplementation((resolve: any) =>
+            getMockChain().then.mockImplementation((resolve: ThenResolve<null>) =>
                 resolve({ data: null, error: { message: 'Not found' } })
             );
 
@@ -47,7 +80,7 @@ describe('Login Actions', () => {
                 password_hash: 'hashed-password',
                 full_name: 'Test User'
             };
-            getMockChain().then.mockImplementation((resolve: any) =>
+            getMockChain().then.mockImplementation((resolve: ThenResolve<typeof mockUser>) =>
                 resolve({ data: mockUser, error: null })
             );
             (verifyPassword as jest.Mock).mockResolvedValue(false);
@@ -69,7 +102,7 @@ describe('Login Actions', () => {
                 password_hash: 'hashed-password',
                 full_name: 'Test User'
             };
-            getMockChain().then.mockImplementation((resolve: any) =>
+            getMockChain().then.mockImplementation((resolve: ThenResolve<typeof mockUser>) =>
                 resolve({ data: mockUser, error: null })
             );
             (verifyPassword as jest.Mock).mockResolvedValue(true);
@@ -89,7 +122,7 @@ describe('Login Actions', () => {
 
     describe('signup', () => {
         it('should return error if user already exists', async () => {
-            getMockChain().then.mockImplementation((resolve: any) =>
+            getMockChain().then.mockImplementation((resolve: ThenResolve<{ id: string }>) =>
                 resolve({ data: { id: 'existing-user' }, error: null })
             );
 
@@ -113,8 +146,8 @@ describe('Login Actions', () => {
             // Access 'then' mock.
             const thenMock = getMockChain().then;
             thenMock
-                .mockImplementationOnce((resolve: any) => resolve({ data: null, error: null }))
-                .mockImplementationOnce((resolve: any) => resolve({ data: null, error: { message: 'DB Error' } }));
+                .mockImplementationOnce((resolve: ThenResolve<null>) => resolve({ data: null, error: null }))
+                .mockImplementationOnce((resolve: ThenResolve<null>) => resolve({ data: null, error: { message: 'DB Error' } }));
 
             (hashPassword as jest.Mock).mockResolvedValue('hashed-password');
 
@@ -138,8 +171,8 @@ describe('Login Actions', () => {
             };
             const thenMock = getMockChain().then;
             thenMock
-                .mockImplementationOnce((resolve: any) => resolve({ data: null, error: null }))
-                .mockImplementationOnce((resolve: any) => resolve({ data: mockNewUser, error: null }));
+                .mockImplementationOnce((resolve: ThenResolve<null>) => resolve({ data: null, error: null }))
+                .mockImplementationOnce((resolve: ThenResolve<typeof mockNewUser>) => resolve({ data: mockNewUser, error: null }));
 
             (hashPassword as jest.Mock).mockResolvedValue('hashed-password');
 

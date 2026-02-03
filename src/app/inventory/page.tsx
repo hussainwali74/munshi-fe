@@ -9,14 +9,15 @@ import { getCategories } from '@/app/settings/actions';
 import EditInventoryModal from '@/components/EditInventoryModal';
 import { useLanguage } from '@/context/LanguageContext';
 import { SkeletonTableRow } from '@/components/Skeleton';
+import type { InventoryItem } from '@/types/inventory';
 
 // Force dynamic rendering (no static generation)
 export const dynamic = 'force-dynamic';
 
 export default function InventoryPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [items, setItems] = useState<any[]>([]);
-    const [editingItem, setEditingItem] = useState<any | null>(null);
+    const [items, setItems] = useState<InventoryItem[]>([]);
+    const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
     const [addImagePreview, setAddImagePreview] = useState<string | null>(null);
     const [addImageFile, setAddImageFile] = useState<File | null>(null);
     const { t, language } = useLanguage();

@@ -7,13 +7,46 @@ jest.mock('@/lib/db');
 jest.mock('@/lib/auth');
 jest.mock('next/cache');
 
+type MockChain = {
+    select: jest.Mock;
+    insert: jest.Mock;
+    update: jest.Mock;
+    delete: jest.Mock;
+    upsert: jest.Mock;
+    eq: jest.Mock;
+    neq: jest.Mock;
+    gt: jest.Mock;
+    lt: jest.Mock;
+    gte: jest.Mock;
+    lte: jest.Mock;
+    like: jest.Mock;
+    ilike: jest.Mock;
+    is: jest.Mock;
+    in: jest.Mock;
+    order: jest.Mock;
+    limit: jest.Mock;
+    offset: jest.Mock;
+    single: jest.Mock;
+    maybeSingle: jest.Mock;
+    or: jest.Mock;
+    then: jest.Mock;
+};
+
+type MockDb = {
+    from: jest.Mock<MockChain, []>;
+    rpc: jest.Mock<MockChain, []>;
+};
+
+type DbError = { message: string };
+type DbResponse<T> = { data: T; error: DbError | null };
+type ThenResolve<T> = (value: DbResponse<T>) => void;
+
 describe('Khata Actions', () => {
     const mockSession = { userId: 'user-123' };
 
     // Helper to get the mock chain object from the manual mock
-    // We cast to any because we know the structure of our manual mock
-    const getMockChain = () => (getDb() as any).from();
-    const getRpcSpy = () => (getDb() as any).rpc;
+    const getMockChain = () => (getDb() as unknown as MockDb).from();
+    const getRpcSpy = () => (getDb() as unknown as MockDb).rpc;
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -21,7 +54,7 @@ describe('Khata Actions', () => {
 
         // Reset default response for db calls
         const chain = getMockChain();
-        chain.then.mockImplementation((resolve: any) => resolve({ data: [], error: null }));
+        chain.then.mockImplementation((resolve: ThenResolve<unknown[]>) => resolve({ data: [], error: null }));
     });
 
     describe('getCustomers', () => {
@@ -38,7 +71,7 @@ describe('Khata Actions', () => {
                 { id: '1', name: 'Customer 1', balance: 100 },
                 { id: '2', name: 'Customer 2', balance: 200 }
             ];
-            getMockChain().then.mockImplementation((resolve: any) =>
+            getMockChain().then.mockImplementation((resolve: ThenResolve<typeof mockCustomers>) =>
                 resolve({ data: mockCustomers, error: null })
             );
 
@@ -52,7 +85,7 @@ describe('Khata Actions', () => {
         });
 
         it('should return empty array on DB error', async () => {
-            getMockChain().then.mockImplementation((resolve: any) =>
+            getMockChain().then.mockImplementation((resolve: ThenResolve<null>) =>
                 resolve({ data: null, error: { message: 'DB Error' } })
             );
 
@@ -72,7 +105,7 @@ describe('Khata Actions', () => {
         });
 
         it('should return null if customer not found', async () => {
-            getMockChain().then.mockImplementation((resolve: any) =>
+            getMockChain().then.mockImplementation((resolve: ThenResolve<null>) =>
                 resolve({ data: null, error: { message: 'Not found' } })
             );
 
@@ -87,7 +120,7 @@ describe('Khata Actions', () => {
 
             // First call returns customer, second call returns transactions
             let callCount = 0;
-            getMockChain().then.mockImplementation((resolve: any) => {
+            getMockChain().then.mockImplementation((resolve: ThenResolve<typeof mockCustomer | typeof mockTransactions>) => {
                 callCount++;
                 if (callCount === 1) {
                     return resolve({ data: mockCustomer, error: null });
@@ -138,8 +171,8 @@ describe('Khata Actions', () => {
         });
 
         it('should throw error on DB error', async () => {
-            getMockChain().then.mockImplementation((resolve: any) =>
-                resolve({ error: { message: 'DB Error' } })
+            getMockChain().then.mockImplementation((resolve: ThenResolve<unknown>) =>
+                resolve({ data: null, error: { message: 'DB Error' } })
             );
 
             const formData = new FormData();
@@ -182,8 +215,8 @@ describe('Khata Actions', () => {
         });
 
         it('should throw error on DB error', async () => {
-            getMockChain().then.mockImplementation((resolve: any) =>
-                resolve({ error: { message: 'DB Error' } })
+            getMockChain().then.mockImplementation((resolve: ThenResolve<unknown>) =>
+                resolve({ data: null, error: { message: 'DB Error' } })
             );
 
             await expect(deleteCustomer('cust-123')).rejects.toThrow('Failed to delete customer');
@@ -228,8 +261,8 @@ describe('Khata Actions', () => {
         });
 
         it('should throw error on DB error', async () => {
-            getMockChain().then.mockImplementation((resolve: any) =>
-                resolve({ error: { message: 'DB Error' } })
+            getMockChain().then.mockImplementation((resolve: ThenResolve<unknown>) =>
+                resolve({ data: null, error: { message: 'DB Error' } })
             );
 
             const formData = new FormData();

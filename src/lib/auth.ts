@@ -6,6 +6,12 @@ import { hash, compare } from 'bcrypt-ts'
 
 const SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET_KEY || 'default-secret-key-change-me')
 
+export type SessionPayload = {
+    userId: string;
+    email: string;
+    name: string;
+} & Record<string, unknown>;
+
 export async function hashPassword(password: string) {
     return await hash(password, 10)
 }
@@ -14,7 +20,7 @@ export async function verifyPassword(password: string, hashString: string) {
     return await compare(password, hashString)
 }
 
-export async function createSession(payload: any) {
+export async function createSession(payload: SessionPayload) {
     const token = await new SignJWT(payload)
         .setProtectedHeader({ alg: 'HS256' })
         .setIssuedAt()

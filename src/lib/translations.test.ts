@@ -8,12 +8,12 @@ describe('translations', () => {
   });
 
   // Helper function to get all keys recursively
-  const getKeys = (obj: any, prefix = ''): string[] => {
+  const getKeys = (obj: Record<string, unknown>, prefix = ''): string[] => {
     return Object.keys(obj).reduce((acc: string[], key) => {
       const value = obj[key];
       const newKey = prefix ? `${prefix}.${key}` : key;
-      if (typeof value === 'object' && value !== null) {
-        return [...acc, ...getKeys(value, newKey)];
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        return [...acc, ...getKeys(value as Record<string, unknown>, newKey)];
       }
       return [...acc, newKey];
     }, []);

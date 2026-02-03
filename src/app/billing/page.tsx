@@ -17,6 +17,20 @@ import InvoiceSuccessModal from './components/InvoiceSuccessModal';
 import PrintSettingsCard from './components/PrintSettingsCard';
 import { calculateBalanceDue, calculateBillTotals, generateBillNumber } from './utils';
 import type { BillReceipt, CartItem, Customer, DiscountType, PaymentMode, ShopDetails } from './types';
+import type { InventorySearchItem } from '@/types/inventory';
+
+type SpeechRecognitionResultLike = { transcript: string };
+type SpeechRecognitionResultListLike = ArrayLike<ArrayLike<SpeechRecognitionResultLike>>;
+type SpeechRecognitionEventLike = { results: SpeechRecognitionResultListLike };
+type SpeechRecognitionLike = {
+    continuous: boolean;
+    lang: string;
+    onstart: (() => void) | null;
+    onend: (() => void) | null;
+    onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+    start: () => void;
+};
+type WebkitSpeechRecognitionConstructor = new () => SpeechRecognitionLike;
 
 export default function BillingPage() {
     const { t, language } = useLanguage();
@@ -28,7 +42,7 @@ export default function BillingPage() {
     const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
 
     const [itemQuery, setItemQuery] = useState('');
-    const [itemResults, setItemResults] = useState<any[]>([]);
+    const [itemResults, setItemResults] = useState<InventorySearchItem[]>([]);
     const [cart, setCart] = useState<CartItem[]>([]);
 
     const [discountType, setDiscountType] = useState<DiscountType>('fixed');
@@ -165,7 +179,7 @@ export default function BillingPage() {
                 ? 2
                 : 3;
 
-    const addToCart = (item: any) => {
+    const addToCart = (item: InventorySearchItem) => {
         const existing = cart.find(i => i.id === item.id);
         if (existing && existing.qty >= existing.maxQty) {
             toast.error(t('billing.maxStockAvailable', { max: existing.maxQty }));
@@ -206,14 +220,15 @@ export default function BillingPage() {
             return;
         }
 
-        const recognition = new (window as any).webkitSpeechRecognition();
+        const RecognitionCtor = (window as Window & { webkitSpeechRecognition: WebkitSpeechRecognitionConstructor }).webkitSpeechRecognition;
+        const recognition = new RecognitionCtor();
         recognition.continuous = false;
         recognition.lang = language === 'ur' ? 'ur-PK' : 'en-PK';
 
         recognition.onstart = () => setIsListening(true);
         recognition.onend = () => setIsListening(false);
 
-        recognition.onresult = async (event: any) => {
+        recognition.onresult = async (event: SpeechRecognitionEventLike) => {
             const transcript = event.results[0][0].transcript;
 
             const match = transcript.match(/^(\d+)\s+(.+)$/);

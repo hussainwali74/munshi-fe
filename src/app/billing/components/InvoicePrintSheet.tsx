@@ -17,73 +17,159 @@ export default function InvoicePrintSheet({ bill, className, printFormat = 'a4',
     const shopAddress = bill.shopDetails?.shopAddress;
 
     const createdDate = new Date(bill.createdAt);
-
     const isThermal = printFormat === 'thermal';
-    const formatClass = isThermal
+
+    const logoText = shopName
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(word => word[0]?.toUpperCase())
+        .join('');
+
+    const containerClass = isThermal
         ? 'invoice-sheet invoice-sheet-thermal max-w-[360px] text-[12px]'
-        : 'invoice-sheet invoice-sheet-a4 max-w-[900px]';
+        : 'invoice-sheet invoice-sheet-a4 max-w-[860px]';
 
-    return (
-        <div className={`bg-white text-black border border-slate-200 rounded-xl ${isThermal ? 'p-5' : 'p-8'} shadow-lg mx-auto ${formatClass} ${className || ''}`}>
-            <div className="flex flex-col gap-6">
-                <div className="flex flex-wrap items-start justify-between gap-6">
-                    <div>
-                        <p className="text-sm uppercase tracking-wide text-slate-500">{t('billing.invoice.invoiceLabel')}</p>
-                        <h1 className="text-2xl font-bold text-slate-900">{shopName}</h1>
-                        {shopOwner && <p className="text-sm text-slate-600">{shopOwner}</p>}
-                        {shopPhone && <p className="text-sm text-slate-600">{shopPhone}</p>}
-                        {shopAddress && <p className="text-sm text-slate-600">{shopAddress}</p>}
+    if (isThermal) {
+        return (
+            <div className={`bg-white text-black border border-slate-200 ${isThermal ? 'p-5' : 'p-8'} mx-auto ${containerClass} ${className || ''}`}>
+                <div className="space-y-4">
+                    <div className="text-center">
+                        <p className="text-lg font-semibold text-slate-900">{shopName}</p>
+                        {shopAddress && <p className="text-xs text-slate-500">{shopAddress}</p>}
+                        {shopPhone && <p className="text-xs text-slate-500">{shopPhone}</p>}
                     </div>
-                    <div className="text-right">
-                        <p className="text-sm text-slate-500">{t('billing.invoice.number')}</p>
-                        <p className="text-xl font-bold text-slate-900">#{bill.billNumber}</p>
-                        <p className="text-sm text-slate-500">{t('billing.invoice.date')}</p>
-                        <p className="text-sm text-slate-700">{createdDate.toLocaleDateString()}</p>
-                    </div>
-                </div>
 
-                <div className="grid gap-6 md:grid-cols-2">
-                    <div>
-                        <p className="text-xs uppercase tracking-wide text-slate-500">{t('billing.invoice.billTo')}</p>
-                        <p className="text-lg font-semibold text-slate-900">{bill.customer.name}</p>
-                        {bill.customer.phone && <p className="text-sm text-slate-700">{bill.customer.phone}</p>}
-                        {bill.customer.address && <p className="text-sm text-slate-700">{bill.customer.address}</p>}
-                        {bill.customer.cnic && <p className="text-sm text-slate-700">{formatCNIC(bill.customer.cnic)}</p>}
+                    <div className="flex justify-between text-[11px] text-slate-600">
+                        <span>{t('billing.invoice.number')}: #{bill.billNumber}</span>
+                        <span>{t('billing.invoice.date')}: {createdDate.toLocaleDateString()}</span>
                     </div>
-                    <div>
-                        <p className="text-xs uppercase tracking-wide text-slate-500">{t('billing.invoice.payment')}</p>
-                        <p className="text-sm text-slate-700">{t('billing.paymentMode')}: {bill.paymentMode === 'cash' ? t('billing.cash') : t('billing.udharCredit')}</p>
-                        <p className="text-sm text-slate-700">{t('billing.invoice.paid')}: {formatCurrency(bill.paidAmount)}</p>
-                        {bill.paymentMode === 'credit' && (
-                            <p className="text-sm text-slate-700">{t('billing.invoice.balance')}: {formatCurrency(Math.max(0, bill.totalAmount - bill.paidAmount))}</p>
-                        )}
-                    </div>
-                </div>
 
-                <div className="overflow-hidden rounded-lg border border-slate-200">
-                    <table className="w-full text-sm">
-                        <thead className="bg-slate-100 text-slate-600">
+                    <div className="border-t border-slate-300" />
+
+                    <div className="text-[11px]">
+                        <p className="text-[10px] uppercase tracking-wide text-slate-500">{t('billing.invoice.billTo')}</p>
+                        <p className="text-sm font-semibold text-slate-900">{bill.customer.name}</p>
+                        {bill.customer.phone && <p className="text-slate-600">{bill.customer.phone}</p>}
+                    </div>
+
+                    <table className="w-full text-[11px]">
+                        <thead className="border-y border-slate-200 text-slate-500">
                             <tr>
-                                <th className="px-3 py-2 text-left">{t('billing.sr')}</th>
-                                <th className="px-3 py-2 text-left">{t('billing.item')}</th>
-                                <th className="px-3 py-2 text-right">{t('billing.qty')}</th>
-                                <th className="px-3 py-2 text-right">{t('billing.rate')}</th>
-                                <th className="px-3 py-2 text-right">{t('billing.total')}</th>
+                                <th className="py-2 text-left">{t('billing.item')}</th>
+                                <th className="py-2 text-center">{t('billing.qty')}</th>
+                                <th className="py-2 text-right">{t('billing.total')}</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-200">
-                            {bill.items.map((item, index) => (
+                        <tbody className="divide-y divide-slate-100">
+                            {bill.items.map(item => (
                                 <tr key={item.id}>
-                                    <td className="px-3 py-2 text-slate-500">{index + 1}</td>
-                                    <td className="px-3 py-2 text-slate-900">{item.name}</td>
-                                    <td className="px-3 py-2 text-right text-slate-700">{item.qty}</td>
-                                    <td className="px-3 py-2 text-right text-slate-700">{formatCurrency(item.price)}</td>
-                                    <td className="px-3 py-2 text-right font-semibold text-slate-900">{formatCurrency(item.price * item.qty)}</td>
+                                    <td className="py-2 text-slate-900">{item.name}</td>
+                                    <td className="py-2 text-center text-slate-700">{item.qty}</td>
+                                    <td className="py-2 text-right text-slate-900">{formatCurrency(item.price * item.qty)}</td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
+
+                    <div className="border-t border-slate-300 pt-3 space-y-1 text-[11px]">
+                        <div className="flex justify-between text-slate-600">
+                            <span>{t('billing.subtotal')}</span>
+                            <span>{formatCurrency(bill.subTotal)}</span>
+                        </div>
+                        <div className="flex justify-between text-slate-600">
+                            <span>{t('billing.discount')}</span>
+                            <span>- {formatCurrency(bill.discountAmount)}</span>
+                        </div>
+                        <div className="flex justify-between font-semibold text-slate-900">
+                            <span>{t('billing.total')}</span>
+                            <span>{formatCurrency(bill.totalAmount)}</span>
+                        </div>
+                    </div>
+
+                    <p className="text-center text-[10px] text-slate-500 border-t border-dashed border-slate-200 pt-3">
+                        {t('billing.invoice.thankYou')}
+                    </p>
                 </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className={`bg-white text-black border border-transparent ${isThermal ? 'p-5' : 'p-10'} mx-auto ${containerClass} ${className || ''}`}>
+            <div className="space-y-8">
+                <div className="flex items-start justify-between gap-6">
+                    <div className="flex items-start gap-4">
+                        <div className="h-14 w-14 rounded-xl bg-slate-700 text-white flex items-center justify-center text-lg font-semibold">
+                            {logoText || 'S'}
+                        </div>
+                        <div>
+                            <p className="text-sm font-semibold text-slate-900">{shopName}</p>
+                            {shopAddress && <p className="text-xs text-slate-500">{shopAddress}</p>}
+                            {shopPhone && <p className="text-xs text-slate-500">{shopPhone}</p>}
+                            {shopOwner && <p className="text-xs text-slate-500">{shopOwner}</p>}
+                        </div>
+                    </div>
+                    <div className="text-right text-sm text-slate-700">
+                        <p className="font-semibold">{t('billing.invoice.number')} #{bill.billNumber}</p>
+                        <p className="text-xs text-slate-500">{t('billing.invoice.date')}</p>
+                        <p className="text-xs text-slate-700">{createdDate.toLocaleDateString()}</p>
+                    </div>
+                </div>
+
+                <div className="border-t-2 border-slate-300" />
+
+                <div>
+                    <h1 className="text-3xl font-semibold text-slate-900">{shopName}</h1>
+                    <p className="text-sm text-slate-500">{t('billing.invoice.message')}</p>
+                </div>
+
+                <div className="grid gap-8 sm:grid-cols-3 text-sm">
+                    <div className="border-t border-slate-200 pt-3">
+                        <p className="text-xs uppercase tracking-wide text-slate-500">{t('billing.invoice.billTo')}</p>
+                        <p className="font-semibold text-slate-900 mt-2">{bill.customer.name}</p>
+                        {bill.customer.phone && <p className="text-slate-600">{bill.customer.phone}</p>}
+                        {bill.customer.address && <p className="text-slate-600">{bill.customer.address}</p>}
+                        {bill.customer.cnic && <p className="text-slate-600">{formatCNIC(bill.customer.cnic)}</p>}
+                    </div>
+                    <div className="border-t border-slate-200 pt-3">
+                        <p className="text-xs uppercase tracking-wide text-slate-500">{t('billing.invoice.details')}</p>
+                        <p className="mt-2 text-slate-600">{t('billing.items')}: {bill.items.length}</p>
+                        <p className="text-slate-600">{t('billing.discount')}: {formatCurrency(bill.discountAmount)}</p>
+                        <p className="text-slate-600">{t('billing.total')}: {formatCurrency(bill.totalAmount)}</p>
+                    </div>
+                    <div className="border-t border-slate-200 pt-3">
+                        <p className="text-xs uppercase tracking-wide text-slate-500">{t('billing.invoice.payment')}</p>
+                        <p className="mt-2 text-slate-600">{t('billing.paymentMode')}: {bill.paymentMode === 'cash' ? t('billing.cash') : t('billing.udharCredit')}</p>
+                        <p className="text-slate-600">{t('billing.invoice.paid')}: {formatCurrency(bill.paidAmount)}</p>
+                        {bill.paymentMode === 'credit' && (
+                            <p className="text-slate-600">{t('billing.invoice.balance')}: {formatCurrency(Math.max(0, bill.totalAmount - bill.paidAmount))}</p>
+                        )}
+                    </div>
+                </div>
+
+                <div className="border-t border-slate-200" />
+
+                <table className="w-full text-sm">
+                    <thead className="text-xs uppercase tracking-wide text-slate-500 border-b border-slate-200">
+                        <tr>
+                            <th className="py-3 text-left">{t('billing.item')}</th>
+                            <th className="py-3 text-center">{t('billing.qty')}</th>
+                            <th className="py-3 text-right">{t('billing.price')}</th>
+                            <th className="py-3 text-right">{t('billing.total')}</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        {bill.items.map(item => (
+                            <tr key={item.id}>
+                                <td className="py-4 text-slate-900">{item.name}</td>
+                                <td className="py-4 text-center text-slate-600">{item.qty}</td>
+                                <td className="py-4 text-right text-slate-600">{formatCurrency(item.price)}</td>
+                                <td className="py-4 text-right text-slate-900">{formatCurrency(item.price * item.qty)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
 
                 <div className="flex justify-end">
                     <div className="w-full max-w-xs space-y-2">
@@ -95,15 +181,16 @@ export default function InvoicePrintSheet({ bill, className, printFormat = 'a4',
                             <span>{t('billing.discount')}</span>
                             <span>- {formatCurrency(bill.discountAmount)}</span>
                         </div>
-                        <div className="flex justify-between text-base font-bold text-slate-900 border-t border-slate-200 pt-2">
-                            <span>{t('billing.total')}</span>
+                        <div className="flex justify-between text-base font-semibold text-slate-900 border-t border-slate-200 pt-3">
+                            <span>{t('billing.invoice.totalDue')}</span>
                             <span>{formatCurrency(bill.totalAmount)}</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="text-xs text-slate-500 border-t border-dashed border-slate-200 pt-4">
-                    {t('billing.invoice.thankYou')}
+                <div className="text-xs text-slate-500 border-t border-slate-200 pt-6 flex justify-between">
+                    <span>{t('billing.invoice.thankYou')}</span>
+                    <span>{t('billing.invoice.page')} 1</span>
                 </div>
             </div>
         </div>

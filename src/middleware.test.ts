@@ -41,7 +41,9 @@ import { NextResponse } from 'next/server';
 import { middleware } from './middleware';
 
 // Helper to create mock NextRequest
-function createMockRequest(pathname: string, sessionCookie?: string) {
+type MiddlewareRequest = Parameters<typeof middleware>[0];
+
+function createMockRequest(pathname: string, sessionCookie?: string): MiddlewareRequest {
     const url = new URL(pathname, 'http://localhost:3000');
     const request = {
         nextUrl: url,
@@ -50,7 +52,7 @@ function createMockRequest(pathname: string, sessionCookie?: string) {
             get: jest.fn().mockReturnValue(sessionCookie ? { value: sessionCookie } : undefined),
         },
     };
-    return request as any;
+    return request as MiddlewareRequest;
 }
 
 describe('Middleware', () => {
