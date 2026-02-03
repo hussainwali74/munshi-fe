@@ -110,21 +110,45 @@ a {
 }
 
 @media print {
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  .invoice-print-root,
+  .invoice-print-root *,
+  .print-root,
+  .print-root * {
+    visibility: visible !important;
+  }
+
+  body[data-print-lang="en"] .invoice-print-root,
+  body[data-print-lang="ur"] .invoice-print-root {
+    visibility: hidden !important;
+  }
+
+  body[data-print-lang="en"] .invoice-print-root.lang-en,
+  body[data-print-lang="en"] .invoice-print-root.lang-en *,
+  body[data-print-lang="ur"] .invoice-print-root.lang-ur,
+  body[data-print-lang="ur"] .invoice-print-root.lang-ur * {
+    visibility: visible !important;
+  }
+
+  .invoice-print-root,
+  .print-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
   .invoice-sheet {
-    box-shadow: none !important;
-    border: none !important;
-  }
-
-  .invoice-sheet-a4 {
-    width: 210mm;
-    max-width: 210mm;
-    padding: 12mm;
-  }
-
-  .invoice-sheet-thermal {
-    width: 80mm;
-    max-width: 80mm;
-    padding: 6mm;
-    font-size: 11px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    margin: 0 auto;
   }
 }
