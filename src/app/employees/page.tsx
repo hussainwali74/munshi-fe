@@ -43,26 +43,27 @@ export default function EmployeesPage() {
         try {
             const formData = new FormData(e.currentTarget);
             await addEmployee(formData);
-            toast.success('Employee added successfully');
+            toast.success(t('employees.employeeAdded'));
             handleCloseModal();
             await fetchEmployees(); // Refresh the list
         } catch (error) {
             console.error('Error adding employee:', error);
-            toast.error('❌ Failed to add employee');
+            toast.error(t('employees.employeeAddFailed'));
         } finally {
             setIsSubmitting(false);
         }
     };
 
     const handleDelete = async (id: string, name: string) => {
-        if (confirm(`Are you sure you want to delete ${name}?`)) {
+        const confirmMessage = t('employees.confirmDelete', { name });
+        if (confirm(confirmMessage)) {
             try {
                 await deleteEmployee(id);
-                toast.success('Employee deleted successfully');
+                toast.success(t('employees.employeeDeleted'));
                 await fetchEmployees();
             } catch (error) {
                 console.error('Error deleting employee:', error);
-                toast.error('❌ Failed to delete employee');
+                toast.error(t('employees.employeeDeleteFailed'));
             }
         }
     };
@@ -79,12 +80,12 @@ export default function EmployeesPage() {
         try {
             const formData = new FormData(e.currentTarget);
             await updateEmployee(formData);
-            toast.success('Employee updated successfully');
+            toast.success(t('employees.employeeUpdated'));
             setEditingEmployee(null);
             await fetchEmployees();
         } catch (error) {
             console.error('Error updating employee:', error);
-            toast.error('❌ Failed to update employee');
+            toast.error(t('employees.employeeUpdateFailed'));
         } finally {
             setIsSubmitting(false);
         }

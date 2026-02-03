@@ -54,12 +54,12 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             formData.append('customerId', id);
             formData.append('type', transactionType === 'purchase' ? 'credit' : 'debit');
             await addTransaction(formData);
-            toast.success(transactionType === 'purchase' ? 'Purchase added' : 'Payment recorded');
+            toast.success(transactionType === 'purchase' ? t('khata.purchaseAdded') : t('khata.paymentRecorded'));
             setIsModalOpen(false);
             await fetchCustomer(); // Refresh the data
         } catch (error) {
             console.error('Transaction error:', error);
-            toast.error('Failed to add transaction');
+            toast.error(t('khata.addTransactionFailed'));
         }
     };
 

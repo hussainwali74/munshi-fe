@@ -84,10 +84,10 @@ export default function SettingsPage() {
                 setNewCategory('');
                 toast.success(t('settings.categoryAdded') || 'Category added successfully');
             } else {
-                toast.error(result.error || 'Failed to add category');
+                toast.error(result.error || t('settings.addCategoryFailed'));
             }
         } catch {
-            toast.error('Failed to add category');
+            toast.error(t('settings.addCategoryFailed'));
         } finally {
             setIsAddingCategory(false);
         }
@@ -106,10 +106,10 @@ export default function SettingsPage() {
                 setCategories(categories.filter(c => c !== category));
                 toast.success(t('settings.categoryRemoved') || 'Category removed successfully');
             } else {
-                toast.error(result.error || 'Failed to remove category');
+                toast.error(result.error || t('settings.removeCategoryFailed'));
             }
         } catch {
-            toast.error('Failed to remove category');
+            toast.error(t('settings.removeCategoryFailed'));
         } finally {
             setRemovingCategory(null);
         }
@@ -119,7 +119,7 @@ export default function SettingsPage() {
         e.preventDefault();
 
         if (!validateShopPhone(shopDetails.shopPhone)) {
-            toast.error('Invalid phone format. Must be 03XX-XXXXXX-X');
+            toast.error(t('settings.invalidPhoneFormat'));
             return;
         }
 
@@ -131,7 +131,7 @@ export default function SettingsPage() {
             toast.success(t('settings.shopDetailsSaved') || 'Shop details saved successfully');
         } catch (error) {
             console.error('Error updating shop details:', error);
-            toast.error('Failed to update shop details');
+            toast.error(t('settings.updateShopDetailsFailed'));
         } finally {
             setIsSavingShop(false);
         }

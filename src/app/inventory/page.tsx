@@ -180,7 +180,7 @@ export default function InventoryPage() {
                                 setIsSubmitting(true);               // ← start spinner
                                 // Show a toast on success/failure
                                 await addInventoryItem(formData);
-                                toast.success('✅ Item added successfully');
+                                toast.success(t('inventory.itemAdded'));
                                 console.log('✅ Item added successfully');
                                 handleCloseAddModal();
                                 // Refresh list
@@ -188,7 +188,7 @@ export default function InventoryPage() {
                                 setItems(data || []);
                             } catch (error) {
                                 console.error('❌ Error adding item:', error);
-                                toast.error('❌ Error adding item');
+                                toast.error(t('inventory.itemAddFailed'));
                                 alert('Error: ' + (error as Error).message);
                             } finally {
                                 setIsSubmitting(false);              // ← stop spinner

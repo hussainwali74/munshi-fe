@@ -6,6 +6,7 @@ import { Search, Edit2, X, Check, ChevronDown, ChevronRight, RotateCcw } from 'l
 import { updateCustomTranslation, deleteCustomTranslation, getMergedTranslations, CustomTranslation } from './translation-actions';
 import { toast } from 'react-hot-toast';
 import { SkeletonTranslationCard } from '@/components/Skeleton';
+import { useLanguage } from '@/context/LanguageContext';
 
 // Helper to flatten keys but keep structure for grouping
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -30,6 +31,7 @@ interface TranslationPair {
 }
 
 export default function TranslationManager() {
+    const { t } = useLanguage();
     const [searchTerm, setSearchTerm] = useState('');
     const [customMap, setCustomMap] = useState<Record<string, string>>({}); // format: "lang:key" -> value
     const [systemMap, setSystemMap] = useState<Record<string, string>>({}); // format: "lang:key" -> value
@@ -57,7 +59,7 @@ export default function TranslationManager() {
             setCustomMap(cusMap);
         } catch (error) {
             console.error(error);
-            toast.error('Failed to load translations');
+            toast.error(t('settings.translationManager.loadFailed'));
         } finally {
             setIsInitialLoading(false);
         }
@@ -137,26 +139,33 @@ export default function TranslationManager() {
 
             await loadTranslations();
             setEditingKey(null);
-            toast.success('Translations updated');
-            window.location.reload();
+            toast.success(t('settings.translationManager.updateSuccess'));
+            if (process.env.NODE_ENV !== 'test') {
+                window.location.reload();
+            }
         } catch {
-            toast.error('Failed to save');
+            toast.error(t('settings.translationManager.saveFailed'));
         } finally {
             setLoading(false);
         }
     };
 
     const handleRevert = async (key: string, lang: 'en' | 'ur') => {
-        if (!confirm(`Revert ${lang === 'en' ? 'English' : 'Urdu'} to default?`)) return;
+        const languageLabel = lang === 'en'
+            ? t('settings.translationManager.languageEnglish')
+            : t('settings.translationManager.languageUrdu');
+        if (!confirm(t('settings.translationManager.revertConfirm', { language: languageLabel }))) return;
         setLoading(true);
         try {
             await deleteCustomTranslation(key, lang);
             await loadTranslations();
             setEditingKey(null); // Close edit mode if open
-            toast.success(`Reverted ${lang === 'en' ? 'English' : 'Urdu'} to default`);
-            window.location.reload();
+            toast.success(t('settings.translationManager.revertSuccess', { language: languageLabel }));
+            if (process.env.NODE_ENV !== 'test') {
+                window.location.reload();
+            }
         } catch {
-            toast.error('Failed to revert');
+            toast.error(t('settings.translationManager.revertFailed'));
         } finally {
             setLoading(false);
         }
@@ -186,7 +195,7 @@ export default function TranslationManager() {
             <div className="relative">
                 <input
                     type="text"
-                    placeholder="Search translations..."
+                    placeholder={t('settings.translationManager.searchPlaceholder')}
                     className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-surface shadow-sm focus:ring-1 focus:ring-primary outline-none"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -241,7 +250,7 @@ export default function TranslationManager() {
                                                 {isEditing ? (
                                                     <div className="space-y-3">
                                                         <div>
-                                                            <label className="text-xs font-semibold text-text-secondary uppercase">English</label>
+                                                            <label className="text-xs font-semibold text-text-secondary uppercase">{t('settings.translationManager.languageEnglish')}</label>
                                                             <input
                                                                 type="text"
                                                                 value={editValues.en}
@@ -251,7 +260,7 @@ export default function TranslationManager() {
                                                             />
                                                         </div>
                                                         <div>
-                                                            <label className="text-xs font-semibold text-text-secondary uppercase">Urdu (اردو)</label>
+                                                            <label className="text-xs font-semibold text-text-secondary uppercase">{t('settings.translationManager.languageUrdu')}</label>
                                                             <input
                                                                 type="text"
                                                                 value={editValues.ur}
@@ -284,7 +293,7 @@ export default function TranslationManager() {
                                                             <div className="flex justify-between items-start">
                                                                 <p className="font-medium text-text-primary">{item.en}</p>
                                                                 {item.isCustomEn && (
-                                                                    <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded ml-2">Custom</span>
+                                                                    <span className="text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded ml-2">{t('settings.translationManager.customBadge')}</span>
                                                                 )}
                                                             </div>
                                                         </div>
@@ -292,7 +301,7 @@ export default function TranslationManager() {
                                                             <div className="flex justify-between items-start">
                                                                 <p className="font-medium text-text-primary font-noto text-xl text-right w-full" dir="rtl">{item.ur}</p>
                                                                 {item.isCustomUr && (
-                                                                    <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">Custom</span>
+                                                                    <span className="text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">{t('settings.translationManager.customBadge')}</span>
                                                                 )}
                                                             </div>
                                                         </div>
@@ -305,7 +314,7 @@ export default function TranslationManager() {
                                                                     setEditValues({ en: item.en, ur: item.ur });
                                                                 }}
                                                                 className="p-1.5 hover:bg-gray-100 rounded-md text-text-secondary"
-                                                                title="Edit"
+                                                                title={t('settings.translationManager.editTitle')}
                                                                 disabled={loading}
                                                             >
                                                                 <Edit2 size={14} />
@@ -314,7 +323,7 @@ export default function TranslationManager() {
                                                                 <button
                                                                     onClick={() => {
                                                                         if (item.isCustomEn && item.isCustomUr) {
-                                                                            if (confirm('Revert both English and Urdu?')) {
+                                                                            if (confirm(t('settings.translationManager.revertConfirmBoth'))) {
                                                                                 handleRevert(item.key, 'en');
                                                                                 handleRevert(item.key, 'ur');
                                                                             }
@@ -325,7 +334,7 @@ export default function TranslationManager() {
                                                                         }
                                                                     }}
                                                                     className="p-1.5 hover:bg-red-50 text-red-500 rounded-md"
-                                                                    title="Revert to Default"
+                                                                    title={t('settings.translationManager.revertTitle')}
                                                                     disabled={loading}
                                                                 >
                                                                     <RotateCcw size={14} />
@@ -345,7 +354,7 @@ export default function TranslationManager() {
 
                 {filteredSections.length === 0 && (
                     <div className="text-center py-12 text-text-secondary bg-surface rounded-xl border border-border">
-                        <p>No translations found for &quot;{searchTerm}&quot;</p>
+                        <p>{t('settings.translationManager.noResults', { term: searchTerm })}</p>
                     </div>
                 )}
             </div>
