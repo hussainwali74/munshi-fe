@@ -158,11 +158,11 @@ export default function EditInventoryModal({ item, categories = ['sanitary', 'el
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.size')}</label>
-                            <input name="size" type="text" defaultValue={item.size} className="w-full p-2 rounded-[0.75rem] border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" />
+                            <input name="size" type="text" defaultValue={item.size ?? ''} className="w-full p-2 rounded-[0.75rem] border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" />
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-1 text-text-primary">{t('inventory.color')}</label>
-                            <input name="color" type="text" defaultValue={item.color} className="w-full p-2 rounded-[0.75rem] border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" />
+                            <input name="color" type="text" defaultValue={item.color ?? ''} className="w-full p-2 rounded-[0.75rem] border border-border bg-surface text-text-primary focus:ring-1 focus:ring-primary focus:border-primary outline-none" />
                         </div>
                     </div>
 
