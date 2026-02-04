@@ -18,6 +18,7 @@ interface ReceivePaymentModalProps {
     selectedInvoiceId: string;
     onSelectedInvoiceChange: (value: string) => void;
     fixedInvoiceId?: string | null;
+    fixedInvoice?: InvoiceOption | null;
     paymentAmount: string;
     onPaymentAmountChange: (value: string) => void;
     paymentNotes: string;
@@ -39,6 +40,7 @@ export default function ReceivePaymentModal({
     selectedInvoiceId,
     onSelectedInvoiceChange,
     fixedInvoiceId = null,
+    fixedInvoice = null,
     paymentAmount,
     onPaymentAmountChange,
     paymentNotes,
@@ -52,8 +54,12 @@ export default function ReceivePaymentModal({
 }: ReceivePaymentModalProps) {
     if (!isOpen) return null;
 
-    const selectedInvoice = invoices.find((invoice) => invoice.id === selectedInvoiceId) || null;
+    const selectedInvoice = invoices.find((invoice) => invoice.id === selectedInvoiceId)
+        || (fixedInvoice && fixedInvoice.id === selectedInvoiceId ? fixedInvoice : null)
+        || null;
     const isInvoiceLocked = Boolean(fixedInvoiceId);
+    const lockedOptions = fixedInvoice ? [fixedInvoice] : invoices.filter((invoice) => invoice.id === fixedInvoiceId);
+    const selectOptions = isInvoiceLocked ? lockedOptions : invoices;
 
     const buildInvoiceLabel = (invoice: InvoiceOption) => {
         const description = invoice.description || t('khata.purchaseUdhar') || 'Purchase (Udhar)';
@@ -90,7 +96,7 @@ export default function ReceivePaymentModal({
                             {!isInvoiceLocked && (
                                 <option value="">{t('khata.generalPayment') || 'General payment'}</option>
                             )}
-                            {invoices.map((invoice) => (
+                            {selectOptions.map((invoice) => (
                                 <option key={invoice.id} value={invoice.id}>
                                     {buildInvoiceLabel(invoice)}
                                 </option>
@@ -101,7 +107,7 @@ export default function ReceivePaymentModal({
                                 {t('common.loading') || 'Loading...'}
                             </p>
                         )}
-                        {!isInvoiceLoading && invoices.length === 0 && (
+                        {!isInvoiceLoading && selectOptions.length === 0 && (
                             <p className="text-xs text-text-secondary mt-1">
                                 {t('khata.noOpenInvoices') || 'No open invoices/bills to apply.'}
                             </p>

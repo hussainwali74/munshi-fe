@@ -151,15 +151,12 @@ export default function TransactionDetailPage({ params }: { params: Promise<{ id
     };
 
     const openPaymentModal = (invoiceId?: string) => {
-        if (invoiceId) {
-            const invoice = outstandingInvoices.find((item) => item.id === invoiceId);
-            if (invoice) {
-                setSelectedInvoiceId(invoiceId);
-                setFixedInvoiceId(invoiceId);
-                setPaymentAmount(getInvoiceRemaining(invoice).toString());
-                setIsPaymentModalOpen(true);
-                return;
-            }
+        if (invoiceId && transaction) {
+            setSelectedInvoiceId(invoiceId);
+            setFixedInvoiceId(invoiceId);
+            setPaymentAmount(getInvoiceRemaining(transaction).toString());
+            setIsPaymentModalOpen(true);
+            return;
         }
         resetPaymentForm();
         setIsPaymentModalOpen(true);
@@ -456,6 +453,14 @@ export default function TransactionDetailPage({ params }: { params: Promise<{ id
                 t={t}
                 isRtl={isRtl}
                 invoices={outstandingInvoices}
+                fixedInvoice={fixedInvoiceId && transaction ? {
+                    id: transaction.id,
+                    description: transaction.description,
+                    date: transaction.date,
+                    amount: transaction.amount,
+                    bill_amount: transaction.bill_amount ?? null,
+                    paid_amount: transaction.paid_amount ?? null
+                } : null}
                 selectedInvoiceId={selectedInvoiceId}
                 onSelectedInvoiceChange={(value) => {
                     setSelectedInvoiceId(value);
