@@ -180,3 +180,111 @@ export async function addTransaction(formData: FormData) {
     revalidatePath('/khata')
     revalidatePath(`/khata/${customerId}`)
 }
+
+export async function getTransactionById(transactionId: string) {
+    const session = await getSession()
+    if (!session) return null
+
+    const { data: transaction, error: transactionError } = await getDb()
+        .from('transactions')
+        .select('*')
+        .eq('id', transactionId)
+        .eq('user_id', session.userId)
+        .single()
+
+    if (transactionError) {
+        console.error('Fetch transaction error:', transactionError)
+        return null
+    }
+
+    const { data: customer, error: customerError } = await getDb()
+        .from('customers')
+        .select('id, name, phone, address, balance')
+        .eq('id', transaction.customer_id)
+        .eq('user_id', session.userId)
+        .single()
+
+    if (customerError) {
+        console.error('Fetch transaction customer error:', customerError)
+        return { transaction, customer: null }
+    }
+
+    return { transaction, customer }
+}
+
+export async function updateTransaction(formData: FormData) {
+    const session = await getSession()
+    if (!session) throw new Error('Not authenticated')
+
+    const transactionId = formData.get('transactionId') as string
+    const type = formData.get('type') as string
+    const amountValue = formData.get('amount') as string
+    const description = (formData.get('description') as string) || null
+    const dateValue = formData.get('date') as string | null
+    const billAmountValue = formData.get('billAmount')
+    const paidAmountValue = formData.get('paidAmount')
+
+    const amount = parseFloat(amountValue)
+    if (Number.isNaN(amount)) {
+        throw new Error('Invalid amount')
+    }
+
+    const { data: existing, error: existingError } = await getDb()
+        .from('transactions')
+        .select('id, amount, type, customer_id')
+        .eq('id', transactionId)
+        .eq('user_id', session.userId)
+        .single()
+
+    if (existingError || !existing) {
+        console.error('Fetch transaction for update error:', existingError)
+        throw new Error('Transaction not found')
+    }
+
+    const updates: Record<string, unknown> = {
+        amount,
+        type,
+        description
+    }
+
+    if (dateValue) {
+        updates.date = new Date(`${dateValue}T00:00:00`).toISOString()
+    }
+
+    if (billAmountValue !== null) {
+        const billAmountString = billAmountValue as string
+        updates.bill_amount = billAmountString === '' ? null : parseFloat(billAmountString)
+    }
+
+    if (paidAmountValue !== null) {
+        const paidAmountString = paidAmountValue as string
+        updates.paid_amount = paidAmountString === '' ? null : parseFloat(paidAmountString)
+    }
+
+    const { error: updateError } = await getDb()
+        .from('transactions')
+        .update(updates)
+        .eq('id', transactionId)
+        .eq('user_id', session.userId)
+
+    if (updateError) {
+        console.error('Transaction update error:', updateError)
+        throw new Error('Failed to update transaction')
+    }
+
+    const previousAmount = Number(existing.amount)
+    const previousEffect = existing.type === 'credit' ? previousAmount : -previousAmount
+    const nextEffect = type === 'credit' ? amount : -amount
+    const balanceDelta = nextEffect - previousEffect
+
+    if (balanceDelta !== 0) {
+        await getDb().rpc('update_customer_balance', {
+            p_customer_id: existing.customer_id,
+            p_amount: balanceDelta
+        })
+    }
+
+    revalidatePath('/khata')
+    revalidatePath(`/khata/${existing.customer_id}`)
+    revalidatePath(`/khata/${existing.customer_id}/transactions/${transactionId}`)
+}

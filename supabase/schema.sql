@@ -9,6 +9,7 @@ create table if not exists users (
   password_hash text not null,
   full_name text,
   business_name text,
+  categories text[] default array['sanitary', 'electrical', 'plumbing', 'other'],
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -90,6 +91,9 @@ begin
     end if;
     if not exists (select 1 from information_schema.columns where table_name = 'users' and column_name = 'shop_phone') then
         alter table users add column shop_phone text;
+    end if;
+    if not exists (select 1 from information_schema.columns where table_name = 'users' and column_name = 'categories') then
+        alter table users add column categories text[] default array['sanitary', 'electrical', 'plumbing', 'other'];
     end if;
 
     -- Transactions columns (Item Details)

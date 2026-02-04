@@ -1,4 +1,4 @@
-import { addCustomer, addTransaction, getCustomers, getCustomerById, updateCustomer, deleteCustomer } from './actions';
+import { addCustomer, addTransaction, getCustomers, getCustomerById, getTransactionById, updateCustomer, updateTransaction, deleteCustomer } from './actions';
 import { getDb } from '@/lib/db';
 import { getSession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
@@ -133,6 +133,37 @@ describe('Khata Actions', () => {
             expect(result).toEqual({
                 ...mockCustomer,
                 transactions: mockTransactions
+            });
+        });
+    });
+
+    describe('getTransactionById', () => {
+        it('should return null if not authenticated', async () => {
+            (getSession as jest.Mock).mockResolvedValue(null);
+
+            const result = await getTransactionById('tx-123');
+
+            expect(result).toBeNull();
+        });
+
+        it('should return transaction with customer data', async () => {
+            const mockTransaction = { id: 'tx-1', customer_id: 'cust-1', amount: 120, type: 'credit', date: '2024-01-01' };
+            const mockCustomer = { id: 'cust-1', name: 'Customer 1', balance: 200 };
+
+            let callCount = 0;
+            getMockChain().then.mockImplementation((resolve: ThenResolve<typeof mockTransaction | typeof mockCustomer>) => {
+                callCount++;
+                if (callCount === 1) {
+                    return resolve({ data: mockTransaction, error: null });
+                }
+                return resolve({ data: mockCustomer, error: null });
+            });
+
+            const result = await getTransactionById('tx-1');
+
+            expect(result).toEqual({
+                transaction: mockTransaction,
+                customer: mockCustomer
             });
         });
     });
@@ -344,6 +375,61 @@ describe('Khata Actions', () => {
             expect(getRpcSpy()).toHaveBeenCalledWith('update_customer_balance', {
                 p_customer_id: 'cust-123',
                 p_amount: -50 // debit = negative
+            });
+        });
+    });
+
+    describe('updateTransaction', () => {
+        it('should throw error if not authenticated', async () => {
+            (getSession as jest.Mock).mockResolvedValue(null);
+
+            const formData = new FormData();
+            formData.append('transactionId', 'tx-123');
+            formData.append('type', 'credit');
+            formData.append('amount', '150');
+            formData.append('description', 'Updated transaction');
+            formData.append('date', '2024-01-15');
+
+            await expect(updateTransaction(formData)).rejects.toThrow('Not authenticated');
+        });
+
+        it('should update transaction and adjust balance delta', async () => {
+            const existingTransaction = { id: 'tx-123', amount: 100, type: 'credit', customer_id: 'cust-123' };
+
+            let callCount = 0;
+            getMockChain().then.mockImplementation((resolve: ThenResolve<typeof existingTransaction | null>) => {
+                callCount++;
+                if (callCount === 1) {
+                    return resolve({ data: existingTransaction, error: null });
+                }
+                return resolve({ data: null, error: null });
+            });
+
+            const formData = new FormData();
+            formData.append('transactionId', 'tx-123');
+            formData.append('type', 'credit');
+            formData.append('amount', '150');
+            formData.append('description', 'Updated transaction');
+            formData.append('date', '2024-01-15');
+            formData.append('billAmount', '200');
+            formData.append('paidAmount', '50');
+
+            await updateTransaction(formData);
+
+            expect(getMockChain().update).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    amount: 150,
+                    type: 'credit',
+                    description: 'Updated transaction',
+                    bill_amount: 200,
+                    paid_amount: 50,
+                    date: expect.any(String)
+                })
+            );
+
+            expect(getRpcSpy()).toHaveBeenCalledWith('update_customer_balance', {
+                p_customer_id: 'cust-123',
+                p_amount: 50
             });
         });
     });

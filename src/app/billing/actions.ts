@@ -47,6 +47,9 @@ export async function createBill(formData: FormData) {
     } catch {
         throw new Error('Invalid items data')
     }
+    if (!Array.isArray(items)) {
+        throw new Error('Invalid items data')
+    }
 
     // 1. Create Transaction Record
     // Actually, for a bill:
@@ -96,13 +99,40 @@ export async function createBill(formData: FormData) {
     }
 
     // 2. Update Inventory Quantities
-    for (const item of items) {
-        if (item.id) {
-            // Decrement stock
-            await getDb().rpc('decrement_stock', {
-                p_item_id: item.id,
-                p_quantity: item.qty
-            })
+    const stockUpdates = items
+        .filter((item: { id?: string; qty?: number }) => item?.id && Number.isFinite(Number(item?.qty)) && Number(item?.qty) > 0)
+        .map((item: { id: string; qty: number }) => ({ id: item.id, qty: Number(item.qty) }))
+
+    if (stockUpdates.length > 0) {
+        const { data: stockRows, error: stockFetchError } = await getDb()
+            .from('inventory')
+            .select('id, quantity')
+            .eq('user_id', session.userId)
+            .in('id', stockUpdates.map((item) => item.id))
+
+        if (stockFetchError) {
+            console.error('Inventory fetch error:', stockFetchError)
+        } else {
+            const stockById = new Map(
+                (stockRows || []).map((row: { id: string; quantity: number | null }) => [row.id, Number(row.quantity ?? 0)])
+            )
+
+            await Promise.all(
+                stockUpdates.map(async (item) => {
+                    const currentQty = stockById.get(item.id)
+                    if (currentQty === undefined) return
+                    const nextQty = Math.max(0, currentQty - item.qty)
+                    const { error: updateError } = await getDb()
+                        .from('inventory')
+                        .update({ quantity: nextQty })
+                        .eq('id', item.id)
+                        .eq('user_id', session.userId)
+
+                    if (updateError) {
+                        console.error('Inventory update error:', updateError)
+                    }
+                })
+            )
         }
     }
 
