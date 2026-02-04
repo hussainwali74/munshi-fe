@@ -1,18 +1,19 @@
 'use client';
 
 import { updateShopDetails, getCategories, addCategory, removeCategory, getShopDetails } from './actions';
-import { Settings as SettingsIcon, Languages as LanguagesIcon, Store as StoreIcon, Tags as TagsIcon, Plus, X, Loader2 } from 'lucide-react';
+import { Settings as SettingsIcon, Languages as LanguagesIcon, Store as StoreIcon, Tags as TagsIcon, Plus, X, Loader2, Printer } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useState, useEffect } from 'react';
 import TranslationManager from './TranslationManager';
 import { toast } from 'react-hot-toast';
 import { formatShopPhone, validateShopPhone } from '@/lib/utils';
+import PrintSettingsCard from '@/app/billing/components/PrintSettingsCard';
 
 
 export default function SettingsPage() {
     const { t, language } = useLanguage();
     const isRtl = language === 'ur';
-    const [activeTab, setActiveTab] = useState<'shop' | 'categories' | 'translations'>('shop');
+    const [activeTab, setActiveTab] = useState<'shop' | 'categories' | 'translations' | 'printing'>('shop');
 
     // Categories state
     const [categories, setCategories] = useState<string[]>([]);
@@ -30,6 +31,10 @@ export default function SettingsPage() {
     });
     const [isLoadingShopDetails, setIsLoadingShopDetails] = useState(true);
     const [isSavingShop, setIsSavingShop] = useState(false);
+
+    // Print settings state
+    const [printFormat, setPrintFormat] = useState<'a4' | 'thermal'>('a4');
+    const [autoPrint, setAutoPrint] = useState(false);
 
     // Fetch shop details on mount
     useEffect(() => {
@@ -53,6 +58,26 @@ export default function SettingsPage() {
         };
         fetchDetails();
     }, []);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        const storedFormat = window.localStorage.getItem('billing.printFormat');
+        if (storedFormat === 'a4' || storedFormat === 'thermal') {
+            setPrintFormat(storedFormat);
+        }
+        const storedAutoPrint = window.localStorage.getItem('billing.autoPrint');
+        setAutoPrint(storedAutoPrint === 'true');
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        window.localStorage.setItem('billing.printFormat', printFormat);
+    }, [printFormat]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        window.localStorage.setItem('billing.autoPrint', autoPrint ? 'true' : 'false');
+    }, [autoPrint]);
 
     // Fetch categories on mount
     useEffect(() => {
@@ -164,6 +189,16 @@ export default function SettingsPage() {
                 >
                     <TagsIcon size={20} />
                     {t('settings.categories') || 'Categories'}
+                </button>
+                <button
+                    onClick={() => setActiveTab('printing')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all whitespace-nowrap ${activeTab === 'printing'
+                        ? 'bg-primary text-white shadow-md'
+                        : 'bg-surface text-text-secondary hover:bg-primary/5 hover:text-primary border border-border'
+                        }`}
+                >
+                    <Printer size={20} />
+                    {t('settings.printSettings') || 'Print Settings'}
                 </button>
                 <button
                     onClick={() => setActiveTab('translations')}
@@ -360,6 +395,25 @@ export default function SettingsPage() {
                                 <strong>{t('common.note') || 'Note'}:</strong> {t('settings.categoriesNote') || 'Categories are used when adding inventory items. Changes will be reflected in the inventory page.'}
                             </p>
                         </div>
+                    </div>
+                ) : activeTab === 'printing' ? (
+                    <div className="bg-surface rounded-xl p-8 shadow-md border border-border max-w-2xl">
+                        <div className="flex items-center gap-4 mb-8 pb-6 border-b border-border">
+                            <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary/10">
+                                <Printer className="text-primary" size={24} />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-bold text-text-primary">{t('settings.printSettingsTitle') || 'Billing Print Settings'}</h2>
+                                <p className="text-sm text-text-secondary">{t('settings.printSettingsSubtitle') || 'Choose invoice format and auto-print preferences'}</p>
+                            </div>
+                        </div>
+                        <PrintSettingsCard
+                            printFormat={printFormat}
+                            autoPrint={autoPrint}
+                            onPrintFormatChange={setPrintFormat}
+                            onAutoPrintChange={setAutoPrint}
+                            t={t}
+                        />
                     </div>
                 ) : (
                     <TranslationManager />

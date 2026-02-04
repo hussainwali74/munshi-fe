@@ -14,7 +14,6 @@ import ItemsCard from './components/ItemsCard';
 import SummaryCard from './components/SummaryCard';
 import InvoicePrintSheet from './components/InvoicePrintSheet';
 import InvoiceSuccessModal from './components/InvoiceSuccessModal';
-import PrintSettingsCard from './components/PrintSettingsCard';
 import { calculateBalanceDue, calculateBillTotals, generateBillNumber } from './utils';
 import type { BillReceipt, CartItem, Customer, DiscountType, PaymentMode, ShopDetails } from './types';
 import { translations, type Language } from '@/lib/translations';
@@ -131,9 +130,7 @@ function BillingPageContent() {
             setPrintFormat(storedFormat);
         }
         const storedAutoPrint = window.localStorage.getItem('billing.autoPrint');
-        if (storedAutoPrint === 'true') {
-            setAutoPrint(true);
-        }
+        setAutoPrint(storedAutoPrint === 'true');
     }, []);
 
     useEffect(() => {
@@ -504,13 +501,6 @@ function BillingPageContent() {
                             onPaymentModeChange={handlePaymentModeChange}
                             onPaidAmountChange={setPaidAmount}
                             onSubmit={handleSubmit}
-                            t={t}
-                        />
-                        <PrintSettingsCard
-                            printFormat={printFormat}
-                            autoPrint={autoPrint}
-                            onPrintFormatChange={setPrintFormat}
-                            onAutoPrintChange={setAutoPrint}
                             t={t}
                         />
                     </div>
