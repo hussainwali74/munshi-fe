@@ -74,24 +74,44 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
         }
     };
 
+    const appTimeZone = 'Asia/Karachi';
+
+    const toDateKey = (value: Date | string) => {
+        const date = typeof value === 'string' ? new Date(value) : value;
+        if (Number.isNaN(date.getTime())) return '';
+        const parts = new Intl.DateTimeFormat('en-CA', {
+            timeZone: appTimeZone,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }).formatToParts(date);
+        const getPart = (type: string) => parts.find((part) => part.type === type)?.value ?? '';
+        return `${getPart('year')}-${getPart('month')}-${getPart('day')}`;
+    };
+
     const formatDate = (dateString: string) => {
         if (!dateString) return '';
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-    };
-
-    const formatInputDate = (dateString: string) => {
-        if (!dateString) return '';
-        const date = new Date(`${dateString}T00:00:00`);
         if (Number.isNaN(date.getTime())) return '';
-        return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+        return new Intl.DateTimeFormat('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            timeZone: appTimeZone
+        }).format(date);
     };
 
-    const toInputDate = (date: Date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+    const formatDateKey = (dateKey: string) => {
+        if (!dateKey) return '';
+        const [year, month, day] = dateKey.split('-').map(Number);
+        if (!year || !month || !day) return dateKey;
+        const date = new Date(Date.UTC(year, month - 1, day, 12));
+        return new Intl.DateTimeFormat('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            timeZone: appTimeZone
+        }).format(date);
     };
 
     const applyQuickFilter = (key: 'today' | 'week' | 'last30' | 'month' | 'all') => {
@@ -102,24 +122,25 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             return;
         }
 
-        const end = toInputDate(now);
+        const end = toDateKey(now);
         let start = end;
 
         if (key === 'week') {
             const startDateValue = new Date(now);
             startDateValue.setDate(startDateValue.getDate() - 6);
-            start = toInputDate(startDateValue);
+            start = toDateKey(startDateValue);
         }
 
         if (key === 'last30') {
             const startDateValue = new Date(now);
             startDateValue.setDate(startDateValue.getDate() - 29);
-            start = toInputDate(startDateValue);
+            start = toDateKey(startDateValue);
         }
 
         if (key === 'month') {
-            const startDateValue = new Date(now.getFullYear(), now.getMonth(), 1);
-            start = toInputDate(startDateValue);
+            const todayKey = toDateKey(now);
+            const [year, month] = todayKey.split('-');
+            start = `${year}-${month}-01`;
         }
 
         if (key === 'today') {
@@ -130,30 +151,29 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
         setEndDate(end);
     };
 
+    const hasFilters = Boolean(startDate || endDate);
+
     const filteredTransactions = useMemo(() => {
         if (!customer?.transactions) return [];
-        const start = startDate ? new Date(`${startDate}T00:00:00`) : null;
-        const end = endDate ? new Date(`${endDate}T23:59:59.999`) : null;
         return customer.transactions.filter((txn) => {
-            const txnDate = new Date(txn.date);
-            if (start && txnDate < start) return false;
-            if (end && txnDate > end) return false;
+            const txnKey = toDateKey(txn.date);
+            if (!txnKey) return !hasFilters;
+            if (startDate && txnKey < startDate) return false;
+            if (endDate && txnKey > endDate) return false;
             return true;
         });
-    }, [customer?.transactions, startDate, endDate]);
-
-    const hasFilters = Boolean(startDate || endDate);
+    }, [customer?.transactions, startDate, endDate, hasFilters]);
 
     const rangeLabel = useMemo(() => {
         if (!hasFilters) return t('khata.filterAll') || 'All';
         if (startDate && endDate) {
             if (startDate === endDate) {
-                return formatInputDate(startDate);
+                return formatDateKey(startDate);
             }
-            return `${formatInputDate(startDate)} - ${formatInputDate(endDate)}`;
+            return `${formatDateKey(startDate)} - ${formatDateKey(endDate)}`;
         }
-        if (startDate) return `${t('khata.from') || 'From'} ${formatInputDate(startDate)}`;
-        if (endDate) return `${t('khata.to') || 'To'} ${formatInputDate(endDate)}`;
+        if (startDate) return `${t('khata.from') || 'From'} ${formatDateKey(startDate)}`;
+        if (endDate) return `${t('khata.to') || 'To'} ${formatDateKey(endDate)}`;
         return t('khata.filterAll') || 'All';
     }, [endDate, hasFilters, startDate, t]);
 
@@ -275,18 +295,15 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                 </div>
 
                 <div className={`flex gap-3 border-t border-border pt-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
-                    <button
+                    <Link
+                        href={`/billing?customerId=${customer.id}`}
                         className={purchaseButtonClass}
-                        onClick={() => {
-                            setTransactionType('purchase');
-                            setIsModalOpen(true);
-                        }}
                     >
                         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15">
                             <ShoppingBag size={18} />
                         </span>
                         <span>{t('khata.addPurchase') || 'Add Purchase (Udhar)'}</span>
-                    </button>
+                    </Link>
                     <button
                         className={paymentButtonClass}
                         onClick={() => {
@@ -438,7 +455,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                             key: 'today',
                             label: t('khata.filterToday') || 'Today',
                             getRange: () => {
-                                const today = toInputDate(new Date());
+                                const today = toDateKey(new Date());
                                 return { start: today, end: today };
                             }
                         },
@@ -449,7 +466,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                                 const now = new Date();
                                 const start = new Date(now);
                                 start.setDate(start.getDate() - 6);
-                                return { start: toInputDate(start), end: toInputDate(now) };
+                                return { start: toDateKey(start), end: toDateKey(now) };
                             }
                         },
                         {
@@ -459,7 +476,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                                 const now = new Date();
                                 const start = new Date(now);
                                 start.setDate(start.getDate() - 29);
-                                return { start: toInputDate(start), end: toInputDate(now) };
+                                return { start: toDateKey(start), end: toDateKey(now) };
                             }
                         },
                         {
@@ -468,7 +485,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                             getRange: () => {
                                 const now = new Date();
                                 const start = new Date(now.getFullYear(), now.getMonth(), 1);
-                                return { start: toInputDate(start), end: toInputDate(now) };
+                                return { start: toDateKey(start), end: toDateKey(now) };
                             }
                         },
                         {
