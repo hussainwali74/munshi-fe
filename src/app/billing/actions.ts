@@ -4,6 +4,28 @@ import { getDb } from '@/lib/db'
 import { getSession } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import type { InventorySearchItem } from '@/types/inventory'
+import type { Customer } from './types'
+
+export async function getCustomerForBilling(customerId: string): Promise<Customer | null> {
+    const session = await getSession()
+    if (!session) return null
+
+    if (!customerId) return null
+
+    const { data, error } = await getDb()
+        .from('customers')
+        .select('id, name, phone, address, cnic')
+        .eq('id', customerId)
+        .eq('user_id', session.userId)
+        .single()
+
+    if (error) {
+        console.error('Fetch customer for billing error:', error)
+        return null
+    }
+
+    return (data as Customer | null) || null
+}
 
 export async function searchInventoryItems(query: string): Promise<InventorySearchItem[]> {
     const session = await getSession()

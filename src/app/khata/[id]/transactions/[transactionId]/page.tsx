@@ -32,20 +32,31 @@ interface TransactionPayload {
     customer: Customer | null;
 }
 
+const appTimeZone = 'Asia/Karachi';
+
+const toDateKey = (value: Date | string) => {
+    const date = typeof value === 'string' ? new Date(value) : value;
+    if (Number.isNaN(date.getTime())) return '';
+    const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: appTimeZone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).formatToParts(date);
+    const getPart = (type: string) => parts.find((part) => part.type === type)?.value ?? '';
+    return `${getPart('year')}-${getPart('month')}-${getPart('day')}`;
+};
+
 const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-};
-
-const toDateInput = (dateString: string) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
     if (Number.isNaN(date.getTime())) return '';
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return new Intl.DateTimeFormat('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        timeZone: appTimeZone
+    }).format(date);
 };
 
 export default function TransactionDetailPage({ params }: { params: Promise<{ id: string; transactionId: string }> }) {
@@ -90,7 +101,7 @@ export default function TransactionDetailPage({ params }: { params: Promise<{ id
         setFormState({
             amount: data.transaction.amount?.toString() ?? '',
             description: data.transaction.description ?? '',
-            date: toDateInput(data.transaction.date),
+            date: toDateKey(data.transaction.date),
             billAmount: data.transaction.bill_amount?.toString() ?? '',
             paidAmount: data.transaction.paid_amount?.toString() ?? ''
         });
@@ -106,7 +117,7 @@ export default function TransactionDetailPage({ params }: { params: Promise<{ id
         setFormState({
             amount: transaction.amount?.toString() ?? '',
             description: transaction.description ?? '',
-            date: toDateInput(transaction.date),
+            date: toDateKey(transaction.date),
             billAmount: transaction.bill_amount?.toString() ?? '',
             paidAmount: transaction.paid_amount?.toString() ?? ''
         });

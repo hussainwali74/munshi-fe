@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { Mic, MicOff, Receipt } from 'lucide-react';
 import { searchCustomers } from '@/app/dashboard/search-actions';
-import { searchInventoryItems, createBill } from './actions';
+import { searchInventoryItems, createBill, getCustomerForBilling } from './actions';
 import { getShopDetails } from '@/app/settings/actions';
 import AddCustomerModal from '@/components/AddCustomerModal';
 import { useLanguage } from '@/context/LanguageContext';
@@ -14,10 +14,10 @@ import ItemsCard from './components/ItemsCard';
 import SummaryCard from './components/SummaryCard';
 import InvoicePrintSheet from './components/InvoicePrintSheet';
 import InvoiceSuccessModal from './components/InvoiceSuccessModal';
-import PrintSettingsCard from './components/PrintSettingsCard';
 import { calculateBalanceDue, calculateBillTotals, generateBillNumber } from './utils';
 import type { BillReceipt, CartItem, Customer, DiscountType, PaymentMode, ShopDetails } from './types';
 import { translations, type Language } from '@/lib/translations';
+import { useSearchParams } from 'next/navigation';
 
 const createTranslator = (lang: Language) => (path: string, vars?: Record<string, string | number>) => {
     const applyVars = (value: string) => {
@@ -55,9 +55,11 @@ type SpeechRecognitionLike = {
 };
 type WebkitSpeechRecognitionConstructor = new () => SpeechRecognitionLike;
 
-export default function BillingPage() {
+function BillingPageContent() {
     const { t, language } = useLanguage();
     const isRtl = language === 'ur';
+    const searchParams = useSearchParams();
+    const customerIdParam = searchParams.get('customerId');
 
     const [customerQuery, setCustomerQuery] = useState('');
     const [customerResults, setCustomerResults] = useState<Customer[]>([]);
@@ -102,15 +104,33 @@ export default function BillingPage() {
     }, []);
 
     useEffect(() => {
+        if (!customerIdParam || selectedCustomer) return;
+
+        let active = true;
+        const loadCustomer = async () => {
+            const customer = await getCustomerForBilling(customerIdParam);
+            if (!active) return;
+            if (customer) {
+                setSelectedCustomer(customer);
+                setCustomerQuery('');
+                setCustomerResults([]);
+            }
+        };
+        loadCustomer();
+
+        return () => {
+            active = false;
+        };
+    }, [customerIdParam, selectedCustomer]);
+
+    useEffect(() => {
         if (typeof window === 'undefined') return;
         const storedFormat = window.localStorage.getItem('billing.printFormat');
         if (storedFormat === 'a4' || storedFormat === 'thermal') {
             setPrintFormat(storedFormat);
         }
         const storedAutoPrint = window.localStorage.getItem('billing.autoPrint');
-        if (storedAutoPrint === 'true') {
-            setAutoPrint(true);
-        }
+        setAutoPrint(storedAutoPrint === 'true');
     }, []);
 
     useEffect(() => {
@@ -422,7 +442,9 @@ export default function BillingPage() {
                     </button>
                 </div>
 
-                <BillingSteps currentStep={currentStep} steps={steps} />
+                <div className="mt-4 mb-6">
+                    <BillingSteps currentStep={currentStep} steps={steps} />
+                </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 space-y-6">
@@ -481,13 +503,6 @@ export default function BillingPage() {
                             onSubmit={handleSubmit}
                             t={t}
                         />
-                        <PrintSettingsCard
-                            printFormat={printFormat}
-                            autoPrint={autoPrint}
-                            onPrintFormatChange={setPrintFormat}
-                            onAutoPrintChange={setAutoPrint}
-                            t={t}
-                        />
                     </div>
                 </div>
 
@@ -520,5 +535,13 @@ export default function BillingPage() {
                 </>
             )}
         </div>
+    );
+}
+
+export default function BillingPage() {
+    return (
+        <Suspense fallback={<div className="text-text-secondary">Loading...</div>}>
+            <BillingPageContent />
+        </Suspense>
     );
 }
