@@ -2,10 +2,12 @@
 
 import { ArrowDownLeft, ArrowLeft, ArrowUpRight, Pencil, Printer, Save, X } from 'lucide-react';
 import Link from 'next/link';
-import { useState, useEffect, use, useCallback } from 'react';
+import { useState, useEffect, use, useCallback, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
-import { getTransactionById, updateTransaction } from '../../../actions';
+import { addTransaction, getCustomerById, getTransactionById, updateTransaction } from '../../../actions';
 import { useLanguage } from '@/context/LanguageContext';
+import ReceivePaymentModal from '@/components/ReceivePaymentModal';
+import { getInvoiceRemaining } from '@/lib/invoice-utils';
 
 interface Transaction {
     id: string;
@@ -68,6 +70,13 @@ export default function TransactionDetailPage({ params }: { params: Promise<{ id
     const [transaction, setTransaction] = useState<Transaction | null>(null);
     const [customer, setCustomer] = useState<Customer | null>(null);
     const [isEditing, setIsEditing] = useState(false);
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const [availableInvoices, setAvailableInvoices] = useState<Transaction[]>([]);
+    const [selectedInvoiceId, setSelectedInvoiceId] = useState('');
+    const [fixedInvoiceId, setFixedInvoiceId] = useState<string | null>(null);
+    const [paymentAmount, setPaymentAmount] = useState('');
+    const [paymentNotes, setPaymentNotes] = useState('');
+    const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
     const [formState, setFormState] = useState({
         amount: '',
         description: '',
@@ -111,6 +120,68 @@ export default function TransactionDetailPage({ params }: { params: Promise<{ id
     useEffect(() => {
         loadTransaction();
     }, [loadTransaction]);
+
+    const refreshCustomerTransactions = useCallback(async () => {
+        const data = await getCustomerById(id);
+        if (!data) return;
+        setAvailableInvoices(data.transactions || []);
+        setCustomer(data);
+    }, [id]);
+
+    useEffect(() => {
+        refreshCustomerTransactions();
+    }, [refreshCustomerTransactions]);
+
+    const outstandingInvoices = useMemo(
+        () => availableInvoices.filter((txn) => txn.type === 'credit' && getInvoiceRemaining(txn) > 0),
+        [availableInvoices]
+    );
+
+
+    const resetPaymentForm = () => {
+        setSelectedInvoiceId('');
+        setFixedInvoiceId(null);
+        setPaymentAmount('');
+        setPaymentNotes('');
+    };
+
+    const closePaymentModal = () => {
+        setIsPaymentModalOpen(false);
+        resetPaymentForm();
+    };
+
+    const openPaymentModal = (invoiceId?: string) => {
+        if (invoiceId) {
+            const invoice = outstandingInvoices.find((item) => item.id === invoiceId);
+            if (invoice) {
+                setSelectedInvoiceId(invoiceId);
+                setFixedInvoiceId(invoiceId);
+                setPaymentAmount(getInvoiceRemaining(invoice).toString());
+                setIsPaymentModalOpen(true);
+                return;
+            }
+        }
+        resetPaymentForm();
+        setIsPaymentModalOpen(true);
+    };
+
+    const handleSubmitPayment = async (formData: FormData) => {
+        if (!customer) return;
+        setIsSubmittingPayment(true);
+        try {
+            formData.append('customerId', customer.id);
+            formData.append('type', 'debit');
+            await addTransaction(formData);
+            toast.success(t('khata.paymentRecorded') || 'Payment recorded');
+            closePaymentModal();
+            await Promise.all([loadTransaction(), refreshCustomerTransactions()]);
+        } catch (error) {
+            console.error('Record payment error:', error);
+            toast.error(t('khata.addTransactionFailed') || 'Failed to add transaction');
+        } finally {
+            setIsSubmittingPayment(false);
+        }
+    };
 
     const resetForm = () => {
         if (!transaction) return;
@@ -195,6 +266,14 @@ export default function TransactionDetailPage({ params }: { params: Promise<{ id
                         )}
                     </div>
                     <div className={`flex items-center gap-2 ${isRtl ? 'sm:flex-row-reverse' : ''} print:hidden`}>
+                        <button
+                            type="button"
+                            onClick={() => openPaymentModal(transaction.type === 'credit' ? transaction.id : undefined)}
+                            className="inline-flex items-center gap-2 rounded-lg border border-secondary/40 bg-secondary/10 px-3 py-2 text-sm font-semibold text-secondary transition hover:bg-secondary/20"
+                        >
+                            <ArrowDownLeft size={16} />
+                            {t('khata.recordPayment') || 'Record Payment'}
+                        </button>
                         {isEditing ? (
                             <button
                                 type="button"
@@ -370,6 +449,31 @@ export default function TransactionDetailPage({ params }: { params: Promise<{ id
                     )}
                 </form>
             </div>
+
+            <ReceivePaymentModal
+                isOpen={isPaymentModalOpen}
+                onClose={closePaymentModal}
+                t={t}
+                isRtl={isRtl}
+                invoices={outstandingInvoices}
+                selectedInvoiceId={selectedInvoiceId}
+                onSelectedInvoiceChange={(value) => {
+                    setSelectedInvoiceId(value);
+                    if (!value) return;
+                    const invoice = outstandingInvoices.find((item) => item.id === value);
+                    if (invoice) {
+                        setPaymentAmount(getInvoiceRemaining(invoice).toString());
+                    }
+                }}
+                fixedInvoiceId={fixedInvoiceId}
+                paymentAmount={paymentAmount}
+                onPaymentAmountChange={setPaymentAmount}
+                paymentNotes={paymentNotes}
+                onPaymentNotesChange={setPaymentNotes}
+                onSubmit={handleSubmitPayment}
+                isSubmitting={isSubmittingPayment}
+                formatInvoiceDate={formatDate}
+            />
         </div>
     );
 }

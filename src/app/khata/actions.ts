@@ -143,6 +143,8 @@ export async function addTransaction(formData: FormData) {
     const itemsJson = formData.get('items') as string
     const billAmount = formData.get('billAmount') ? parseFloat(formData.get('billAmount') as string) : amount
     const paidAmount = formData.get('paidAmount') ? parseFloat(formData.get('paidAmount') as string) : 0
+    const applyToTransactionIdRaw = formData.get('applyToTransactionId') as string | null
+    const applyToTransactionId = applyToTransactionIdRaw?.trim() ? applyToTransactionIdRaw.trim() : null
 
     let items = null
     try {
@@ -151,6 +153,44 @@ export async function addTransaction(formData: FormData) {
         }
     } catch (e) {
         console.error('Invalid items JSON:', e)
+    }
+
+    let invoiceUpdate: { id: string; nextPaidAmount: number } | null = null
+
+    if (applyToTransactionId) {
+        if (type !== 'debit') {
+            throw new Error('Payments can only be applied to invoices for debit transactions')
+        }
+
+        const { data: invoice, error: invoiceError } = await getDb()
+            .from('transactions')
+            .select('id, amount, bill_amount, paid_amount, type, customer_id')
+            .eq('id', applyToTransactionId)
+            .eq('user_id', session.userId)
+            .single()
+
+        if (invoiceError || !invoice) {
+            console.error('Apply payment invoice fetch error:', invoiceError)
+            throw new Error('Invoice not found')
+        }
+
+        if (invoice.customer_id !== customerId) {
+            throw new Error('Invoice does not belong to this customer')
+        }
+
+        if (invoice.type !== 'credit') {
+            throw new Error('Payments can only be applied to credit invoices')
+        }
+
+        const invoiceTotal = Number(invoice.bill_amount ?? invoice.amount ?? 0)
+        const existingPaid = Number(invoice.paid_amount ?? 0)
+        const nextPaidAmount = existingPaid + amount
+
+        if (invoiceTotal > 0 && nextPaidAmount - invoiceTotal > 0.001) {
+            throw new Error('Payment exceeds invoice balance')
+        }
+
+        invoiceUpdate = { id: invoice.id, nextPaidAmount }
     }
 
     // Insert transaction
@@ -168,6 +208,18 @@ export async function addTransaction(formData: FormData) {
     if (error) {
         console.error('Transaction error:', error)
         throw new Error('Failed to add transaction')
+    }
+
+    if (invoiceUpdate) {
+        const { error: invoiceUpdateError } = await getDb()
+            .from('transactions')
+            .update({ paid_amount: invoiceUpdate.nextPaidAmount })
+            .eq('id', invoiceUpdate.id)
+            .eq('user_id', session.userId)
+
+        if (invoiceUpdateError) {
+            console.error('Invoice paid update error:', invoiceUpdateError)
+        }
     }
 
     // Update customer balance

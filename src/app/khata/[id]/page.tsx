@@ -6,6 +6,8 @@ import { useState, useEffect, use, useCallback, useMemo } from 'react';
 import { addTransaction, getCustomerById } from '../actions';
 import { useLanguage } from '@/context/LanguageContext';
 import { toast } from 'react-hot-toast';
+import ReceivePaymentModal from '@/components/ReceivePaymentModal';
+import { getInvoiceRemaining } from '@/lib/invoice-utils';
 
 interface Transaction {
     id: string;
@@ -36,6 +38,9 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
     const isRtl = language === 'ur';
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [selectedInvoiceId, setSelectedInvoiceId] = useState('');
+    const [paymentAmount, setPaymentAmount] = useState('');
+    const [paymentNotes, setPaymentNotes] = useState('');
 
     const inputClassName =
         'w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20';
@@ -66,7 +71,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             formData.append('type', transactionType === 'purchase' ? 'credit' : 'debit');
             await addTransaction(formData);
             toast.success(transactionType === 'purchase' ? t('khata.purchaseAdded') : t('khata.paymentRecorded'));
-            setIsModalOpen(false);
+            closeTransactionModal();
             await fetchCustomer(); // Refresh the data
         } catch (error) {
             console.error('Transaction error:', error);
@@ -113,6 +118,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             timeZone: appTimeZone
         }).format(date);
     };
+
 
     const applyQuickFilter = (key: 'today' | 'week' | 'last30' | 'month' | 'all') => {
         const now = new Date();
@@ -164,6 +170,12 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
         });
     }, [customer?.transactions, startDate, endDate, hasFilters]);
 
+    const outstandingInvoices = useMemo(() => {
+        if (!customer?.transactions) return [];
+        return customer.transactions.filter((txn) => txn.type === 'credit' && getInvoiceRemaining(txn) > 0);
+    }, [customer?.transactions]);
+
+
     const rangeLabel = useMemo(() => {
         if (!hasFilters) return t('khata.filterAll') || 'All';
         if (startDate && endDate) {
@@ -178,6 +190,29 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
     }, [endDate, hasFilters, startDate, t]);
 
     const isQuickFilterActive = (start: string, end: string) => startDate === start && endDate === end;
+
+    const resetPaymentForm = () => {
+        setSelectedInvoiceId('');
+        setPaymentAmount('');
+        setPaymentNotes('');
+    };
+
+    const closeTransactionModal = () => {
+        setIsModalOpen(false);
+        resetPaymentForm();
+    };
+
+    const openPaymentModal = (invoiceId?: string) => {
+        setTransactionType('payment');
+        if (invoiceId) {
+            setSelectedInvoiceId(invoiceId);
+            const invoice = outstandingInvoices.find((item) => item.id === invoiceId);
+            setPaymentAmount(invoice ? getInvoiceRemaining(invoice).toString() : '');
+        } else {
+            resetPaymentForm();
+        }
+        setIsModalOpen(true);
+    };
 
     if (loading) {
         return (
@@ -306,10 +341,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                     </Link>
                     <button
                         className={paymentButtonClass}
-                        onClick={() => {
-                            setTransactionType('payment');
-                            setIsModalOpen(true);
-                        }}
+                        onClick={() => openPaymentModal()}
                     >
                         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary/20">
                             <ArrowDownLeft size={18} />
@@ -319,15 +351,15 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                 </div>
             </div>
 
-            {/* Transaction Modal */}
-            {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setIsModalOpen(false)}>
+            {/* Purchase Modal */}
+            {isModalOpen && transactionType === 'purchase' && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={closeTransactionModal}>
                     <div className="bg-surface rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between p-4 border-b border-border sticky top-0 bg-surface z-10">
                             <h2 className="text-xl font-bold">
-                                {transactionType === 'purchase' ? (t('khata.addPurchase') || 'Add Purchase (Udhar)') : (t('khata.recordPayment') || 'Record Payment')}
+                                {t('khata.addPurchase') || 'Add Purchase (Udhar)'}
                             </h2>
-                            <button onClick={() => setIsModalOpen(false)} className="text-text-secondary hover:text-text-primary">
+                            <button onClick={closeTransactionModal} className="text-text-secondary hover:text-text-primary">
                                 ✕
                             </button>
                         </div>
@@ -335,52 +367,59 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                         <form action={handleSubmitTransaction} className="p-4 space-y-4">
                             <input type="hidden" name="customerId" value={customer.id} />
 
-                            {transactionType === 'purchase' ? (
-                                <>
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1">{t('khata.totalBillAmount') || 'Total Bill Amount'} (Rs)</label>
-                                        <input name="billAmount" type="number" step="0.01" required className={inputClassName} placeholder="0.00" />
-                                    </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1">{t('khata.totalBillAmount') || 'Total Bill Amount'} (Rs)</label>
+                                <input name="billAmount" type="number" step="0.01" required className={inputClassName} placeholder="0.00" />
+                            </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1">{t('khata.amountPaidNow') || 'Amount Paid Now'} (Rs)</label>
-                                        <input name="paidAmount" type="number" step="0.01" className={inputClassName} placeholder="0.00" defaultValue="0" />
-                                        <p className="text-xs text-text-secondary mt-1">{t('khata.remainingAddedToUdhar') || 'The remaining amount will be added to Udhar'}</p>
-                                    </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1">{t('khata.amountPaidNow') || 'Amount Paid Now'} (Rs)</label>
+                                <input name="paidAmount" type="number" step="0.01" className={inputClassName} placeholder="0.00" defaultValue="0" />
+                                <p className="text-xs text-text-secondary mt-1">{t('khata.remainingAddedToUdhar') || 'The remaining amount will be added to Udhar'}</p>
+                            </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1">{t('khata.description') || 'Description'}</label>
-                                        <textarea name="description" className={`${inputClassName} resize-none`} rows={2} placeholder={t('khata.descriptionPlaceholder') || 'e.g. Plumbing items, Sanitary goods'}></textarea>
-                                    </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1">{t('khata.description') || 'Description'}</label>
+                                <textarea name="description" className={`${inputClassName} resize-none`} rows={2} placeholder={t('khata.descriptionPlaceholder') || 'e.g. Plumbing items, Sanitary goods'}></textarea>
+                            </div>
 
-                                    <input type="hidden" name="amount" value="0" />
-                                </>
-                            ) : (
-                                <>
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1">{t('khata.paymentAmount') || 'Payment Amount'} (Rs)</label>
-                                        <input name="amount" type="number" step="0.01" required className={inputClassName} placeholder="0.00" />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium mb-1">{t('khata.notes') || 'Notes'} ({t('common.optional') || 'Optional'})</label>
-                                        <textarea name="description" className={`${inputClassName} resize-none`} rows={2} placeholder={t('khata.paymentNotesPlaceholder') || 'Payment notes'}></textarea>
-                                    </div>
-                                </>
-                            )}
+                            <input type="hidden" name="amount" value="0" />
 
                             <div className="pt-4">
                                 <button
                                     type="submit"
                                     className="w-full rounded-xl bg-gradient-to-r from-primary to-primary-dark px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-primary/40"
                                 >
-                                    {transactionType === 'purchase' ? (t('khata.addPurchase') || 'Add Purchase') : (t('khata.recordPayment') || 'Record Payment')}
+                                    {t('khata.addPurchase') || 'Add Purchase'}
                                 </button>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
+
+            <ReceivePaymentModal
+                isOpen={isModalOpen && transactionType === 'payment'}
+                onClose={closeTransactionModal}
+                t={t}
+                isRtl={isRtl}
+                invoices={outstandingInvoices}
+                selectedInvoiceId={selectedInvoiceId}
+                onSelectedInvoiceChange={(value) => {
+                    setSelectedInvoiceId(value);
+                    if (!value) return;
+                    const invoice = outstandingInvoices.find((item) => item.id === value);
+                    if (invoice) {
+                        setPaymentAmount(getInvoiceRemaining(invoice).toString());
+                    }
+                }}
+                paymentAmount={paymentAmount}
+                onPaymentAmountChange={setPaymentAmount}
+                paymentNotes={paymentNotes}
+                onPaymentNotesChange={setPaymentNotes}
+                onSubmit={handleSubmitTransaction}
+                formatInvoiceDate={formatDate}
+            />
 
             {/* Transaction History */}
             <div className="bg-surface rounded-xl p-6 shadow-md border border-border print-root" dir={isRtl ? 'rtl' : 'ltr'}>

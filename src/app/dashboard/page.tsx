@@ -3,7 +3,7 @@
 
 import { ArrowUpRight, ArrowDownLeft, AlertTriangle, Users, Search, X, Calendar, Clock, Printer } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { searchCustomers, getRecentTransactions, getDashboardStats } from './search-actions';
 import Link from 'next/link';
 import AddCustomerModal from '@/components/AddCustomerModal';
@@ -12,6 +12,10 @@ import InvoicePrintSheet from '@/app/billing/components/InvoicePrintSheet';
 import type { BillReceipt, ShopDetails } from '@/app/billing/types';
 import { getShopDetails } from '@/app/settings/actions';
 import { translations, type Language } from '@/lib/translations';
+import { addTransaction, getCustomerById } from '@/app/khata/actions';
+import ReceivePaymentModal from '@/components/ReceivePaymentModal';
+import { getInvoiceRemaining } from '@/lib/invoice-utils';
+import { toast } from 'react-hot-toast';
 
 
 interface Transaction {
@@ -40,6 +44,16 @@ interface CustomerSearchResult {
   cnic?: string | null;
 }
 
+interface CustomerInvoice {
+  id: string;
+  date: string;
+  type: 'credit' | 'debit';
+  amount: number;
+  description: string | null;
+  bill_amount: number | null;
+  paid_amount: number | null;
+}
+
 type Variant = 'primary' | 'secondary' | 'danger' | 'success' | 'warning';
 
 export default function Home() {
@@ -63,6 +77,17 @@ export default function Home() {
     newCustomersThisMonth: number;
   } | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [paymentCustomerQuery, setPaymentCustomerQuery] = useState('');
+  const [paymentCustomerResults, setPaymentCustomerResults] = useState<CustomerSearchResult[]>([]);
+  const [isPaymentCustomerLoading, setIsPaymentCustomerLoading] = useState(false);
+  const [selectedPaymentCustomer, setSelectedPaymentCustomer] = useState<CustomerSearchResult | null>(null);
+  const [customerInvoices, setCustomerInvoices] = useState<CustomerInvoice[]>([]);
+  const [isLoadingInvoices, setIsLoadingInvoices] = useState(false);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState('');
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentNotes, setPaymentNotes] = useState('');
+  const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
 
   const createTranslator = (lang: Language) => (path: string, vars?: Record<string, string | number>) => {
     const applyVars = (value: string) => {
@@ -89,37 +114,39 @@ export default function Home() {
   const tEn = createTranslator('en');
   const tUr = createTranslator('ur');
 
+  const fetchStats = useCallback(async () => {
+    setIsLoadingStats(true);
+    try {
+      const data = await getDashboardStats();
+      setStats(data);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    } finally {
+      setIsLoadingStats(false);
+    }
+  }, []);
+
+  const fetchTransactions = useCallback(async () => {
+    setIsLoadingTransactions(true);
+    try {
+      const data = await getRecentTransactions();
+      setTransactions(data);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+    } finally {
+      setIsLoadingTransactions(false);
+    }
+  }, []);
+
   // Fetch dashboard stats on mount
   useEffect(() => {
-    const fetchStats = async () => {
-      setIsLoadingStats(true);
-      try {
-        const data = await getDashboardStats();
-        setStats(data);
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-      } finally {
-        setIsLoadingStats(false);
-      }
-    };
     fetchStats();
-  }, []);
+  }, [fetchStats]);
 
   // Fetch recent transactions on mount
   useEffect(() => {
-    const fetchTransactions = async () => {
-      setIsLoadingTransactions(true);
-      try {
-        const data = await getRecentTransactions();
-        setTransactions(data);
-      } catch (error) {
-        console.error('Error fetching transactions:', error);
-      } finally {
-        setIsLoadingTransactions(false);
-      }
-    };
     fetchTransactions();
-  }, []);
+  }, [fetchTransactions]);
 
   useEffect(() => {
     const loadShopDetails = async () => {
@@ -194,6 +221,164 @@ export default function Home() {
 
     return () => clearTimeout(delayDebounceFn);
   }, [query]);
+
+  useEffect(() => {
+    if (selectedPaymentCustomer) return;
+    const delayDebounceFn = setTimeout(async () => {
+      if (paymentCustomerQuery.trim().length > 0) {
+        setIsPaymentCustomerLoading(true);
+        try {
+          const data = await searchCustomers(paymentCustomerQuery);
+          setPaymentCustomerResults(data);
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setIsPaymentCustomerLoading(false);
+        }
+      } else {
+        setPaymentCustomerResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [paymentCustomerQuery, selectedPaymentCustomer]);
+
+  const formatInvoiceDate = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return dateString;
+    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  };
+
+  const resetPaymentModal = () => {
+    setPaymentCustomerQuery('');
+    setPaymentCustomerResults([]);
+    setSelectedPaymentCustomer(null);
+    setCustomerInvoices([]);
+    setSelectedInvoiceId('');
+    setPaymentAmount('');
+    setPaymentNotes('');
+  };
+
+  const clearSelectedPaymentCustomer = () => {
+    setSelectedPaymentCustomer(null);
+    setPaymentCustomerQuery('');
+    setPaymentCustomerResults([]);
+    setCustomerInvoices([]);
+    setSelectedInvoiceId('');
+    setPaymentAmount('');
+    setPaymentNotes('');
+  };
+
+  const closePaymentModal = () => {
+    setIsPaymentModalOpen(false);
+    resetPaymentModal();
+  };
+
+  const fetchPaymentCustomerInvoices = async (customerId: string) => {
+    setIsLoadingInvoices(true);
+    try {
+      const data = await getCustomerById(customerId);
+      setCustomerInvoices(((data?.transactions as CustomerInvoice[] | undefined) || []));
+    } catch (error) {
+      console.error('Error fetching customer invoices:', error);
+    } finally {
+      setIsLoadingInvoices(false);
+    }
+  };
+
+  const handleSelectPaymentCustomer = async (customer: CustomerSearchResult) => {
+    setSelectedPaymentCustomer(customer);
+    setPaymentCustomerQuery(customer.name);
+    setPaymentCustomerResults([]);
+    setSelectedInvoiceId('');
+    setPaymentAmount('');
+    setPaymentNotes('');
+    await fetchPaymentCustomerInvoices(customer.id);
+  };
+
+  const outstandingInvoices = useMemo(
+    () => customerInvoices.filter((txn) => txn.type === 'credit' && getInvoiceRemaining(txn) > 0),
+    [customerInvoices]
+  );
+
+  const handleSubmitPayment = async (formData: FormData) => {
+    if (!selectedPaymentCustomer) {
+      toast.error(t('billing.selectCustomerAlert') || 'Please select a customer');
+      return;
+    }
+
+    setIsSubmittingPayment(true);
+    try {
+      formData.append('customerId', selectedPaymentCustomer.id);
+      formData.append('type', 'debit');
+      await addTransaction(formData);
+      toast.success(t('khata.paymentRecorded') || 'Payment recorded');
+      closePaymentModal();
+      await Promise.all([fetchTransactions(), fetchStats()]);
+    } catch (error) {
+      console.error('Record payment error:', error);
+      toast.error(t('khata.addTransactionFailed') || 'Failed to add transaction');
+    } finally {
+      setIsSubmittingPayment(false);
+    }
+  };
+
+  const paymentCustomerContent = (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium">
+        {t('billing.customer') || 'Customer'}
+      </label>
+      <div className="relative">
+        <Search size={16} className={`absolute ${isRtl ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 text-text-secondary`} />
+        <input
+          type="text"
+          value={paymentCustomerQuery}
+          onChange={(event) => setPaymentCustomerQuery(event.target.value)}
+          disabled={Boolean(selectedPaymentCustomer)}
+          className={`w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-primary shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 ${isRtl ? 'pr-9' : 'pl-9'} ${selectedPaymentCustomer ? 'opacity-70' : ''}`}
+          placeholder={t('billing.searchCustomer') || 'Search customer...'}
+        />
+      </div>
+
+      {isPaymentCustomerLoading && (
+        <p className="text-xs text-text-secondary">{t('common.loading') || 'Loading...'}</p>
+      )}
+
+      {!selectedPaymentCustomer && paymentCustomerResults.length > 0 && (
+        <div className="rounded-lg border border-border bg-background/40 divide-y divide-border max-h-48 overflow-auto">
+          {paymentCustomerResults.map((customer) => (
+            <button
+              key={customer.id}
+              type="button"
+              onClick={() => handleSelectPaymentCustomer(customer)}
+              className="w-full text-left px-3 py-2 hover:bg-primary/5"
+            >
+              <p className="text-sm font-semibold text-text-primary">{customer.name}</p>
+              <p className="text-xs text-text-secondary">{customer.phone || customer.address || ''}</p>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {selectedPaymentCustomer && (
+        <div className="flex items-center justify-between rounded-lg border border-border bg-background/40 px-3 py-2">
+          <div>
+            <p className="text-sm font-semibold text-text-primary">{selectedPaymentCustomer.name}</p>
+            <p className="text-xs text-text-secondary">{selectedPaymentCustomer.phone || selectedPaymentCustomer.address || ''}</p>
+          </div>
+          <button
+            type="button"
+            onClick={clearSelectedPaymentCustomer}
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            {t('common.clear') || 'Clear'}
+          </button>
+        </div>
+      )}
+
+    </div>
+  );
 
   // Close search results when clicking outside
   useEffect(() => {
@@ -349,9 +534,12 @@ export default function Home() {
               <Link href="/billing" className="inline-flex  items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px w-full">
                 <ArrowUpRight size={20} /> {t('dashboard.addTransaction')}
               </Link>
-              <Link href="/khata" className="inline-flex items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 bg-primary/10 text-primary hover:bg-primary/20 hover:-translate-y-px border border-transparent w-full">
+              <button
+                onClick={() => setIsPaymentModalOpen(true)}
+                className="inline-flex items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 bg-primary/10 text-primary hover:bg-primary/20 hover:-translate-y-px border border-transparent w-full"
+              >
                 <ArrowDownLeft size={20} /> {t('dashboard.addPayment')}
-              </Link>
+              </button>
               <button
                 onClick={() => setIsAddCustomerOpen(true)}
                 className="inline-flex items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 bg-primary/10 text-primary hover:bg-primary/20 hover:-translate-y-px border border-transparent w-full"
@@ -362,6 +550,33 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      <ReceivePaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={closePaymentModal}
+        t={t}
+        isRtl={isRtl}
+        invoices={selectedPaymentCustomer ? outstandingInvoices : []}
+        selectedInvoiceId={selectedInvoiceId}
+        onSelectedInvoiceChange={(value) => {
+          setSelectedInvoiceId(value);
+          if (!value) return;
+          const invoice = outstandingInvoices.find((item) => item.id === value);
+          if (invoice) {
+            setPaymentAmount(getInvoiceRemaining(invoice).toString());
+          }
+        }}
+        paymentAmount={paymentAmount}
+        onPaymentAmountChange={setPaymentAmount}
+        paymentNotes={paymentNotes}
+        onPaymentNotesChange={setPaymentNotes}
+        onSubmit={handleSubmitPayment}
+        isSubmitting={isSubmittingPayment}
+        isInvoiceLoading={isLoadingInvoices}
+        formatInvoiceDate={formatInvoiceDate}
+        topContent={paymentCustomerContent}
+        isSubmitDisabled={!selectedPaymentCustomer || isSubmittingPayment}
+      />
 
       {/* Transaction Detail Modal */}
       {selectedTransaction && (

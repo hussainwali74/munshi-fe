@@ -47,6 +47,9 @@ jest.mock('lucide-react', () => ({
     Tags: () => <span data-testid="tags-icon" />,
     Plus: () => <span data-testid="plus-icon" />,
     Loader2: () => <span data-testid="loader-icon" />,
+    Printer: () => <span data-testid="printer-icon" />,
+    FileText: () => <span data-testid="file-text-icon" />,
+    Receipt: () => <span data-testid="receipt-icon" />,
 }));
 
 describe('Settings Page - Urdu Support', () => {

@@ -377,6 +377,41 @@ describe('Khata Actions', () => {
                 p_amount: -50 // debit = negative
             });
         });
+
+        it('should apply payment to invoice when applyToTransactionId is provided', async () => {
+            const invoice = {
+                id: 'inv-123',
+                customer_id: 'cust-123',
+                type: 'credit',
+                amount: 200,
+                bill_amount: 200,
+                paid_amount: 20
+            };
+
+            let callCount = 0;
+            getMockChain().then.mockImplementation((resolve: ThenResolve<typeof invoice | null>) => {
+                callCount += 1;
+                if (callCount === 1) {
+                    return resolve({ data: invoice, error: null });
+                }
+                return resolve({ data: null, error: null });
+            });
+
+            const formData = new FormData();
+            formData.append('customerId', 'cust-123');
+            formData.append('type', 'debit');
+            formData.append('amount', '50');
+            formData.append('description', 'Payment received');
+            formData.append('applyToTransactionId', 'inv-123');
+
+            await addTransaction(formData);
+
+            expect(getMockChain().update).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    paid_amount: 70
+                })
+            );
+        });
     });
 
     describe('updateTransaction', () => {
