@@ -12,11 +12,15 @@ interface InvoicePrintSheetProps {
 
 export default function InvoicePrintSheet({ bill, className, printFormat = 'a4', t }: InvoicePrintSheetProps) {
     const shopName = bill.shopDetails?.businessName || t('billing.invoice.shopNameFallback');
-    const shopOwner = bill.shopDetails?.fullName;
     const shopPhone = bill.shopDetails?.shopPhone;
     const shopAddress = bill.shopDetails?.shopAddress;
 
     const createdDate = new Date(bill.createdAt);
+    const balance = Math.max(0, bill.totalAmount - bill.paidAmount);
+    const isUdhar = bill.paymentMode === 'credit' && balance > 0;
+    const statusLabel = isUdhar
+        ? t('billing.invoice.udharStatus', { amount: formatCurrency(balance) })
+        : t('billing.invoice.paidStatus');
     const isThermal = printFormat === 'thermal';
 
     const logoText = shopName
@@ -51,6 +55,11 @@ export default function InvoicePrintSheet({ bill, className, printFormat = 'a4',
                         <p className="text-[10px] uppercase tracking-wide text-slate-500">{t('billing.invoice.billTo')}</p>
                         <p className="text-sm font-semibold text-slate-900">{bill.customer.name}</p>
                         {bill.customer.phone && <p className="text-slate-600">{bill.customer.phone}</p>}
+                    </div>
+
+                    <div className="text-[11px] text-slate-700">
+                        <p className="text-[10px] uppercase tracking-wide text-slate-500">{t('billing.invoice.paymentStatus')}</p>
+                        <p className="font-semibold text-slate-900">{statusLabel}</p>
                     </div>
 
                     <table className="w-full text-[11px]">
@@ -107,7 +116,6 @@ export default function InvoicePrintSheet({ bill, className, printFormat = 'a4',
                             <p className="text-sm font-semibold text-slate-900">{shopName}</p>
                             {shopAddress && <p className="text-xs text-slate-500">{shopAddress}</p>}
                             {shopPhone && <p className="text-xs text-slate-500">{shopPhone}</p>}
-                            {shopOwner && <p className="text-xs text-slate-500">{shopOwner}</p>}
                         </div>
                     </div>
                     <div className="text-right text-sm text-slate-700">
@@ -143,8 +151,9 @@ export default function InvoicePrintSheet({ bill, className, printFormat = 'a4',
                         <p className="mt-2 text-slate-600">{t('billing.paymentMode')}: {bill.paymentMode === 'cash' ? t('billing.cash') : t('billing.udharCredit')}</p>
                         <p className="text-slate-600">{t('billing.invoice.paid')}: {formatCurrency(bill.paidAmount)}</p>
                         {bill.paymentMode === 'credit' && (
-                            <p className="text-slate-600">{t('billing.invoice.balance')}: {formatCurrency(Math.max(0, bill.totalAmount - bill.paidAmount))}</p>
+                            <p className="text-slate-600">{t('billing.invoice.balance')}: {formatCurrency(balance)}</p>
                         )}
+                        <p className="mt-1 text-slate-700 font-semibold">{t('billing.invoice.paymentStatus')}: {statusLabel}</p>
                     </div>
                 </div>
 

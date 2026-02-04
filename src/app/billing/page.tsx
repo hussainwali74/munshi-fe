@@ -17,6 +17,29 @@ import InvoiceSuccessModal from './components/InvoiceSuccessModal';
 import PrintSettingsCard from './components/PrintSettingsCard';
 import { calculateBalanceDue, calculateBillTotals, generateBillNumber } from './utils';
 import type { BillReceipt, CartItem, Customer, DiscountType, PaymentMode, ShopDetails } from './types';
+import { translations, type Language } from '@/lib/translations';
+
+const createTranslator = (lang: Language) => (path: string, vars?: Record<string, string | number>) => {
+    const applyVars = (value: string) => {
+        if (!vars) return value;
+        return value.replace(/\{(\w+)\}/g, (_, key: string) => {
+            const replacement = vars[key];
+            return replacement === undefined ? `{${key}}` : String(replacement);
+        });
+    };
+
+    const keys = path.split('.');
+    let current: any = translations[lang];
+
+    for (const key of keys) {
+        if (current[key] === undefined) {
+            return applyVars(path);
+        }
+        current = current[key];
+    }
+
+    return applyVars(current);
+};
 import type { InventorySearchItem } from '@/types/inventory';
 
 type SpeechRecognitionResultLike = { transcript: string };
@@ -62,9 +85,13 @@ export default function BillingPage() {
     const [autoPrint, setAutoPrint] = useState(false);
 
     const lastPrintedRef = useRef<string | null>(null);
+    const originalTitleRef = useRef<string | null>(null);
 
     const customerSearchRef = useRef<HTMLDivElement>(null);
     const itemSearchRef = useRef<HTMLDivElement>(null);
+
+    const tEn = createTranslator('en');
+    const tUr = createTranslator('ur');
 
     useEffect(() => {
         const loadShopDetails = async () => {
@@ -158,11 +185,55 @@ export default function BillingPage() {
 
     useEffect(() => {
         if (!completedBill || !autoPrint) return;
+        if (typeof window === 'undefined' || typeof window.print !== 'function') return;
         if (lastPrintedRef.current === completedBill.billNumber) return;
         lastPrintedRef.current = completedBill.billNumber;
         const timer = window.setTimeout(() => window.print(), 300);
         return () => window.clearTimeout(timer);
     }, [completedBill, autoPrint]);
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+
+        const handleBeforePrint = () => {
+            if (!completedBill) return;
+            if (!originalTitleRef.current) {
+                originalTitleRef.current = document.title;
+            }
+            const printLang = (document.body.dataset.printLang as Language | undefined) || language;
+            document.body.dataset.printLang = printLang;
+            const titleT = createTranslator(printLang);
+            const shopTitle = shopDetails?.businessName || titleT('billing.invoice.shopNameFallback');
+            document.title = `${shopTitle} - ${titleT('billing.invoice.invoiceLabel')} #${completedBill.billNumber}`;
+        };
+
+        const handleAfterPrint = () => {
+            if (originalTitleRef.current) {
+                document.title = originalTitleRef.current;
+                originalTitleRef.current = null;
+            }
+            document.body.removeAttribute('data-print-lang');
+        };
+
+        window.addEventListener('beforeprint', handleBeforePrint);
+        window.addEventListener('afterprint', handleAfterPrint);
+
+        return () => {
+            window.removeEventListener('beforeprint', handleBeforePrint);
+            window.removeEventListener('afterprint', handleAfterPrint);
+            if (originalTitleRef.current) {
+                document.title = originalTitleRef.current;
+                originalTitleRef.current = null;
+            }
+            document.body.removeAttribute('data-print-lang');
+        };
+    }, [completedBill, shopDetails, language]);
+
+    const handlePrint = (lang: Language) => {
+        if (typeof window === 'undefined') return;
+        document.body.dataset.printLang = lang;
+        window.print();
+    };
 
     const handlePaymentModeChange = (mode: PaymentMode) => {
         setPaymentMode(mode);
@@ -434,12 +505,18 @@ export default function BillingPage() {
                     <InvoiceSuccessModal
                         bill={completedBill}
                         onClose={() => setCompletedBill(null)}
-                        onPrint={() => window.print()}
+                        onPrintEnglish={() => handlePrint('en')}
+                        onPrintUrdu={() => handlePrint('ur')}
                         t={t}
                     >
                         <InvoicePrintSheet bill={completedBill} t={t} printFormat={printFormat} />
                     </InvoiceSuccessModal>
-                    <InvoicePrintSheet bill={completedBill} t={t} printFormat={printFormat} className="hidden print:block" />
+                    <div className="invoice-print-root lang-en hidden print:block">
+                        <InvoicePrintSheet bill={completedBill} t={tEn} printFormat={printFormat} />
+                    </div>
+                    <div className="invoice-print-root lang-ur hidden print:block urdu-text" dir="rtl">
+                        <InvoicePrintSheet bill={completedBill} t={tUr} printFormat={printFormat} />
+                    </div>
                 </>
             )}
         </div>

@@ -14,7 +14,7 @@ interface TransactionRow {
     paid_amount: number | null;
     created_at: string;
     customer_id: string | null;
-    customers: Array<{ id: string; name: string }> | null;
+    customers: { id: string; name: string; phone?: string | null; address?: string | null; cnic?: string | null } | Array<{ id: string; name: string; phone?: string | null; address?: string | null; cnic?: string | null }> | null;
 }
 
 interface BalanceRow {
@@ -79,7 +79,10 @@ export async function getRecentTransactions() {
             customer_id,
             customers (
                 id,
-                name
+                name,
+                phone,
+                address,
+                cnic
             )
         `)
         .eq('user_id', session.userId)
@@ -111,12 +114,24 @@ export async function getRecentTransactions() {
 
         const timeStr = createdAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
 
+        const customerName = Array.isArray(txn.customers)
+            ? txn.customers[0]?.name
+            : txn.customers?.name;
+
+        const customer = Array.isArray(txn.customers)
+            ? txn.customers[0]
+            : txn.customers;
+
         return {
             id: txn.id,
-            customerName: txn.customers?.[0]?.name || 'Unknown Customer',
+            customerName: customerName || 'Unknown Customer',
             customerId: txn.customer_id,
+            customerPhone: customer?.phone || null,
+            customerAddress: customer?.address || null,
+            customerCnic: customer?.cnic || null,
             date: dateStr,
             time: timeStr,
+            createdAt: txn.created_at,
             type: txn.type,
             amount: txn.amount,
             description: txn.description || (txn.type === 'credit' ? 'Purchase' : 'Payment'),

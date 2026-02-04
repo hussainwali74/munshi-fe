@@ -1,21 +1,29 @@
 
 'use client';
 
-import { ArrowUpRight, ArrowDownLeft, AlertTriangle, Users, Search, X, Calendar, Clock } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, AlertTriangle, Users, Search, X, Calendar, Clock, Printer } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useState, useEffect, useRef } from 'react';
 import { searchCustomers, getRecentTransactions, getDashboardStats } from './search-actions';
 import Link from 'next/link';
 import AddCustomerModal from '@/components/AddCustomerModal';
 import { SkeletonCustomerRow } from '@/components/Skeleton';
+import InvoicePrintSheet from '@/app/billing/components/InvoicePrintSheet';
+import type { BillReceipt, ShopDetails } from '@/app/billing/types';
+import { getShopDetails } from '@/app/settings/actions';
+import { translations, type Language } from '@/lib/translations';
 
 
 interface Transaction {
   id: string;
   customerName: string;
   customerId: string | null;
+  customerPhone: string | null;
+  customerAddress: string | null;
+  customerCnic: string | null;
   date: string;
   time: string;
+  createdAt: string;
   type: 'credit' | 'debit';
   amount: number;
   description: string;
@@ -45,6 +53,7 @@ export default function Home() {
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
+  const [shopDetails, setShopDetails] = useState<ShopDetails | null>(null);
   const [stats, setStats] = useState<{
     totalUdhar: number;
     totalPayable: number;
@@ -54,6 +63,31 @@ export default function Home() {
     newCustomersThisMonth: number;
   } | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+  const createTranslator = (lang: Language) => (path: string, vars?: Record<string, string | number>) => {
+    const applyVars = (value: string) => {
+      if (!vars) return value;
+      return value.replace(/\{(\w+)\}/g, (_, key: string) => {
+        const replacement = vars[key];
+        return replacement === undefined ? `{${key}}` : String(replacement);
+      });
+    };
+
+    const keys = path.split('.');
+    let current: any = translations[lang];
+
+    for (const key of keys) {
+      if (current[key] === undefined) {
+        return applyVars(path);
+      }
+      current = current[key];
+    }
+
+    return applyVars(current);
+  };
+
+  const tEn = createTranslator('en');
+  const tUr = createTranslator('ur');
 
   // Fetch dashboard stats on mount
   useEffect(() => {
@@ -86,6 +120,60 @@ export default function Home() {
     };
     fetchTransactions();
   }, []);
+
+  useEffect(() => {
+    const loadShopDetails = async () => {
+      const details = await getShopDetails();
+      setShopDetails(details);
+    };
+    loadShopDetails();
+  }, []);
+
+  const buildReceiptFromTransaction = (txn: Transaction): BillReceipt => {
+    const totalAmount = txn.billAmount ?? txn.amount ?? 0;
+    const paidAmount = txn.paidAmount ?? (txn.type === 'debit' ? totalAmount : 0);
+    const items = (txn.items && txn.items.length > 0)
+      ? txn.items.map((item, index) => ({
+        id: `${txn.id}-${index}`,
+        name: item.name,
+        price: item.price,
+        qty: item.qty,
+        maxQty: item.qty,
+      }))
+      : [{
+        id: `${txn.id}-line`,
+        name: txn.description || t('dashboard.paymentReceived'),
+        price: totalAmount,
+        qty: 1,
+        maxQty: 1,
+      }];
+
+    return {
+      billNumber: txn.id.slice(-6),
+      createdAt: txn.createdAt,
+      customer: {
+        id: txn.customerId || 'unknown',
+        name: txn.customerName,
+        phone: txn.customerPhone || '',
+        address: txn.customerAddress || '',
+        cnic: txn.customerCnic || undefined,
+      },
+      items,
+      shopDetails,
+      subTotal: totalAmount,
+      discountAmount: 0,
+      totalAmount,
+      paidAmount,
+      paymentMode: txn.type === 'credit' ? 'credit' : 'cash',
+      transactionId: txn.id,
+    };
+  };
+
+  const handlePrint = (lang: Language) => {
+    if (typeof window === 'undefined') return;
+    document.body.dataset.printLang = lang;
+    window.print();
+  };
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
@@ -283,7 +371,7 @@ export default function Home() {
               <h3 className="text-lg font-bold flex items-center gap-2">
                 {t('dashboard.transactionDetails')}
               </h3>
-              <button onClick={() => setSelectedTransaction(null)} className="text-text-secondary hover:text-text-primary">
+              <button onClick={() => setSelectedTransaction(null)} className="text-text-secondary hover:text-text-primary print:hidden">
                 <X size={20} />
               </button>
             </div>
@@ -324,6 +412,31 @@ export default function Home() {
                   <h4 className="font-semibold text-sm text-text-secondary mb-2 uppercase tracking-wider">{t('dashboard.description')}</h4>
                   <p className="text-text-primary p-3 bg-primary/5 dark:bg-primary/10 rounded-lg">{selectedTransaction.description}</p>
                 </div>
+
+                {(() => {
+                  const totalAmount = selectedTransaction.billAmount ?? selectedTransaction.amount;
+                  const paidAmount = selectedTransaction.paidAmount ?? (selectedTransaction.type === 'debit' ? totalAmount : 0);
+                  const balance = Math.max(0, totalAmount - paidAmount);
+                  const isUdhar = selectedTransaction.type === 'credit' && balance > 0;
+                  const isPartial = selectedTransaction.type === 'credit' && paidAmount > 0 && balance > 0;
+                  const statusLabel = isUdhar
+                    ? (isPartial ? t('dashboard.partiallyPaid') : t('dashboard.udharOutstanding'))
+                    : t('dashboard.paidInFull');
+
+                  return (
+                    <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border p-3 bg-background/60">
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-text-secondary">{t('dashboard.paymentStatus')}</p>
+                        <p className="text-sm font-semibold text-text-primary">{statusLabel}</p>
+                      </div>
+                      {balance > 0 && (
+                        <div className="text-sm font-bold text-danger">
+                          {t('dashboard.udharRemaining')}: Rs {balance.toLocaleString()}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {selectedTransaction.items && selectedTransaction.items.length > 0 && (
                   <div>
@@ -375,13 +488,35 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="mt-8">
+              <div className="mt-8 space-y-3 print:hidden">
+                <button
+                  onClick={() => handlePrint('ur')}
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark w-full shadow-md"
+                >
+                  <Printer size={18} /> {t('billing.invoice.printUrdu')}
+                </button>
+                <button
+                  onClick={() => handlePrint('en')}
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border border-border outline-none bg-surface text-text-primary hover:bg-background w-full"
+                >
+                  <Printer size={18} /> {t('billing.invoice.printEnglish')}
+                </button>
                 <button onClick={() => setSelectedTransaction(null)} className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-surface text-text-primary border border-border hover:bg-background w-full">
                   {t('dashboard.closeDetails')}
                 </button>
               </div>
             </div>
           </div>
+          {selectedTransaction && (
+            <>
+              <div className="invoice-print-root lang-en hidden print:block">
+                <InvoicePrintSheet bill={buildReceiptFromTransaction(selectedTransaction)} t={tEn} printFormat="a4" />
+              </div>
+              <div className="invoice-print-root lang-ur hidden print:block urdu-text" dir="rtl">
+                <InvoicePrintSheet bill={buildReceiptFromTransaction(selectedTransaction)} t={tUr} printFormat="a4" />
+              </div>
+            </>
+          )}
         </div>
       )}
 
