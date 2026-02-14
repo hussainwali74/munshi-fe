@@ -5,6 +5,14 @@ import { getDb } from '@/lib/db'
 import { getSession } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 
+interface CreatedCustomerRow {
+    id: string
+    name: string
+    phone: string | null
+    address: string | null
+    cnic: string | null
+}
+
 export async function getCustomers() {
     const session = await getSession()
     if (!session) return []
@@ -106,7 +114,7 @@ export async function deleteCustomer(id: string) {
     revalidatePath('/khata')
 }
 
-export async function addCustomer(formData: FormData) {
+export async function addCustomer(formData: FormData): Promise<CreatedCustomerRow> {
     const session = await getSession()
     if (!session) throw new Error('Not authenticated')
 
@@ -115,21 +123,27 @@ export async function addCustomer(formData: FormData) {
     const cnic = formData.get('cnic') as string
     const address = formData.get('address') as string
 
-    const { error } = await getDb().from('customers').insert({
-        user_id: session.userId,
-        name,
-        phone,
-        cnic,
-        address,
-        balance: 0
-    })
+    const { data: customer, error } = await getDb()
+        .from('customers')
+        .insert({
+            user_id: session.userId,
+            name,
+            phone,
+            cnic,
+            address,
+            balance: 0
+        })
+        .select('id, name, phone, address, cnic')
+        .single()
 
-    if (error) {
+    if (error || !customer) {
         console.error('Customer creation error:', error)
         throw new Error('Failed to add customer')
     }
 
     revalidatePath('/khata')
+
+    return customer as CreatedCustomerRow
 }
 
 export async function addTransaction(formData: FormData) {

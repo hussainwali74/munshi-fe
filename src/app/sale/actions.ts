@@ -118,16 +118,38 @@ async function resolveCustomerId(userId: string, customerName: string, customerP
     return (insertedCustomer as CustomerRow).id
 }
 
+async function validateCustomerId(userId: string, customerId: string): Promise<string> {
+    const { data: customers, error } = await getDb()
+        .from('customers')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('id', customerId)
+        .limit(1)
+
+    if (error) {
+        console.error('Validate customer for sale error:', error)
+        throw new Error('Failed to create receipt')
+    }
+
+    const customer = ((customers as CustomerRow[] | null) || [])[0]
+    if (!customer?.id) {
+        throw new Error('Customer not found')
+    }
+
+    return customer.id
+}
+
 export async function createSaleReceipt(formData: FormData) {
     const session = await getSession()
     if (!session) throw new Error('Not authenticated')
 
+    const selectedCustomerId = String(formData.get('customerId') || '').trim()
     const customerName = String(formData.get('customerName') || '').trim()
     const customerPhone = String(formData.get('customerPhone') || '').trim()
     const rawItems = String(formData.get('items') || '[]')
     const requestedGstRate = Number(formData.get('gstRate') || DEFAULT_GST_RATE)
 
-    if (!customerName || !customerPhone) {
+    if (!selectedCustomerId && (!customerName || !customerPhone)) {
         throw new Error('Please enter customer name and phone number')
     }
 
@@ -144,7 +166,10 @@ export async function createSaleReceipt(formData: FormData) {
     const subtotal = Math.round(rawSubtotal)
     const gstAmount = Math.round((subtotal * gstRate) / 100)
     const totalAmount = subtotal + gstAmount
-    const customerId = await resolveCustomerId(String(session.userId), customerName, customerPhone)
+    const userId = String(session.userId)
+    const customerId = selectedCustomerId
+        ? await validateCustomerId(userId, selectedCustomerId)
+        : await resolveCustomerId(userId, customerName, customerPhone)
 
     const billFormData = new FormData()
     billFormData.append('customerId', customerId)

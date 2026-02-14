@@ -9,7 +9,15 @@ import { formatCNIC } from '@/lib/utils';
 interface AddCustomerModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSuccess?: () => void;
+    onSuccess?: (customer: CreatedCustomerPayload) => void;
+}
+
+interface CreatedCustomerPayload {
+    id: string;
+    name: string;
+    phone: string | null;
+    address: string | null;
+    cnic: string | null;
 }
 
 export default function AddCustomerModal({ isOpen, onClose, onSuccess }: AddCustomerModalProps) {
@@ -37,9 +45,9 @@ export default function AddCustomerModal({ isOpen, onClose, onSuccess }: AddCust
                 </div>
 
                 <form action={async (formData) => {
-                    await addCustomer(formData);
+                    const customer = await addCustomer(formData);
                     onClose();
-                    if (onSuccess) onSuccess();
+                    if (onSuccess) onSuccess(customer);
                 }} className="p-6 space-y-5">
                     <div>
                         <label className="block text-sm font-semibold mb-2 text-text-primary">

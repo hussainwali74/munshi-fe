@@ -150,5 +150,33 @@ describe('Sale actions', () => {
             const billFormData = (createBill as jest.Mock).mock.calls[0][0] as FormData
             expect(billFormData.get('customerId')).toBe('customer-new')
         })
+
+        it('uses selected customer id when customerId is provided', async () => {
+            responseQueue.push({
+                data: [{ id: 'customer-selected' }],
+                error: null,
+            })
+            ;(createBill as jest.Mock).mockResolvedValue({ id: 'tx-3' })
+
+            const formData = new FormData()
+            formData.append('customerId', 'customer-selected')
+            formData.append('items', JSON.stringify([
+                { id: 'item-3', name: 'Shower Head', price: 1800, qty: 1, maxQty: 5 },
+            ]))
+
+            const result = await createSaleReceipt(formData)
+
+            expect(mockQueryBuilder.insert).not.toHaveBeenCalled()
+
+            const billFormData = (createBill as jest.Mock).mock.calls[0][0] as FormData
+            expect(billFormData.get('customerId')).toBe('customer-selected')
+            expect(result).toEqual({
+                transactionId: 'tx-3',
+                customerId: 'customer-selected',
+                subtotal: 1800,
+                gstAmount: 324,
+                totalAmount: 2124,
+            })
+        })
     })
 })
