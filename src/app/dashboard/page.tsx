@@ -1,21 +1,22 @@
 
 'use client';
 
-import { ArrowUpRight, ArrowDownLeft, AlertTriangle, Users, Search, X, Calendar, Clock, Printer } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, AlertTriangle, Users, Search, X, Calendar, Clock } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { searchCustomers, getRecentTransactions, getDashboardStats } from './search-actions';
 import Link from 'next/link';
 import AddCustomerModal from '@/components/AddCustomerModal';
 import { SkeletonCustomerRow } from '@/components/Skeleton';
-import InvoicePrintSheet from '@/app/billing/components/InvoicePrintSheet';
-import type { BillReceipt, ShopDetails } from '@/app/billing/types';
+import InvoiceDetailPanel from '@/app/billing/components/InvoiceDetailPanel';
+import type { ShopDetails } from '@/app/billing/types';
 import { getShopDetails } from '@/app/settings/actions';
-import { translations, type Language } from '@/lib/translations';
 import { addTransaction, getCustomerById } from '@/app/khata/actions';
 import ReceivePaymentModal from '@/components/ReceivePaymentModal';
 import { getInvoiceRemaining } from '@/lib/invoice-utils';
 import { toast } from 'react-hot-toast';
+import { createBillReceiptFromTransaction } from '@/lib/invoice-receipt';
+import { buildBillingHref } from '@/lib/billing-navigation';
 
 
 interface Transaction {
@@ -89,31 +90,6 @@ export default function Home() {
   const [paymentNotes, setPaymentNotes] = useState('');
   const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
 
-  const createTranslator = (lang: Language) => (path: string, vars?: Record<string, string | number>) => {
-    const applyVars = (value: string) => {
-      if (!vars) return value;
-      return value.replace(/\{(\w+)\}/g, (_, key: string) => {
-        const replacement = vars[key];
-        return replacement === undefined ? `{${key}}` : String(replacement);
-      });
-    };
-
-    const keys = path.split('.');
-    let current: any = translations[lang];
-
-    for (const key of keys) {
-      if (current[key] === undefined) {
-        return applyVars(path);
-      }
-      current = current[key];
-    }
-
-    return applyVars(current);
-  };
-
-  const tEn = createTranslator('en');
-  const tUr = createTranslator('ur');
-
   const fetchStats = useCallback(async () => {
     setIsLoadingStats(true);
     try {
@@ -156,51 +132,15 @@ export default function Home() {
     loadShopDetails();
   }, []);
 
-  const buildReceiptFromTransaction = (txn: Transaction): BillReceipt => {
-    const totalAmount = txn.billAmount ?? txn.amount ?? 0;
-    const paidAmount = txn.paidAmount ?? (txn.type === 'debit' ? totalAmount : 0);
-    const items = (txn.items && txn.items.length > 0)
-      ? txn.items.map((item, index) => ({
-        id: `${txn.id}-${index}`,
-        name: item.name,
-        price: item.price,
-        qty: item.qty,
-        maxQty: item.qty,
-      }))
-      : [{
-        id: `${txn.id}-line`,
-        name: txn.description || t('dashboard.paymentReceived'),
-        price: totalAmount,
-        qty: 1,
-        maxQty: 1,
-      }];
-
-    return {
-      billNumber: txn.id.slice(-6),
-      createdAt: txn.createdAt,
-      customer: {
-        id: txn.customerId || 'unknown',
-        name: txn.customerName,
-        phone: txn.customerPhone || '',
-        address: txn.customerAddress || '',
-        cnic: txn.customerCnic || undefined,
-      },
-      items,
-      shopDetails,
-      subTotal: totalAmount,
-      discountAmount: 0,
-      totalAmount,
-      paidAmount,
-      paymentMode: txn.type === 'credit' ? 'credit' : 'cash',
-      transactionId: txn.id,
-    };
-  };
-
-  const handlePrint = (lang: Language) => {
-    if (typeof window === 'undefined') return;
-    document.body.dataset.printLang = lang;
-    window.print();
-  };
+  const selectedTransactionBill = useMemo(
+    () => selectedTransaction
+      ? createBillReceiptFromTransaction(selectedTransaction, {
+        shopDetails,
+        fallbackItemName: t('dashboard.paymentReceived')
+      })
+      : null,
+    [selectedTransaction, shopDetails, t]
+  );
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
@@ -531,7 +471,7 @@ export default function Home() {
           <div className="bg-surface rounded-xl p-6 shadow-md border border-border mb-6">
             <h2 className="text-2xl font-bold mb-3">{t('dashboard.quickActions')}</h2>
             <div className="flex flex-col gap-3">
-              <Link href="/billing" className="inline-flex  items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px w-full">
+              <Link href={buildBillingHref()} className="inline-flex  items-center justify-start gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark hover:-translate-y-px w-full">
                 <ArrowUpRight size={20} /> {t('dashboard.addTransaction')}
               </Link>
               <button
@@ -703,35 +643,40 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="mt-8 space-y-3 print:hidden">
-                <button
-                  onClick={() => handlePrint('ur')}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-primary text-white hover:bg-primary-dark w-full shadow-md"
-                >
-                  <Printer size={18} /> {t('billing.invoice.printUrdu')}
-                </button>
-                <button
-                  onClick={() => handlePrint('en')}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border border-border outline-none bg-surface text-text-primary hover:bg-background w-full"
-                >
-                  <Printer size={18} /> {t('billing.invoice.printEnglish')}
-                </button>
-                <button onClick={() => setSelectedTransaction(null)} className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-200 border-none outline-none bg-surface text-text-primary border border-border hover:bg-background w-full">
-                  {t('dashboard.closeDetails')}
-                </button>
-              </div>
+              {selectedTransactionBill && (
+                <div className="mt-8">
+                  <InvoiceDetailPanel
+                    bill={selectedTransactionBill}
+                    t={t}
+                    printFormat="a4"
+                    actionSlot={(
+                      <div className="flex flex-wrap items-center gap-2">
+                        {selectedTransaction.customerId && (
+                          <Link
+                            href={buildBillingHref({
+                              customerId: selectedTransaction.customerId,
+                              transactionId: selectedTransaction.id
+                            })}
+                            onClick={() => setSelectedTransaction(null)}
+                            className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold text-text-primary transition hover:bg-background"
+                          >
+                            {t('dashboard.addTransaction')}
+                          </Link>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setSelectedTransaction(null)}
+                          className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold text-text-primary transition hover:bg-background"
+                        >
+                          {t('dashboard.closeDetails')}
+                        </button>
+                      </div>
+                    )}
+                  />
+                </div>
+              )}
             </div>
           </div>
-          {selectedTransaction && (
-            <>
-              <div className="invoice-print-root lang-en hidden print:block">
-                <InvoicePrintSheet bill={buildReceiptFromTransaction(selectedTransaction)} t={tEn} printFormat="a4" />
-              </div>
-              <div className="invoice-print-root lang-ur hidden print:block urdu-text" dir="rtl">
-                <InvoicePrintSheet bill={buildReceiptFromTransaction(selectedTransaction)} t={tUr} printFormat="a4" />
-              </div>
-            </>
-          )}
         </div>
       )}
 

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, Home, Users, Package, FileText } from 'lucide-react';
+import { Menu, Home, Users, Package, FileText, ShoppingCart } from 'lucide-react';
 import Sidebar from './Sidebar';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -15,6 +15,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const navItems = [
         { name: t('common.home'), icon: Home, href: '/dashboard' },
         { name: t('common.khata'), icon: FileText, href: '/khata' },
+        { name: t('common.sale'), icon: ShoppingCart, href: '/sale' },
         { name: t('common.inventory'), icon: Package, href: '/inventory' },
         { name: t('common.employees'), icon: Users, href: '/employees' },
     ];

@@ -1,17 +1,15 @@
 import React from 'react';
-import { Printer, CheckCircle, X } from 'lucide-react';
+import { CheckCircle, X } from 'lucide-react';
 import type { BillReceipt } from '../types';
 
 interface InvoiceSuccessModalProps {
     bill: BillReceipt;
     onClose: () => void;
-    onPrintEnglish: () => void;
-    onPrintUrdu: () => void;
     children: React.ReactNode;
     t: (key: string, options?: Record<string, string | number>) => string;
 }
 
-export default function InvoiceSuccessModal({ bill, onClose, onPrintEnglish, onPrintUrdu, children, t }: InvoiceSuccessModalProps) {
+export default function InvoiceSuccessModal({ bill, onClose, children, t }: InvoiceSuccessModalProps) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm print:static print:inset-auto print:bg-transparent print:backdrop-blur-none">
             <div className="bg-surface rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl border border-border animate-in fade-in zoom-in-95 duration-200 print:max-h-none print:overflow-visible">
@@ -29,29 +27,6 @@ export default function InvoiceSuccessModal({ bill, onClose, onPrintEnglish, onP
                 </div>
 
                 <div className="p-6 space-y-6">
-                    <div className="flex flex-wrap items-center justify-between gap-4 print:hidden">
-                        <div className="flex flex-wrap items-center gap-3">
-                            <button
-                                onClick={onPrintUrdu}
-                                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-white font-semibold shadow-md hover:bg-primary-dark transition-colors"
-                            >
-                                <Printer size={18} /> {t('billing.invoice.printUrdu')}
-                            </button>
-                            <button
-                                onClick={onPrintEnglish}
-                                className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-text-primary font-semibold hover:bg-background transition-colors"
-                            >
-                                <Printer size={18} /> {t('billing.invoice.printEnglish')}
-                            </button>
-                        </div>
-                        <button
-                            onClick={onClose}
-                            className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-text-primary font-semibold hover:bg-background transition-colors"
-                        >
-                            {t('billing.invoice.done')}
-                        </button>
-                    </div>
-
                     {children}
                 </div>
             </div>

@@ -5,6 +5,47 @@ import { getSession } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import type { InventorySearchItem } from '@/types/inventory'
 import type { Customer } from './types'
+import { createBillReceiptFromTransaction } from '@/lib/invoice-receipt'
+
+interface BillingTransactionRow {
+    id: string
+    amount: number
+    type: 'credit' | 'debit'
+    description: string | null
+    items: unknown
+    bill_amount: number | null
+    paid_amount: number | null
+    customer_id: string | null
+    customers: {
+        id: string
+        name: string
+        phone?: string | null
+        address?: string | null
+        cnic?: string | null
+    } | Array<{
+        id: string
+        name: string
+        phone?: string | null
+        address?: string | null
+        cnic?: string | null
+    }> | null
+}
+
+export interface BillingPrefillDraft {
+    billNumber: string
+    customer: Customer
+    items: Array<{
+        id: string
+        name: string
+        price: number
+        qty: number
+        maxQty: number
+    }>
+    totalAmount: number
+    discountAmount: number
+    paidAmount: number
+    paymentMode: 'cash' | 'credit'
+}
 
 export async function getCustomerForBilling(customerId: string): Promise<Customer | null> {
     const session = await getSession()
@@ -25,6 +66,74 @@ export async function getCustomerForBilling(customerId: string): Promise<Custome
     }
 
     return (data as Customer | null) || null
+}
+
+export async function getBillingDraftFromTransaction(transactionId: string): Promise<BillingPrefillDraft | null> {
+    const session = await getSession()
+    if (!session) return null
+    if (!transactionId) return null
+
+    const { data, error } = await getDb()
+        .from('transactions')
+        .select(`
+            id,
+            amount,
+            type,
+            description,
+            items,
+            bill_amount,
+            paid_amount,
+            customer_id,
+            customers (
+                id,
+                name,
+                phone,
+                address,
+                cnic
+            )
+        `)
+        .eq('id', transactionId)
+        .eq('user_id', session.userId)
+        .single()
+
+    if (error || !data) {
+        console.error('Fetch transaction for billing prefill error:', error)
+        return null
+    }
+
+    const transaction = data as BillingTransactionRow
+    const customer = Array.isArray(transaction.customers)
+        ? transaction.customers[0]
+        : transaction.customers
+
+    if (!customer) {
+        return null
+    }
+
+    const receipt = createBillReceiptFromTransaction({
+        id: transaction.id,
+        type: transaction.type,
+        amount: transaction.amount,
+        description: transaction.description,
+        items: transaction.items,
+        bill_amount: transaction.bill_amount,
+        paid_amount: transaction.paid_amount,
+        customer_id: transaction.customer_id,
+        customerName: customer.name,
+        customerPhone: customer.phone || '',
+        customerAddress: customer.address || '',
+        customerCnic: customer.cnic || undefined
+    })
+
+    return {
+        billNumber: receipt.billNumber,
+        customer: receipt.customer,
+        items: receipt.items,
+        totalAmount: receipt.totalAmount,
+        discountAmount: receipt.discountAmount,
+        paidAmount: receipt.paidAmount,
+        paymentMode: receipt.paymentMode
+    }
 }
 
 export async function searchInventoryItems(query: string): Promise<InventorySearchItem[]> {
@@ -58,107 +167,148 @@ export async function createBill(formData: FormData) {
 
     const customerId = formData.get('customerId') as string
     const itemsJson = formData.get('items') as string
-    const finalAmount = parseFloat(formData.get('finalAmount') as string)
-    const paidAmount = parseFloat(formData.get('paidAmount') as string) || 0
-    const paymentMode = formData.get('paymentMode') as string || 'cash' // cash, credit (udhar)
+    const finalAmount = Number(formData.get('finalAmount') as string)
+    const paidAmount = Number(formData.get('paidAmount') as string) || 0
+    const paymentMode = (formData.get('paymentMode') as string) || 'cash'
     const billNumber = (formData.get('billNumber') as string) || Date.now().toString().slice(-6)
 
-    let items = []
+    if (!customerId) throw new Error('Customer is required')
+    if (!Number.isFinite(finalAmount) || finalAmount <= 0) throw new Error('Invalid bill amount')
+    if (!Number.isFinite(paidAmount) || paidAmount < 0) throw new Error('Invalid paid amount')
+    if (paidAmount > finalAmount) throw new Error('Paid amount cannot exceed bill amount')
+    if (paymentMode !== 'cash' && paymentMode !== 'credit') throw new Error('Invalid payment mode')
+
+    let items: unknown[] = []
     try {
-        items = JSON.parse(itemsJson)
+        items = JSON.parse(itemsJson || '[]')
     } catch {
         throw new Error('Invalid items data')
     }
     if (!Array.isArray(items)) {
         throw new Error('Invalid items data')
     }
+    if (items.length === 0) {
+        throw new Error('Bill must contain at least one item')
+    }
 
-    // 1. Create Transaction Record
-    // Actually, for a bill:
-    // If fully paid: It's a cash sale. We might just record it as a 'sale' type or 'debit' (money coming in).
-    // If udhar: It's 'credit' (money receivable).
-    // Let's stick to the existing types: 'credit' (receivable/udhar), 'debit' (payable/payment received).
-    // If it's a cash sale, it's technically a 'debit' (payment received) matching the bill amount?
-    // Or maybe we need a new type 'sale'.
-    // For now, let's assume:
-    // - If Udhar: type = 'credit', amount = finalAmount, paid = paidAmount.
-    // - If Cash: type = 'debit', amount = finalAmount, paid = finalAmount. (This might be confusing if 'debit' is only for payments).
-    // Let's check how dashboard displays it.
-    // Dashboard: credit -> ArrowUpRight (Red) -> Receivable. debit -> ArrowDownLeft (Green) -> Payable/Received.
-    // So a Cash Sale is money received -> Debit.
-    // An Udhar Sale is money receivable -> Credit.
+    const quantityByItemId = new Map<string, { qty: number; name: string }>()
+    for (const item of items) {
+        if (!item || typeof item !== 'object') continue
+        const raw = item as { id?: unknown; qty?: unknown; name?: unknown }
+        const id = typeof raw.id === 'string' ? raw.id.trim() : ''
+        const qty = Number(raw.qty)
+        if (!id || !Number.isFinite(qty) || qty <= 0) continue
 
-    // However, a "Bill" usually implies a Sale.
-    // If I sell goods worth 1000.
-    // Case 1: Cash. I get 1000. My cash increases. Customer balance unchanged.
-    // Case 2: Udhar. I get 0. Customer balance +1000.
+        const existing = quantityByItemId.get(id)
+        if (existing) {
+            existing.qty += qty
+        } else {
+            quantityByItemId.set(id, {
+                qty,
+                name: typeof raw.name === 'string' ? raw.name : ''
+            })
+        }
+    }
+    if (quantityByItemId.size === 0) {
+        throw new Error('Bill must contain valid item quantities')
+    }
 
-    // Let's use a specific logic:
-    // We will insert into `transactions`.
-    // If paymentMode is 'credit' (Udhar):
-    //   type: 'credit', amount: finalAmount, paid: paidAmount.
-    //   Balance change: +(finalAmount - paidAmount).
-    // If paymentMode is 'cash':
-    //   type: 'debit', amount: finalAmount, paid: finalAmount.
-    //   Balance change: 0.
+    const stockItemIds = Array.from(quantityByItemId.keys())
+    const { data: stockRows, error: stockFetchError } = await getDb()
+        .from('inventory')
+        .select('id, name, quantity')
+        .eq('user_id', session.userId)
+        .in('id', stockItemIds)
+
+    if (stockFetchError) {
+        console.error('Inventory fetch error:', stockFetchError)
+        throw new Error('Failed to verify inventory stock')
+    }
+
+    const stockById = new Map(
+        ((stockRows as Array<{ id: string; name: string; quantity: number | null }> | null) || [])
+            .map((row) => [row.id, row])
+    )
+
+    const nextStockLevels: Array<{ id: string; name: string; currentQty: number; nextQty: number }> = []
+    for (const [itemId, itemMeta] of quantityByItemId.entries()) {
+        const row = stockById.get(itemId)
+        if (!row) {
+            throw new Error(`${itemMeta.name || 'Item'} is no longer in inventory`)
+        }
+
+        const currentQty = Number(row.quantity ?? 0)
+        if (currentQty < itemMeta.qty) {
+            throw new Error(`${row.name || itemMeta.name || 'Item'} has only ${currentQty} in stock`)
+        }
+
+        nextStockLevels.push({
+            id: row.id,
+            name: row.name || itemMeta.name || 'Item',
+            currentQty,
+            nextQty: currentQty - itemMeta.qty
+        })
+    }
+
+    const updatedItems: Array<{ id: string; previousQty: number }> = []
+    for (const stockItem of nextStockLevels) {
+        const { data: updatedRows, error: stockUpdateError } = await getDb()
+            .from('inventory')
+            .update({ quantity: stockItem.nextQty })
+            .eq('id', stockItem.id)
+            .eq('user_id', session.userId)
+            .eq('quantity', stockItem.currentQty)
+            .select('id')
+
+        const hasUpdatedRow = Array.isArray(updatedRows) && updatedRows.length > 0
+        if (stockUpdateError || !hasUpdatedRow) {
+            if (stockUpdateError) {
+                console.error('Inventory update error:', stockUpdateError)
+            }
+
+            await Promise.all(
+                updatedItems.map((updatedItem) =>
+                    getDb()
+                        .from('inventory')
+                        .update({ quantity: updatedItem.previousQty })
+                        .eq('id', updatedItem.id)
+                        .eq('user_id', session.userId)
+                )
+            )
+            throw new Error(`${stockItem.name} stock changed. Please refresh and try again`)
+        }
+
+        updatedItems.push({ id: stockItem.id, previousQty: stockItem.currentQty })
+    }
 
     const transactionType = paymentMode === 'credit' ? 'credit' : 'debit'
-
     const { data: transaction, error: txError } = await getDb().from('transactions').insert({
         user_id: session.userId,
         customer_id: customerId,
         amount: finalAmount,
         type: transactionType,
-        description: `Bill #${billNumber}`, // Simple bill number
-        items: items,
+        description: `Bill #${billNumber}`,
+        items,
         bill_amount: finalAmount,
         paid_amount: paidAmount
     }).select().single()
 
     if (txError) {
         console.error('Bill creation error:', txError)
+
+        await Promise.all(
+            nextStockLevels.map((stockItem) =>
+                getDb()
+                    .from('inventory')
+                    .update({ quantity: stockItem.currentQty })
+                    .eq('id', stockItem.id)
+                    .eq('user_id', session.userId)
+            )
+        )
+
         throw new Error('Failed to create bill')
     }
 
-    // 2. Update Inventory Quantities
-    const stockUpdates = items
-        .filter((item: { id?: string; qty?: number }) => item?.id && Number.isFinite(Number(item?.qty)) && Number(item?.qty) > 0)
-        .map((item: { id: string; qty: number }) => ({ id: item.id, qty: Number(item.qty) }))
-
-    if (stockUpdates.length > 0) {
-        const { data: stockRows, error: stockFetchError } = await getDb()
-            .from('inventory')
-            .select('id, quantity')
-            .eq('user_id', session.userId)
-            .in('id', stockUpdates.map((item) => item.id))
-
-        if (stockFetchError) {
-            console.error('Inventory fetch error:', stockFetchError)
-        } else {
-            const stockById = new Map(
-                (stockRows || []).map((row: { id: string; quantity: number | null }) => [row.id, Number(row.quantity ?? 0)])
-            )
-
-            await Promise.all(
-                stockUpdates.map(async (item) => {
-                    const currentQty = stockById.get(item.id)
-                    if (currentQty === undefined) return
-                    const nextQty = Math.max(0, currentQty - item.qty)
-                    const { error: updateError } = await getDb()
-                        .from('inventory')
-                        .update({ quantity: nextQty })
-                        .eq('id', item.id)
-                        .eq('user_id', session.userId)
-
-                    if (updateError) {
-                        console.error('Inventory update error:', updateError)
-                    }
-                })
-            )
-        }
-    }
-
-    // 3. Update Customer Balance (only if Udhar)
     if (paymentMode === 'credit') {
         const balanceChange = finalAmount - paidAmount
         if (balanceChange > 0) {

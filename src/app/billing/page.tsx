@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { Mic, MicOff, Receipt } from 'lucide-react';
 import { searchCustomers } from '@/app/dashboard/search-actions';
-import { searchInventoryItems, createBill, getCustomerForBilling } from './actions';
+import { searchInventoryItems, createBill, getBillingDraftFromTransaction, getCustomerForBilling } from './actions';
 import { getShopDetails } from '@/app/settings/actions';
 import AddCustomerModal from '@/components/AddCustomerModal';
 import { useLanguage } from '@/context/LanguageContext';
@@ -12,34 +12,13 @@ import BillingSteps from './components/BillingSteps';
 import CustomerCard from './components/CustomerCard';
 import ItemsCard from './components/ItemsCard';
 import SummaryCard from './components/SummaryCard';
-import InvoicePrintSheet from './components/InvoicePrintSheet';
+import InvoiceDetailPanel from './components/InvoiceDetailPanel';
 import InvoiceSuccessModal from './components/InvoiceSuccessModal';
 import { calculateBalanceDue, calculateBillTotals, generateBillNumber } from './utils';
 import type { BillReceipt, CartItem, Customer, DiscountType, PaymentMode, ShopDetails } from './types';
-import { translations, type Language } from '@/lib/translations';
+import type { Language } from '@/lib/translations';
+import { createTranslator } from '@/lib/translator';
 import { useSearchParams } from 'next/navigation';
-
-const createTranslator = (lang: Language) => (path: string, vars?: Record<string, string | number>) => {
-    const applyVars = (value: string) => {
-        if (!vars) return value;
-        return value.replace(/\{(\w+)\}/g, (_, key: string) => {
-            const replacement = vars[key];
-            return replacement === undefined ? `{${key}}` : String(replacement);
-        });
-    };
-
-    const keys = path.split('.');
-    let current: any = translations[lang];
-
-    for (const key of keys) {
-        if (current[key] === undefined) {
-            return applyVars(path);
-        }
-        current = current[key];
-    }
-
-    return applyVars(current);
-};
 import type { InventorySearchItem } from '@/types/inventory';
 
 type SpeechRecognitionResultLike = { transcript: string };
@@ -60,6 +39,7 @@ function BillingPageContent() {
     const isRtl = language === 'ur';
     const searchParams = useSearchParams();
     const customerIdParam = searchParams.get('customerId');
+    const transactionIdParam = searchParams.get('transactionId');
 
     const [customerQuery, setCustomerQuery] = useState('');
     const [customerResults, setCustomerResults] = useState<Customer[]>([]);
@@ -87,13 +67,11 @@ function BillingPageContent() {
     const [autoPrint, setAutoPrint] = useState(false);
 
     const lastPrintedRef = useRef<string | null>(null);
+    const hydratedTransactionRef = useRef<string | null>(null);
     const originalTitleRef = useRef<string | null>(null);
 
     const customerSearchRef = useRef<HTMLDivElement>(null);
     const itemSearchRef = useRef<HTMLDivElement>(null);
-
-    const tEn = createTranslator('en');
-    const tUr = createTranslator('ur');
 
     useEffect(() => {
         const loadShopDetails = async () => {
@@ -104,6 +82,7 @@ function BillingPageContent() {
     }, []);
 
     useEffect(() => {
+        if (transactionIdParam) return;
         if (!customerIdParam || selectedCustomer) return;
 
         let active = true;
@@ -121,7 +100,38 @@ function BillingPageContent() {
         return () => {
             active = false;
         };
-    }, [customerIdParam, selectedCustomer]);
+    }, [customerIdParam, selectedCustomer, transactionIdParam]);
+
+    useEffect(() => {
+        if (!transactionIdParam) {
+            hydratedTransactionRef.current = null;
+            return;
+        }
+        if (hydratedTransactionRef.current === transactionIdParam) return;
+
+        let active = true;
+        const loadDraft = async () => {
+            const draft = await getBillingDraftFromTransaction(transactionIdParam);
+            if (!active || !draft) return;
+
+            setSelectedCustomer(draft.customer);
+            setCustomerQuery('');
+            setCustomerResults([]);
+            setCart(draft.items);
+            setDiscountType('fixed');
+            setDiscountValue(draft.discountAmount);
+            setPaymentMode(draft.paymentMode);
+            setPaidAmount(draft.paidAmount);
+            setBillNumber(draft.billNumber || generateBillNumber());
+            hydratedTransactionRef.current = transactionIdParam;
+        };
+
+        loadDraft();
+
+        return () => {
+            active = false;
+        };
+    }, [transactionIdParam]);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -249,12 +259,6 @@ function BillingPageContent() {
         };
     }, [completedBill, shopDetails, language]);
 
-    const handlePrint = (lang: Language) => {
-        if (typeof window === 'undefined') return;
-        document.body.dataset.printLang = lang;
-        window.print();
-    };
-
     const handlePaymentModeChange = (mode: PaymentMode) => {
         setPaymentMode(mode);
         if (mode === 'credit') {
@@ -271,6 +275,11 @@ function BillingPageContent() {
                 : 3;
 
     const addToCart = (item: InventorySearchItem) => {
+        if (Number(item.quantity) <= 0) {
+            toast.error(t('billing.outOfStock'));
+            return;
+        }
+
         const existing = cart.find(i => i.id === item.id);
         if (existing && existing.qty >= existing.maxQty) {
             toast.error(t('billing.maxStockAvailable', { max: existing.maxQty }));
@@ -334,14 +343,25 @@ function BillingPageContent() {
             const items = await searchInventoryItems(query);
             if (items && items.length > 0) {
                 const item = items[0];
+                if (item.quantity <= 0) {
+                    toast.error(t('billing.outOfStock'));
+                    return;
+                }
+
                 setCart(prev => {
                     const existing = prev.find(i => i.id === item.id);
                     if (existing) {
                         const newQty = Math.min(existing.qty + qty, existing.maxQty);
                         return prev.map(i => i.id === item.id ? { ...i, qty: newQty } : i);
                     }
-                    return [...prev, { id: item.id, name: item.name, price: item.selling_price, qty: Math.min(qty, item.quantity), maxQty: item.quantity }];
+
+                    const boundedQty = Math.min(qty, item.quantity);
+                    return [...prev, { id: item.id, name: item.name, price: item.selling_price, qty: boundedQty, maxQty: item.quantity }];
                 });
+
+                if (qty > item.quantity) {
+                    toast.error(t('billing.maxStockAvailable', { max: item.quantity }));
+                }
                 toast.success(t('billing.addedToCart', { item: item.name }));
             } else {
                 toast.error(t('billing.itemNotFound', { query }));
@@ -402,7 +422,8 @@ function BillingPageContent() {
             toast.success(t('billing.billCreated'));
         } catch (error) {
             console.error(error);
-            toast.error(t('billing.failedCreateBill'));
+            const message = error instanceof Error && error.message ? error.message : t('billing.failedCreateBill');
+            toast.error(message);
         } finally {
             setIsSubmitting(false);
         }
@@ -516,23 +537,26 @@ function BillingPageContent() {
             </div>
 
             {completedBill && (
-                <>
-                    <InvoiceSuccessModal
+                <InvoiceSuccessModal
+                    bill={completedBill}
+                    onClose={() => setCompletedBill(null)}
+                    t={t}
+                >
+                    <InvoiceDetailPanel
                         bill={completedBill}
-                        onClose={() => setCompletedBill(null)}
-                        onPrintEnglish={() => handlePrint('en')}
-                        onPrintUrdu={() => handlePrint('ur')}
                         t={t}
-                    >
-                        <InvoicePrintSheet bill={completedBill} t={t} printFormat={printFormat} />
-                    </InvoiceSuccessModal>
-                    <div className="invoice-print-root lang-en hidden print:block">
-                        <InvoicePrintSheet bill={completedBill} t={tEn} printFormat={printFormat} />
-                    </div>
-                    <div className="invoice-print-root lang-ur hidden print:block urdu-text" dir="rtl">
-                        <InvoicePrintSheet bill={completedBill} t={tUr} printFormat={printFormat} />
-                    </div>
-                </>
+                        printFormat={printFormat}
+                        actionSlot={(
+                            <button
+                                type="button"
+                                onClick={() => setCompletedBill(null)}
+                                className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-text-primary font-semibold hover:bg-background transition-colors"
+                            >
+                                {t('billing.invoice.done')}
+                            </button>
+                        )}
+                    />
+                </InvoiceSuccessModal>
             )}
         </div>
     );

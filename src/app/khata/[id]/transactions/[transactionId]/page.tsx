@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowDownLeft, ArrowLeft, ArrowUpRight, Pencil, Printer, Save, X } from 'lucide-react';
+import { ArrowDownLeft, ArrowLeft, ArrowUpRight, Pencil, Save, X } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, use, useCallback, useMemo } from 'react';
 import { toast } from 'react-hot-toast';
@@ -8,6 +8,11 @@ import { addTransaction, getCustomerById, getTransactionById, updateTransaction 
 import { useLanguage } from '@/context/LanguageContext';
 import ReceivePaymentModal from '@/components/ReceivePaymentModal';
 import { getInvoiceRemaining } from '@/lib/invoice-utils';
+import InvoiceDetailPanel from '@/app/billing/components/InvoiceDetailPanel';
+import { createBillReceiptFromTransaction } from '@/lib/invoice-receipt';
+import { getShopDetails } from '@/app/settings/actions';
+import type { ShopDetails } from '@/app/billing/types';
+import { buildBillingHref } from '@/lib/billing-navigation';
 
 interface Transaction {
     id: string;
@@ -74,6 +79,7 @@ export default function TransactionDetailPage({ params }: { params: Promise<{ id
     const [availableInvoices, setAvailableInvoices] = useState<Transaction[]>([]);
     const [selectedInvoiceId, setSelectedInvoiceId] = useState('');
     const [fixedInvoiceId, setFixedInvoiceId] = useState<string | null>(null);
+    const [shopDetails, setShopDetails] = useState<ShopDetails | null>(null);
     const [paymentAmount, setPaymentAmount] = useState('');
     const [paymentNotes, setPaymentNotes] = useState('');
     const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
@@ -132,9 +138,35 @@ export default function TransactionDetailPage({ params }: { params: Promise<{ id
         refreshCustomerTransactions();
     }, [refreshCustomerTransactions]);
 
+    useEffect(() => {
+        const loadShopDetails = async () => {
+            const details = await getShopDetails();
+            setShopDetails(details);
+        };
+        loadShopDetails();
+    }, []);
+
     const outstandingInvoices = useMemo(
         () => availableInvoices.filter((txn) => txn.type === 'credit' && getInvoiceRemaining(txn) > 0),
         [availableInvoices]
+    );
+
+    const invoiceBill = useMemo(
+        () => transaction
+            ? createBillReceiptFromTransaction(transaction, {
+                shopDetails,
+                fallbackCustomer: customer
+                    ? {
+                        id: customer.id,
+                        name: customer.name,
+                        phone: customer.phone || '',
+                        address: customer.address || ''
+                    }
+                    : undefined,
+                fallbackItemName: transaction.description || (t('khata.noDescription') || 'No description')
+            })
+            : null,
+        [transaction, shopDetails, customer, t]
     );
 
 
@@ -218,12 +250,6 @@ export default function TransactionDetailPage({ params }: { params: Promise<{ id
         }
     };
 
-    const handlePrint = () => {
-        if (typeof window !== 'undefined') {
-            window.print();
-        }
-    };
-
     if (loading) {
         return (
             <div className="space-y-4">
@@ -252,7 +278,7 @@ export default function TransactionDetailPage({ params }: { params: Promise<{ id
                 <ArrowLeft size={20} className={isRtl ? 'rotate-180' : ''} /> {t('khata.backToCustomer') || 'Back to Customer'}
             </Link>
 
-            <div className="bg-surface rounded-xl p-6 shadow-md border border-border print-root">
+            <div className="bg-surface rounded-xl p-6 shadow-md border border-border">
                 <div className={`flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between ${isRtl ? 'sm:flex-row-reverse' : ''}`}>
                     <div>
                         <h1 className="text-2xl font-bold mb-1">{t('khata.transactionDetails') || 'Transaction Details'}</h1>
@@ -293,14 +319,12 @@ export default function TransactionDetailPage({ params }: { params: Promise<{ id
                                 {t('common.edit') || 'Edit'}
                             </button>
                         )}
-                        <button
-                            type="button"
-                            onClick={handlePrint}
-                            className="inline-flex items-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark"
+                        <Link
+                            href={buildBillingHref({ customerId: id, transactionId: transaction.id })}
+                            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-semibold text-text-secondary transition hover:text-text-primary hover:bg-background"
                         >
-                            <Printer size={16} />
-                            {t('common.print') || 'Print'}
-                        </button>
+                            {t('khata.addPurchase') || 'Add Purchase (Udhar)'}
+                        </Link>
                     </div>
                 </div>
 
@@ -445,6 +469,12 @@ export default function TransactionDetailPage({ params }: { params: Promise<{ id
                         </div>
                     )}
                 </form>
+
+                {invoiceBill && (
+                    <div className="mt-8 border-t border-border pt-6">
+                        <InvoiceDetailPanel bill={invoiceBill} t={t} printFormat="a4" />
+                    </div>
+                )}
             </div>
 
             <ReceivePaymentModal

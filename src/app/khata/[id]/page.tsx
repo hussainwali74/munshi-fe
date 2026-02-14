@@ -8,6 +8,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { toast } from 'react-hot-toast';
 import ReceivePaymentModal from '@/components/ReceivePaymentModal';
 import { getInvoiceRemaining } from '@/lib/invoice-utils';
+import { buildBillingHref } from '@/lib/billing-navigation';
 
 interface Transaction {
     id: string;
@@ -331,7 +332,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
 
                 <div className={`flex gap-3 border-t border-border pt-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
                     <Link
-                        href={`/billing?customerId=${customer.id}`}
+                        href={buildBillingHref({ customerId: customer.id })}
                         className={purchaseButtonClass}
                     >
                         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15">

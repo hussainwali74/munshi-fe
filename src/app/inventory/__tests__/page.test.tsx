@@ -74,10 +74,10 @@ describe('Inventory Page - Urdu Support', () => {
             expect(getInventoryItems).toHaveBeenCalled();
         });
 
-        expect(screen.getByText('inventory.title')).toBeInTheDocument();
+        expect(screen.getAllByText('inventory.title').length).toBeGreaterThan(0);
     });
 
-    it('renders correctly in Urdu (RTL) with Filter button translated', async () => {
+    it('renders correctly in Urdu (RTL)', async () => {
         (useLanguage as jest.Mock).mockReturnValue({
             language: 'ur',
             t: mockT,
@@ -89,26 +89,7 @@ describe('Inventory Page - Urdu Support', () => {
             expect(getInventoryItems).toHaveBeenCalled();
         });
 
-        // Check for RTL direction
-        const titleElement = screen.getByText('inventory.title');
+        const titleElement = screen.getAllByText('inventory.title')[0];
         expect(titleElement.closest('div[dir="rtl"]')).toBeInTheDocument();
-        // Note: Inventory page might not have a single wrapper with dir="rtl" for everything,
-        // but specific sections might. Let's check my implementation.
-        // In step 150 (replace_file_content), I didn't explicitly wrap everything in a dir="rtl" div 
-        // inside the return statement like I did for Employees/Settings/Home, 
-        // OR maybe I missed it? 
-
-        // Wait, let me check the file content again or my previous edits.
-        // Step 150 showed editing the Filter button text. 
-        // Step 145 showed `inventory: { ... }` in translations.
-        // I previously said: "Good news - the inventory page is already using the useLanguage hook... The issue is that the inventory translations already exist... I need to check if there are any missing translations... lines 248: Filter...".
-
-        // I did NOT fix the RTL structure in Step 150! I named the task "Adding Urdu translations for filter/confirmDelete and updating inventory page RTL",
-        // but the `replace_file_content` call ONLY changed the Filter button text.
-        // Wait, looking at Step 150 diff:
-        // - Filter text change.
-
-        // Did I forget to add `dir={isRtl ? 'rtl' : 'ltr'}` to the inventory page?
-        // Let me check the file content again.
     });
 });

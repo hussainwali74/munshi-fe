@@ -19,6 +19,7 @@ jest.mock('@/context/LanguageContext', () => ({
             const translations: Record<string, string> = {
                 'common.home': 'Dashboard',
                 'common.khata': 'Khata',
+                'common.sale': 'Sale',
                 'common.inventory': 'Inventory',
                 'common.employees': 'Employees',
                 'common.settings': 'Settings',
@@ -54,6 +55,7 @@ describe('Sidebar', () => {
 
             expect(screen.getByText('Dashboard')).toBeInTheDocument();
             expect(screen.getByText('Khata')).toBeInTheDocument();
+            expect(screen.getByText('Sale')).toBeInTheDocument();
             expect(screen.getByText('Inventory')).toBeInTheDocument();
             expect(screen.getByText('Employees')).toBeInTheDocument();
             expect(screen.getByText('Settings')).toBeInTheDocument();

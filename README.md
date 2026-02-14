@@ -67,6 +67,17 @@ npm run dev
 
 Visit `http://localhost:3000` to see the application in action.
 
+### 4. Seed Demo Data (Optional)
+
+To load ready-to-use demo data:
+
+1. Run `supabase/schema.sql` in Supabase SQL Editor (if not already done).
+2. Run `supabase/seed.sql`.
+
+Seed details and reset instructions:
+
+- `docs/SEED_DATA.md`
+
 ## 🚢 Deployment
 
 ### Cloudflare Pages (Recommended)
